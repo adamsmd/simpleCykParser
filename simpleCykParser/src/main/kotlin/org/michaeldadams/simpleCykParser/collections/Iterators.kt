@@ -1,24 +1,25 @@
-package org.michaeldadams.simpleCykParser.collections.iterators
+/** Iterators over various collection types. */
 
-/* TODO: document package */
-/* TODO: put in package */
-/* TODO: put in "collections.defmap" package */
+package org.michaeldadams.simpleCykParser.collections.iterators
 
 import java.util.NavigableMap
 import java.util.Queue
 
 /**
- * Iterator over the elements of a `NavigableMap`
+ * Iterator over the elements of a `NavigableMap`.
  *
  * @param K the type of map keys
  * @param V the type of map values
- * @param map the map to be iterated over
+ * @property map the map to be iterated over
  */
 open class NavigableIterator<K, V>(val map: NavigableMap<K, V>) : Iterator<Map.Entry<K, V>> {
   /** The key currently pointed to by the iterator.  Contains `null` before first call to `next`. */
   protected var key: K? = null
 
-  /** Computes the next entry in the map. */
+  /** Computes the next entry in the map.
+   *
+   * @return the next entry in the map
+   */
   protected open fun nextEntry(): Map.Entry<K, V>? = if (key == null) map.firstEntry() else map.higherEntry(key)
 
   override fun hasNext(): Boolean = nextEntry() != null
@@ -28,7 +29,7 @@ open class NavigableIterator<K, V>(val map: NavigableMap<K, V>) : Iterator<Map.E
 }
 
 /**
- * Iterator (in reverse order) over the elements of a `NavigableMap`
+ * Iterator (in reverse order) over the elements of a `NavigableMap`.
  *
  * @param K the type of map keys
  * @param V the type of map values
@@ -42,9 +43,9 @@ class ReverseNavigableIterator<K, V>(map: NavigableMap<K, V>) : NavigableIterato
  * Iterator over the elements of a `Queue` until the `Queue` is empty.
  *
  * @param T the type of queue elements
- * @param queue the queue to be iterated over
+ * @property queue the queue to be iterated over
  */
 class QueueIterator<T>(val queue: Queue<T>) : Iterator<T> {
-  override fun hasNext(): Boolean = !queue.isEmpty()
+  override fun hasNext(): Boolean = queue.isNotEmpty()
   override fun next(): T = queue.remove()
 }

@@ -1,8 +1,6 @@
-package org.michaeldadams.simpleCykParser.collections.defMap
+/** Wrappers for maps that implement default values. */
 
-/* TODO: document package */
-/* TODO: put in package */
-/* TODO: put in "collections.defmap" package */
+package org.michaeldadams.simpleCykParser.collections.defMap
 
 import java.util.LinkedHashMap
 import java.util.TreeMap
@@ -14,12 +12,12 @@ import java.util.TreeMap
  * @param K the type of map keys
  * @param V the type of map values
  * @param M the type of the map to be wrapped
- * @param map the map to be wrapped
- * @param devalueValue a function generating default values
+ * @property map the map to be wrapped
+ * @property defaultValue a function generating default values
  */
 class DefMap<K, V, M : MutableMap<K, V>>(val map: M, val defaultValue: () -> V) :
   MutableMap<K, V> by map {
-  override fun get(key: K): V = getOrPut(key, defaultValue)
+  override fun get(key: K): V = map.getOrPut(key, defaultValue)
 }
 
 /**

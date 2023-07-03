@@ -12,12 +12,12 @@ class LexerTest {
       terminals:
         - A: "A"
         - B: "B"
-        - C: "[A-Z]+"
+        - X: "[A-Z]+"
     """.trimIndent()
-    val y = parseYaml(x)
-    val l = lexRulesFromYamlMap(y)
+    val y = mapFromYamlString(x)
+    val l = lexRulesFromMap(y)
     assertEquals(
-      Pair(9, listOf(Token("A", 1, 1), Token("B", 3, 3), Token("C", 6, 7))),
+      Pair(9, listOf(Token("A", 1, 1), Token("B", 3, 3), Token("X", 6, 7))),
       Lexer.lex(l, " A B  AA "))
   }
 }
