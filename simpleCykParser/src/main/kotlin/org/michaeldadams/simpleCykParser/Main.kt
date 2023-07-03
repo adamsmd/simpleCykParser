@@ -1,4 +1,5 @@
 /** Main entry point for simpleCykParser. */
+package org.michaeldadams.simpleCykParser.main
 
 import com.github.ajalt.clikt.completion.completionOption
 import com.github.ajalt.clikt.core.CliktCommand

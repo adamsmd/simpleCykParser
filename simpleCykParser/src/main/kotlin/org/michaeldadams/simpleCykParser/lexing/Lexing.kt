@@ -1,3 +1,7 @@
+package org.michaeldadams.simpleCykParser.lexing
+
+import org.michaeldadams.simpleCykParser.grammar.*
+
 data class Token(val terminal: Terminal, val range: IntRange) {
   constructor(name: String, range: IntRange) : this(Terminal(name), range)
   constructor(terminal: Terminal, start: Int, endInclusive: Int) : this(terminal, IntRange(start, endInclusive))

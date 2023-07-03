@@ -1,5 +1,9 @@
+package org.michaeldadams.simpleCykParser.parsing
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
+import org.michaeldadams.simpleCykParser.grammar.yaml.*
 
 class ParserTest {
   @Test fun test1(): Unit {

@@ -1,5 +1,9 @@
+package org.michaeldadams.simpleCykParser.lexing
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
+import org.michaeldadams.simpleCykParser.grammar.yaml.*
 
 class LexerTest {
   @Test fun test1(): Unit {

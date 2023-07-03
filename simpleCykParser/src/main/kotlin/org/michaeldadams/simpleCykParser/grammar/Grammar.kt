@@ -1,3 +1,5 @@
+package org.michaeldadams.simpleCykParser.grammar
+
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode

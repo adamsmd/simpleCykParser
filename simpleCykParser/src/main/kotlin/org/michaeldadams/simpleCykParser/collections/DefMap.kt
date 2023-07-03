@@ -1,3 +1,5 @@
+package org.michaeldadams.simpleCykParser.collections.defMap
+
 /* TODO: document package */
 /* TODO: put in package */
 /* TODO: put in "collections.defmap" package */
