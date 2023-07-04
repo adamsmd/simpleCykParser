@@ -1,6 +1,6 @@
 /** Iterators over various collection types. */
 
-package org.michaeldadams.simpleCykParser.collections.iterators
+package org.michaeldadams.simpleCykParser.collections
 
 import java.util.NavigableMap
 import java.util.Queue

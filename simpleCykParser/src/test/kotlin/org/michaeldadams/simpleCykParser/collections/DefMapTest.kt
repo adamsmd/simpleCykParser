@@ -1,8 +1,5 @@
-package org.michaeldadams.simpleCykParser.lexing
+package org.michaeldadams.simpleCykParser.collections
 
-import org.michaeldadams.simpleCykParser.collections.defMap.DefMap
-import org.michaeldadams.simpleCykParser.collections.defMap.defHashMap
-import org.michaeldadams.simpleCykParser.collections.defMap.defTreeMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

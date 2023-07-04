@@ -1,8 +1,8 @@
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.collections.defMap.DefHashMap
-import org.michaeldadams.simpleCykParser.collections.defMap.defHashMap
-import org.michaeldadams.simpleCykParser.collections.iterators.QueueIterator
+import org.michaeldadams.simpleCykParser.collections.DefHashMap
+import org.michaeldadams.simpleCykParser.collections.QueueIterator
+import org.michaeldadams.simpleCykParser.collections.defHashMap
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal
 import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Production

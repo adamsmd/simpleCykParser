@@ -1,6 +1,6 @@
 /** Wrappers for maps that implement default values. */
 
-package org.michaeldadams.simpleCykParser.collections.defMap
+package org.michaeldadams.simpleCykParser.collections
 
 import java.util.LinkedHashMap
 import java.util.TreeMap

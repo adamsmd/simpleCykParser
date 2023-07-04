@@ -1,4 +1,4 @@
-package org.michaeldadams.simpleCykParser.collections.iterators
+package org.michaeldadams.simpleCykParser.collections
 
 import java.util.LinkedList
 import java.util.TreeMap

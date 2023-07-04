@@ -1,9 +1,9 @@
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.collections.defMap.DefTreeMap
-import org.michaeldadams.simpleCykParser.collections.defMap.defTreeMap
-import org.michaeldadams.simpleCykParser.collections.iterators.NavigableIterator
-import org.michaeldadams.simpleCykParser.collections.iterators.ReverseNavigableIterator
+import org.michaeldadams.simpleCykParser.collections.DefTreeMap
+import org.michaeldadams.simpleCykParser.collections.NavigableIterator
+import org.michaeldadams.simpleCykParser.collections.ReverseNavigableIterator
+import org.michaeldadams.simpleCykParser.collections.defTreeMap
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 
