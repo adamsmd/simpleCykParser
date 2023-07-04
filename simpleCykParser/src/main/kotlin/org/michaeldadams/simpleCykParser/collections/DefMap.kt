@@ -34,6 +34,7 @@ typealias DefHashMap<K, V> = DefMap<K, V, LinkedHashMap<K, V>>
  * @param K the type of map keys
  * @param V the type of map values
  * @param defaultValue a function generating default values
+ * @return a [DefHashMap] using [defaultValue]
  */
 fun <K, V> defHashMap(defaultValue: () -> V): DefHashMap<K, V> = DefMap(LinkedHashMap(), defaultValue)
 
@@ -51,5 +52,6 @@ typealias DefTreeMap<K, V> = DefMap<K, V, TreeMap<K, V>>
  * @param K the type of map keys
  * @param V the type of map values
  * @param defaultValue a function generating default values
+ * @return a [DefTreeMap] using [defaultValue]
  */
 fun <K, V> defTreeMap(defaultValue: () -> V): DefTreeMap<K, V> = DefMap(TreeMap(), defaultValue)

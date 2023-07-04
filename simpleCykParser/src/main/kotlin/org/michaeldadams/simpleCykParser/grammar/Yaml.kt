@@ -51,11 +51,11 @@ fun YamlMap.toParseRules(): ParseRules {
   val whitespaceRegex = "\\p{IsWhite_Space}+".toRegex()
   val productionsMap = productionsYaml.entries.map { entry ->
     Nonterminal(entry.key.content) to
-      entry.value.cast<YamlList>().items.map {
-        val (name, rhsString) = when (it) {
-          is YamlMap -> it.toPair()
-          is YamlScalar -> null to it.content
-          else -> incorrectType(it, "YamlMap or YamlScalar")
+      entry.value.cast<YamlList>().items.map { yamlNode ->
+        val (name, rhsString) = when (yamlNode) {
+          is YamlMap -> yamlNode.toPair()
+          is YamlScalar -> null to yamlNode.content
+          else -> incorrectType(yamlNode, "YamlMap or YamlScalar")
         }
         val rhs = rhsString
           .split(whitespaceRegex)
