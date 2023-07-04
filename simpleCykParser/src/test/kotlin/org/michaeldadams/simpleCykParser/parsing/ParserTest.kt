@@ -15,9 +15,9 @@ class ParserTest {
           - X: ""
     """.trimIndent()
     val y = mapFromYamlString(x)
-    val l = parseRulesFromMap(y)
-    println(l)
-    // assertEquals(
+    /*val l = */parseRulesFromMap(y)
+    // println(l)
+    // TODO: assertEquals(
     //   listOf(Token("A", 1, 1), Token("B", 3, 3), Token("C", 6, 7)),
     //   Lexer.lex(l, " A B  AA "))
   }

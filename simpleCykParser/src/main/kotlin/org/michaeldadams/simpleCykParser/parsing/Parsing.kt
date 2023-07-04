@@ -41,7 +41,7 @@ class PartialParseTable {
   val nullable: Set<Symbol> = TODO()
 
   /** Partial symbols that should be generated if a symbol is completely parsed */
-  // TODO: rename to "partial" or something
+  // TODO: rename to "partial" or something "partialProductionInitializers"
   val seeds: Map<Symbol, Set<PartiallyParsedProduction>> = TODO()
 
   /**

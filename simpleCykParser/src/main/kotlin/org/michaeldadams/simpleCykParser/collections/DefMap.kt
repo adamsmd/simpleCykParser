@@ -7,7 +7,7 @@ import java.util.TreeMap
 
 /**
  * Wrapper for maps that implements default values. Looking up a non-existant
- * value adds the value returned by `defaultValue` to the map.
+ * value adds the value returned by [defaultValue] to the map.
  *
  * @param K the type of map keys
  * @param V the type of map values
@@ -21,7 +21,7 @@ class DefMap<K, V, M : MutableMap<K, V>>(val map: M, val defaultValue: () -> V) 
 }
 
 /**
- * `DefMap` specialized to wrap a `LinkedHashMap`.
+ * [DefMap] specialized to wrap a [LinkedHashMap].
  *
  * @param K the type of map keys
  * @param V the type of map values
@@ -29,7 +29,7 @@ class DefMap<K, V, M : MutableMap<K, V>>(val map: M, val defaultValue: () -> V) 
 typealias DefHashMap<K, V> = DefMap<K, V, LinkedHashMap<K, V>>
 
 /**
- * Create a `DefHashMap` with a new `LinkedHashMap`.
+ * Create a [DefHashMap] with a new [LinkedHashMap].
  *
  * @param K the type of map keys
  * @param V the type of map values
@@ -38,7 +38,7 @@ typealias DefHashMap<K, V> = DefMap<K, V, LinkedHashMap<K, V>>
 fun <K, V> defHashMap(defaultValue: () -> V): DefHashMap<K, V> = DefMap(LinkedHashMap(), defaultValue)
 
 /**
- * `DefMap` specialized to wrap a `TreeMap`.
+ * [DefMap] specialized to wrap a [TreeMap].
  *
  * @param K the type of map keys
  * @param V the type of map values
@@ -46,7 +46,7 @@ fun <K, V> defHashMap(defaultValue: () -> V): DefHashMap<K, V> = DefMap(LinkedHa
 typealias DefTreeMap<K, V> = DefMap<K, V, TreeMap<K, V>>
 
 /**
- * Create a `DefTreeMap` with a new `TreeMap`.
+ * Create a [DefTreeMap] with a new [TreeMap].
  *
  * @param K the type of map keys
  * @param V the type of map values

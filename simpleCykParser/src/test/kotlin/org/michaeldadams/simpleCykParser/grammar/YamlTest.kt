@@ -20,7 +20,31 @@ class YamlTest {
           - X: ""
     """.trimIndent()
     val y = mapFromYamlString(x)
-    val g = grammarFromMap(y)
-    println(g)
+    /*var g = */grammarFromMap(y)
+    // println(g)
+    // TODO: assertEqual(grammar, g)
+  }
+
+  @Test fun test2(): Unit {
+    val x = """
+      whitespace: \s+
+      terminals:
+        - STRING: '"[^"]"'
+        - NUM: \d+
+        - IF: if
+        - (: \(
+      start: S
+      productions:
+        S:
+          - F: if ( S ) then { else }
+          - F: '" S "'
+          - S S
+          - ""
+        T: []
+    """.trimIndent()
+    val y = mapFromYamlString(x)
+    /*var g = */grammarFromMap(y)
+    // println(g)
+    // TODO: assertEqual(grammar, g)
   }
 }

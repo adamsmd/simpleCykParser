@@ -1,3 +1,5 @@
+/** Functions for converting Yaml to a grammar. */
+
 package org.michaeldadams.simpleCykParser.grammar.yaml
 
 import com.charleskorn.kaml.IncorrectTypeException
@@ -19,19 +21,17 @@ import kotlin.text.Regex
 import kotlin.text.toRegex
 
 fun mapFromYamlString(string: String): Map<String, YamlNode> =
-  when (val yaml = Yaml.default.parseToYamlNode(string)) {
-    is YamlMap -> yaml.entries.mapKeys { it.key.content }
-    else -> TODO()
-  }
+  Yaml.default.parseToYamlNode(string).cast<YamlMap>().entries.mapKeys { it.key.content }
 
 fun lexRulesFromMap(yamlMap: Map<String, YamlNode>): LexRules {
   val whitespace: Regex = yamlMap.getYaml<YamlScalar>("whitespace").content.toRegex()
 
-  val rules = yamlMap.getYaml<YamlList>("terminals").items.map {
-    (it as? YamlMap ?: TODO()).asPair()
+  val terminals = yamlMap.getYaml<YamlList>("terminals").items.map {
+    it.cast<YamlMap>().asPair()
   }.map { LexRule(Terminal(it.first), it.second.toRegex()) }
+  // TODO: regex RegexOption.COMMENTS
 
-  return LexRules(whitespace, rules)
+  return LexRules(whitespace, terminals)
 }
 
 fun parseRulesFromMap(yamlMap: Map<String, YamlNode>): ParseRules {
@@ -39,35 +39,36 @@ fun parseRulesFromMap(yamlMap: Map<String, YamlNode>): ParseRules {
   val productionsYaml: Map<YamlScalar, YamlNode> = yamlMap.getYaml<YamlMap>("productions").entries
   val nonterminals: Set<String> = productionsYaml.keys.map { it.content }.toSet()
 
+  val whitespaceRegex = "\\p{IsWhite_Space}+".toRegex()
   val productionsMap = productionsYaml.entries.map { entry ->
     NonTerminal(entry.key.content) to
-      (entry.value as? YamlList ?: TODO()).items
-        .map {
-          val (name, rhsString) = when (it) {
-            is YamlMap -> it.asPair()
-            is YamlScalar -> null to it.content
-            else -> TODO()
-          }
-          val rhs = rhsString
-            .split("\\p{IsWhite_Space}+".toRegex())
-            .filter { it.isNotEmpty() }
-            .map { if (it in nonterminals) NonTerminal(it) else Terminal(it) }
-          Production(NonTerminal(entry.key.content), name, rhs)
+      entry.value.cast<YamlList>().items.map {
+        val (name, rhsString) = when (it) {
+          is YamlMap -> it.asPair()
+          is YamlScalar -> null to it.content
+          else -> incorrectType(it, "YamlMap or YamlScalar")
         }
-        .toSet()
+        val rhs = rhsString
+          .split(whitespaceRegex)
+          .filter { it.isNotEmpty() }
+          .map { if (it in nonterminals) NonTerminal(it) else Terminal(it) }
+        Production(NonTerminal(entry.key.content), name, rhs)
+      }.toSet()
   }.toMap()
 
   return ParseRules(NonTerminal(start), productionsMap)
 }
 
-/**
+/*
 
 whitespace: \s+
 terminals:
   - STRING: '"[^"]"'
   - NUM: \d+
   - IF: if
-  - (: (
+  - (: \(
+  - STR: (?idmsuxU-idmsuxU) ... TODO (note some flags have no inline)
+terminalOptions: COMMENTS, UNICODE
 start: S
 productions:
   S:
@@ -86,13 +87,18 @@ fun grammarFromMap(yamlMap: Map<String, YamlNode>): Grammar =
 /* Helpers */
 /*********************/
 
+private fun incorrectType(node: YamlNode, type: String): Nothing =
+  throw IncorrectTypeException("Value is not a ${type}.", node.path)
+
+private inline fun <reified T : YamlNode> YamlNode.cast(): T =
+  this as? T ?: incorrectType(this, T::class.java.name)
+
 private inline fun <reified T : YamlNode> Map<String, YamlNode>.getYaml(key: String): T =
-  (this[key] ?: throw MissingRequiredPropertyException(key, YamlPath.root))
-    as? T ?: throw IncorrectTypeException("Value for '${key}' is not a ${T::class.java.name}.", YamlPath.root)
+  (this[key] ?: throw MissingRequiredPropertyException(key, YamlPath.root)).cast<T>()
 
 private fun YamlMap.asPair(): Pair<String, String> {
   if (this.entries.size < 1) TODO()
   if (this.entries.size > 1) TODO()
   val p = this.entries.toList().single()
-  return p.first.content to (p.second as? YamlScalar ?: TODO()).content
+  return p.first.content to (p.second.cast<YamlScalar>()).content
 }

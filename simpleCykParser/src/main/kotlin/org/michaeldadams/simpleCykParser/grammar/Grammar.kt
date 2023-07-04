@@ -44,7 +44,7 @@ data class LexRule(val terminal: Terminal, val regex: Regex)
  * The combined lexical rules of a language.
  *
  * Note that multiple lexical rules match, the longest match wins.  If there are
- * multiple longest matches, which ever rule is earliest in `lexRules` wins.
+ * multiple longest matches, which ever rule is earliest in [lexRules] wins.
  *
  * Also note that multiple rules for the same terminal are allowed.
  *
@@ -52,6 +52,7 @@ data class LexRule(val terminal: Terminal, val regex: Regex)
  * @property lexRules all of the non-whitespace lexical rules for the language
  */
 data class LexRules(val whitespace: Regex, val lexRules: List<LexRule>) {
+  // TODO: lazy
   val terminals: Set<Terminal> = lexRules.map { it.terminal }.toSet()
 }
 
@@ -99,21 +100,16 @@ data class Grammar(val lexRules: LexRules, val parseRules: ParseRules) {
    * In a well-formed grammar, this function will return the empty set.
    *
    * @return pairs of the productions using undefined symbols and the position
-   * of the undefined symbol in the `rhs` of that production
+   * of the undefined symbol in the [rhs] of that production
    */
   fun undefinedSymbols(): Set<Pair<Production, Int>> =
     parseRules.productions.values.flatten().flatMap { prod ->
       prod.rhs.mapIndexedNotNull { i, s -> if (s in symbols) null else Pair(prod, i) }
     }.toSet()
 
-  // fun recursivelyUnusedSymbols(): Set<Symbol> {
-  // fun unusedSymbols(): Set<Symbol> {
-  //   var s = symbols
-  //   s =- parseRules.start
+  fun unusedSymbols(): Set<Symbol> = TODO()
+  fun recursivelyUnusedSymbols(): Set<Symbol> = TODO()
 
-  // }
-
-  // fun recursivelyEmptyNonTerminals(): Set<NonTerminal> {
-  // fun emptyNonTerminals(): Set<NonTerminal> {
-  // }
+  fun emptyNonTerminals(): Set<NonTerminal> = TODO()
+  fun recursivelyEmptyNonTerminals(): Set<NonTerminal> = TODO()
 }

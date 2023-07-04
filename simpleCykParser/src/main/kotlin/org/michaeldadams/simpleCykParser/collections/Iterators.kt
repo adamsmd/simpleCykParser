@@ -6,14 +6,14 @@ import java.util.NavigableMap
 import java.util.Queue
 
 /**
- * Iterator over the elements of a `NavigableMap`.
+ * Iterator over the elements of a [NavigableMap].
  *
  * @param K the type of map keys
  * @param V the type of map values
  * @property map the map to be iterated over
  */
 open class NavigableIterator<K, V>(val map: NavigableMap<K, V>) : Iterator<Map.Entry<K, V>> {
-  /** The key currently pointed to by the iterator.  Contains `null` before first call to `next`. */
+  /** The key currently pointed to by the iterator.  Contains `null` before first call to [next]. */
   protected var key: K? = null
 
   /** Computes the next entry in the map.
@@ -29,7 +29,7 @@ open class NavigableIterator<K, V>(val map: NavigableMap<K, V>) : Iterator<Map.E
 }
 
 /**
- * Iterator (in reverse order) over the elements of a `NavigableMap`.
+ * Iterator (in reverse order) over the elements of a [NavigableMap].
  *
  * @param K the type of map keys
  * @param V the type of map values
@@ -40,7 +40,7 @@ class ReverseNavigableIterator<K, V>(map: NavigableMap<K, V>) : NavigableIterato
 }
 
 /**
- * Iterator over the elements of a `Queue` until the `Queue` is empty.
+ * Iterator over the elements of a [Queue] until the [Queue] is empty.
  *
  * @param T the type of queue elements
  * @property queue the queue to be iterated over

@@ -60,5 +60,5 @@ Please include the following information in any issues you file:
 
 ## License
 
-This software is MIT licensed (see [`LICENSE`](LICNSE) for details).  If you
+This software is MIT licensed (see [`LICENSE`](LICENSE) for details).  If you
 need some other license for your uses, feel free to contact me.

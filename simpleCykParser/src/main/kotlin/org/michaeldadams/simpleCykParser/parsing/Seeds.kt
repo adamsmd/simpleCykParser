@@ -3,6 +3,7 @@ package org.michaeldadams.simpleCykParser.parsing.seeds
 import org.michaeldadams.simpleCykParser.grammar.*
 import org.michaeldadams.simpleCykParser.parsing.*
 
+// TODO: PartialProductionInitializers
 object Seeds {
   fun seeds(grammar: Grammar, nullable: Set<NonTerminal>): Map<Symbol, Set<ParsedProduction>> {
     var partialSymbols: Set<PartiallyParsedProduction> = emptySet()
