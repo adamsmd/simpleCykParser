@@ -13,7 +13,7 @@ import com.charleskorn.kaml.YamlScalar
 import org.michaeldadams.simpleCykParser.grammar.Grammar
 import org.michaeldadams.simpleCykParser.grammar.LexRule
 import org.michaeldadams.simpleCykParser.grammar.LexRules
-import org.michaeldadams.simpleCykParser.grammar.NonTerminal
+import org.michaeldadams.simpleCykParser.grammar.Nonterminal
 import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Terminal
@@ -41,7 +41,7 @@ fun parseRulesFromMap(yamlMap: Map<String, YamlNode>): ParseRules {
 
   val whitespaceRegex = "\\p{IsWhite_Space}+".toRegex()
   val productionsMap = productionsYaml.entries.map { entry ->
-    NonTerminal(entry.key.content) to
+    Nonterminal(entry.key.content) to
       entry.value.cast<YamlList>().items.map {
         val (name, rhsString) = when (it) {
           is YamlMap -> it.asPair()
@@ -51,12 +51,12 @@ fun parseRulesFromMap(yamlMap: Map<String, YamlNode>): ParseRules {
         val rhs = rhsString
           .split(whitespaceRegex)
           .filter { it.isNotEmpty() }
-          .map { if (it in nonterminals) NonTerminal(it) else Terminal(it) }
-        Production(NonTerminal(entry.key.content), name, rhs)
+          .map { if (it in nonterminals) Nonterminal(it) else Terminal(it) }
+        Production(Nonterminal(entry.key.content), name, rhs)
       }.toSet()
   }.toMap()
 
-  return ParseRules(NonTerminal(start), productionsMap)
+  return ParseRules(Nonterminal(start), productionsMap)
 }
 
 /*

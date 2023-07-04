@@ -11,8 +11,8 @@ class GrammarTest {
   // @Test fun testUndefined(): Unit {
   //   val x = Terminal("x")
   //   val y = Terminal("y")
-  //   val a = NonTerminal("a")
-  //   val b = NonTerminal("b")
+  //   val a = Nonterminal("a")
+  //   val b = Nonterminal("b")
   //   val 
   //   A -> A B A B A
   //   A -> x y x y x

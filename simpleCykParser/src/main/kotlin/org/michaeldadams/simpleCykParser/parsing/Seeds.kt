@@ -5,7 +5,7 @@ import org.michaeldadams.simpleCykParser.parsing.*
 
 // TODO: PartialProductionInitializers
 object Seeds {
-  fun seeds(grammar: Grammar, nullable: Set<NonTerminal>): Map<Symbol, Set<ParsedProduction>> {
+  fun seeds(grammar: Grammar, nullable: Set<Nonterminal>): Map<Symbol, Set<ParsedProduction>> {
     var partialSymbols: Set<PartiallyParsedProduction> = emptySet()
     for (productions in grammar.parseRules.productions.values) {
       for (production in productions) {
@@ -14,7 +14,7 @@ object Seeds {
           partialSymbols += partialSymbol
 
           val nextSymbol = partialSymbol.nextSymbol
-          if (nextSymbol !is NonTerminal || nextSymbol !in nullable) { break }
+          if (nextSymbol !is Nonterminal || nextSymbol !in nullable) { break }
         }
       }
     }

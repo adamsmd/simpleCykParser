@@ -5,12 +5,12 @@ package org.michaeldadams.simpleCykParser.grammar
 import kotlin.text.Regex
 
 /**************************************/
-/* Terminals and Non-Terminals        */
+/* Terminals and Nonterminals        */
 /**************************************/
 
 /**
- * A terminal or non-terminal in the grammar.  Note that terminals and
- * non-terminals have separate namespaces.
+ * A terminal or nonterminal in the grammar.  Note that terminals and
+ * nonterminals have separate namespaces.
  */
 sealed interface Symbol
 
@@ -22,11 +22,11 @@ sealed interface Symbol
 data class Terminal(val name: String) : Symbol
 
 /**
- * A non-terminal in the grammar.
+ * A nonterminal in the grammar.
  *
- * @property name the name of the non-terminal
+ * @property name the name of the nonterminal
  */
-data class NonTerminal(val name: String) : Symbol
+data class Nonterminal(val name: String) : Symbol
 
 /**************************************/
 /* Lexing                             */
@@ -52,6 +52,7 @@ data class LexRule(val terminal: Terminal, val regex: Regex)
  * @property lexRules all of the non-whitespace lexical rules for the language
  */
 data class LexRules(val whitespace: Regex, val lexRules: List<LexRule>) {
+  /** The terminals defined in these lexical rules */
   val terminals: Set<Terminal> by lazy { lexRules.map { it.terminal }.toSet() }
 }
 
@@ -60,22 +61,23 @@ data class LexRules(val whitespace: Regex, val lexRules: List<LexRule>) {
 /**************************************/
 
 /**
- * A production rule for a non-terminal.
+ * A production rule for a nonterminal.
  *
- * @property lhs the non-terminal that this production is for
+ * @property lhs the nonterminal that this production is for
  * @property name an optional name for this production
  * @property rhs the symbols that this production expands to
  */
-data class Production(val lhs: NonTerminal, val name: String?, val rhs: List<Symbol>)
+data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Symbol>)
 
 /**
  * The combined parsing rules of a language.
  *
  * @property start the start symbol of the language
- * @property productions a map from a non-terminal to the set of productions for that non-terminal
+ * @property productions a map from a nonterminal to the set of productions for that nonterminal
  */
-data class ParseRules(val start: Symbol, val productions: Map<NonTerminal, Set<Production>>) {
-  val nonterminals: Set<NonTerminal> by lazy { productions.keys }
+data class ParseRules(val start: Symbol, val productions: Map<Nonterminal, Set<Production>>) {
+  /** The nonterminals defined in these parse rules */
+  val nonterminals: Set<Nonterminal> by lazy { productions.keys }
 }
 
 /**************************************/
@@ -89,7 +91,9 @@ data class ParseRules(val start: Symbol, val productions: Map<NonTerminal, Set<P
  * @property parseRules the parsing rules of the language
  */
 data class Grammar(val lexRules: LexRules, val parseRules: ParseRules) {
+  /** The terminals defined in these parse rules */
   val terminals get() = lexRules.terminals
+  /** The terminals defined in these parse rules */
   val nonterminals get() = parseRules.nonterminals
   val symbols: Set<Symbol> by lazy { terminals + nonterminals }
 }

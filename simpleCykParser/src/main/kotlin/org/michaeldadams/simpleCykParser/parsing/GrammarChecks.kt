@@ -20,5 +20,5 @@ fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> =
 fun Grammar.unusedSymbols(): Set<Symbol> = TODO()
 fun Grammar.recursivelyUnusedSymbols(): Set<Symbol> = TODO()
 
-fun Grammar.emptyNonTerminals(): Set<NonTerminal> = TODO()
-fun Grammar.recursivelyEmptyNonTerminals(): Set<NonTerminal> = TODO()
+fun Grammar.emptyNonterminals(): Set<Nonterminal> = TODO()
+fun Grammar.recursivelyEmptyNonterminals(): Set<Nonterminal> = TODO()

@@ -44,7 +44,7 @@ fun MatchResult.toToken(terminal: Terminal): Token = Token(terminal, this.groups
 /**
  * Perform lexing over some text.
  *
- * Stops at the end of [chars] or if no non-terminals (TODO: nonterminals?) match
+ * Stops at the end of [chars] or if no nonterminals match
  *
  * @param lexerRules the rules to use for lexing
  * @param chars the text to lex
