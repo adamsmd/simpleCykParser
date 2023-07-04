@@ -52,8 +52,7 @@ data class LexRule(val terminal: Terminal, val regex: Regex)
  * @property lexRules all of the non-whitespace lexical rules for the language
  */
 data class LexRules(val whitespace: Regex, val lexRules: List<LexRule>) {
-  // TODO: lazy
-  val terminals: Set<Terminal> = lexRules.map { it.terminal }.toSet()
+  val terminals: Set<Terminal> by lazy { lexRules.map { it.terminal }.toSet() }
 }
 
 /**************************************/
@@ -76,7 +75,7 @@ data class Production(val lhs: NonTerminal, val name: String?, val rhs: List<Sym
  * @property productions a map from a non-terminal to the set of productions for that non-terminal
  */
 data class ParseRules(val start: Symbol, val productions: Map<NonTerminal, Set<Production>>) {
-  val nonterminals: Set<NonTerminal> = productions.keys
+  val nonterminals: Set<NonTerminal> by lazy { productions.keys }
 }
 
 /**************************************/
@@ -92,24 +91,5 @@ data class ParseRules(val start: Symbol, val productions: Map<NonTerminal, Set<P
 data class Grammar(val lexRules: LexRules, val parseRules: ParseRules) {
   val terminals get() = lexRules.terminals
   val nonterminals get() = parseRules.nonterminals
-  val symbols: Set<Symbol> = terminals + nonterminals
-
-  /**
-   * Find productions that use undefined symbols.
-   *
-   * In a well-formed grammar, this function will return the empty set.
-   *
-   * @return pairs of the productions using undefined symbols and the position
-   * of the undefined symbol in the [rhs] of that production
-   */
-  fun undefinedSymbols(): Set<Pair<Production, Int>> =
-    parseRules.productions.values.flatten().flatMap { prod ->
-      prod.rhs.mapIndexedNotNull { i, s -> if (s in symbols) null else Pair(prod, i) }
-    }.toSet()
-
-  fun unusedSymbols(): Set<Symbol> = TODO()
-  fun recursivelyUnusedSymbols(): Set<Symbol> = TODO()
-
-  fun emptyNonTerminals(): Set<NonTerminal> = TODO()
-  fun recursivelyEmptyNonTerminals(): Set<NonTerminal> = TODO()
+  val symbols: Set<Symbol> by lazy { terminals + nonterminals }
 }
