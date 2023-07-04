@@ -1,4 +1,4 @@
-package org.michaeldadams.simpleCykParser.grammar.yaml
+package org.michaeldadams.simpleCykParser.grammar
 
 import kotlin.test.Test
 // import kotlin.test.assertEquals
@@ -17,8 +17,8 @@ class YamlTest {
           - ( S )
           - X: ""
     """.trimIndent()
-    val y = mapFromYamlString(x)
-    /*var g = */grammarFromMap(y)
+    val y = x.toYamlMap()
+    /*var g = */y.toGrammar()
     // println(g)
     // TODO: assertEqual(grammar, g)
   }
@@ -40,8 +40,8 @@ class YamlTest {
           - ""
         T: []
     """.trimIndent()
-    val y = mapFromYamlString(x)
-    /*var g = */grammarFromMap(y)
+    val y = x.toYamlMap()
+    /*var g = */y.toGrammar()
     // println(g)
     // TODO: assertEqual(grammar, g)
   }

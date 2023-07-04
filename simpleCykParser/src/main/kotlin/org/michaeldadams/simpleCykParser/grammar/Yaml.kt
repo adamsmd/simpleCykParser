@@ -1,6 +1,6 @@
 /** Functions for converting Yaml to a grammar. */
 
-package org.michaeldadams.simpleCykParser.grammar.yaml
+package org.michaeldadams.simpleCykParser.grammar
 
 import com.charleskorn.kaml.IncorrectTypeException
 import com.charleskorn.kaml.MissingRequiredPropertyException
@@ -10,33 +10,42 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.YamlPath
 import com.charleskorn.kaml.YamlScalar
-import org.michaeldadams.simpleCykParser.grammar.Grammar
-import org.michaeldadams.simpleCykParser.grammar.LexRule
-import org.michaeldadams.simpleCykParser.grammar.LexRules
-import org.michaeldadams.simpleCykParser.grammar.Nonterminal
-import org.michaeldadams.simpleCykParser.grammar.ParseRules
-import org.michaeldadams.simpleCykParser.grammar.Production
-import org.michaeldadams.simpleCykParser.grammar.Terminal
 import kotlin.text.Regex
 import kotlin.text.toRegex
 
-fun mapFromYamlString(string: String): Map<String, YamlNode> =
-  Yaml.default.parseToYamlNode(string).cast<YamlMap>().entries.mapKeys { it.key.content }
+/**
+ * Parses a string as Yaml containing a map.
+ *
+ * @return the map resulting from parsing the string
+ */
+fun String.toYamlMap(): YamlMap = Yaml.default.parseToYamlNode(this).cast<YamlMap>()
 
-fun lexRulesFromMap(yamlMap: Map<String, YamlNode>): LexRules {
-  val whitespace: Regex = yamlMap.getYaml<YamlScalar>("whitespace").content.toRegex()
+/**
+ * Extracts lexing rules from a [YamlMap].
+ *
+ * @return the lexing rules extracted from the [YamlMap]
+ */
+fun YamlMap.toLexRules(): LexRules {
+  val map = this.toMap()
+  val whitespace: Regex = map.getYaml<YamlScalar>("whitespace").content.toRegex()
 
-  val terminals = yamlMap.getYaml<YamlList>("terminals").items.map {
-    it.cast<YamlMap>().asPair()
+  val terminals = map.getYaml<YamlList>("terminals").items.map {
+    it.cast<YamlMap>().toPair()
   }.map { LexRule(Terminal(it.first), it.second.toRegex()) }
   // TODO: regex RegexOption.COMMENTS
 
   return LexRules(whitespace, terminals)
 }
 
-fun parseRulesFromMap(yamlMap: Map<String, YamlNode>): ParseRules {
-  val start: String = yamlMap.getYaml<YamlScalar>("start").content
-  val productionsYaml: Map<YamlScalar, YamlNode> = yamlMap.getYaml<YamlMap>("productions").entries
+/**
+ * Extracts parsing rules from a [YamlMap].
+ *
+ * @return the parsing rules extracted from the [YamlMap]
+ */
+fun YamlMap.toParseRules(): ParseRules {
+  val map = this.toMap()
+  val start: String = map.getYaml<YamlScalar>("start").content
+  val productionsYaml: Map<YamlScalar, YamlNode> = map.getYaml<YamlMap>("productions").entries
   val nonterminals: Set<String> = productionsYaml.keys.map { it.content }.toSet()
 
   val whitespaceRegex = "\\p{IsWhite_Space}+".toRegex()
@@ -44,7 +53,7 @@ fun parseRulesFromMap(yamlMap: Map<String, YamlNode>): ParseRules {
     Nonterminal(entry.key.content) to
       entry.value.cast<YamlList>().items.map {
         val (name, rhsString) = when (it) {
-          is YamlMap -> it.asPair()
+          is YamlMap -> it.toPair()
           is YamlScalar -> null to it.content
           else -> incorrectType(it, "YamlMap or YamlScalar")
         }
@@ -60,6 +69,8 @@ fun parseRulesFromMap(yamlMap: Map<String, YamlNode>): ParseRules {
 }
 
 /*
+
+TODO:
 
 whitespace: \s+
 terminals:
@@ -80,11 +91,15 @@ productions:
 
 */
 
-fun grammarFromMap(yamlMap: Map<String, YamlNode>): Grammar =
-  Grammar(lexRulesFromMap(yamlMap), parseRulesFromMap(yamlMap))
+/**
+ * Extracts a grammar from a [YamlMap].
+ *
+ * @return the grammar extracted from the [YamlMap]
+ */
+fun YamlMap.toGrammar(): Grammar = Grammar(this.toLexRules(), this.toParseRules())
 
 /**********************/
-/* Helpers */
+/* Private Helpers */
 /*********************/
 
 private fun incorrectType(node: YamlNode, type: String): Nothing =
@@ -96,9 +111,10 @@ private inline fun <reified T : YamlNode> YamlNode.cast(): T =
 private inline fun <reified T : YamlNode> Map<String, YamlNode>.getYaml(key: String): T =
   (this[key] ?: throw MissingRequiredPropertyException(key, YamlPath.root)).cast<T>()
 
-private fun YamlMap.asPair(): Pair<String, String> {
-  if (this.entries.size < 1) TODO() // TODO: require()
-  if (this.entries.size > 1) TODO()
+private fun YamlMap.toMap(): Map<String, YamlNode> = this.entries.mapKeys { it.key.content }
+
+private fun YamlMap.toPair(): Pair<String, String> {
+  require(this.entries.size == 1) { "TODO" }
   val p = this.entries.toList().single()
   return p.first.content to p.second.cast<YamlScalar>().content
 }

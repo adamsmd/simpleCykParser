@@ -1,7 +1,7 @@
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.grammar.yaml.mapFromYamlString
-import org.michaeldadams.simpleCykParser.grammar.yaml.parseRulesFromMap
+import org.michaeldadams.simpleCykParser.grammar.toParseRules
+import org.michaeldadams.simpleCykParser.grammar.toYamlMap
 import kotlin.test.Test
 // import kotlin.test.assertEquals
 
@@ -14,8 +14,8 @@ class ParserTest {
           - ( S )
           - X: ""
     """.trimIndent()
-    val y = mapFromYamlString(x)
-    /*val l = */parseRulesFromMap(y)
+    val y = x.toYamlMap()
+    /*val l = */y.toParseRules()
     // println(l)
     // TODO: assertEquals(
     //   listOf(Token("A", 1, 1), Token("B", 3, 3), Token("C", 6, 7)),

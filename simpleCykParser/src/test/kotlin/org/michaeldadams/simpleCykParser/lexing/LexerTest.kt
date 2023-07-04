@@ -1,8 +1,8 @@
 package org.michaeldadams.simpleCykParser.lexing
 
 import org.michaeldadams.simpleCykParser.grammar.Terminal
-import org.michaeldadams.simpleCykParser.grammar.yaml.lexRulesFromMap
-import org.michaeldadams.simpleCykParser.grammar.yaml.mapFromYamlString
+import org.michaeldadams.simpleCykParser.grammar.toYamlMap
+import org.michaeldadams.simpleCykParser.grammar.toLexRules
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -24,8 +24,8 @@ class LexerTest {
         - Y: "(?x) \\d+ ( \\.\\d+ )?"
     """.trimIndent()
 
-    val y = mapFromYamlString(x)
-    val l = lexRulesFromMap(y)
+    val y = x.toYamlMap()
+    val l = y.toLexRules()
 
     val expectedTokens = listOf(
       Token(Terminal("A"), listOf(MatchGroup("A", IntRange(1, 1)))),
