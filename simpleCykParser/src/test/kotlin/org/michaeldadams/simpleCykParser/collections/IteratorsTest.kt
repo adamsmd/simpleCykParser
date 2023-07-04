@@ -21,7 +21,7 @@ class IteratorsTest {
   }
 
   @Test fun testQueueIterator(): Unit {
-    var results = listOf<String>()
+    var results = emptyList<String>()
 
     val queue = LinkedList<String>()
     queue.add("A")

@@ -1,8 +1,8 @@
 package org.michaeldadams.simpleCykParser.lexing
 
 import org.michaeldadams.simpleCykParser.grammar.Terminal
-import org.michaeldadams.simpleCykParser.grammar.toYamlMap
 import org.michaeldadams.simpleCykParser.grammar.toLexRules
+import org.michaeldadams.simpleCykParser.grammar.toYamlMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
