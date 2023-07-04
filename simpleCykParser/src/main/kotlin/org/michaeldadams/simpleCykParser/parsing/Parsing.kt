@@ -1,26 +1,30 @@
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.grammar.*
-import org.michaeldadams.simpleCykParser.collections.defMap.*
-import org.michaeldadams.simpleCykParser.collections.iterators.*
+import org.michaeldadams.simpleCykParser.collections.defMap.DefTreeMap
+import org.michaeldadams.simpleCykParser.collections.defMap.defTreeMap
+import org.michaeldadams.simpleCykParser.collections.iterators.NavigableIterator
+import org.michaeldadams.simpleCykParser.collections.iterators.ReverseNavigableIterator
+import org.michaeldadams.simpleCykParser.grammar.Production
+import org.michaeldadams.simpleCykParser.grammar.Symbol
 
 sealed interface ParsedProduction
 data class CompleteSymbol(val production: Production) : ParsedProduction
 data class PartiallyParsedProduction(val production: Production, val consumed: Int) : ParsedProduction {
   init {
-    assert(consumed < production.rhs.size) {
+    require(consumed < production.rhs.size) {
       "Consumed is greater than or equal to production length: ${this}"
     }
   }
   val nextSymbol: Symbol
     get() = production.rhs[consumed]
 
-  fun nextParsedProduction(): ParsedProduction =
-    if (this.consumed == this.production.rhs.size - 1) {
-      CompleteSymbol(production)
-    } else {
-      PartiallyParsedProduction(production, consumed + 1)
-    }
+  val nextParsedProduction: ParsedProduction
+    get() =
+      if (this.consumed == this.production.rhs.size - 1) {
+        CompleteSymbol(production)
+      } else {
+        PartiallyParsedProduction(production, consumed + 1)
+      }
 }
 
 // class Chart {
@@ -37,10 +41,10 @@ data class PartiallyParsedProduction(val production: Production, val consumed: I
 // }
 
 class PartialParseTable {
-  /** Which symbols are nullable */
+  /** Which symbols are nullable. */
   val nullable: Set<Symbol> = TODO()
 
-  /** Partial symbols that should be generated if a symbol is completely parsed */
+  /** Partial symbols that should be generated if a symbol is completely parsed. */
   // TODO: rename to "partial" or something "partialProductionInitializers"
   val seeds: Map<Symbol, Set<PartiallyParsedProduction>> = TODO()
 
@@ -75,33 +79,24 @@ class PartialParseTable {
    * Take a parse (left) that goes from leftRow to middle, and add an entry that steps forward one and goes from leftRow to rightCol.
    */
   fun add(left: PartiallyParsedProduction, leftRow: Int, middle: Int, rightCol: Int): Unit {
-    when (val parsedProduction = left.nextParsedProduction()) {
-      is CompleteSymbol -> {
-        if (byRowAndSymbol[leftRow][left.production.lhs][rightCol][parsedProduction.production].add(middle)) {
+    when (val parsedProduction = left.nextParsedProduction) {
+      is CompleteSymbol ->
+        if (byRowAndSymbol[leftRow][left.production.lhs][rightCol][parsedProduction.production]
+          .add(middle)
+        ) {
           // TODO: stop if nothing new added (for support of non-expanding productions)
           // complete entry causes partial entry (and empties before and after that if needed)
           for (i in seeds[left.production.lhs] ?: emptySet()) {
             add(i, leftRow, leftRow, rightCol)
           }
         }
-        // byRowAndSymbol[leftRow][left.production.lhs][rightCol][parsedProduction.production] += middle
-        // // complete entry causes partial entry (and empties before and after that if needed)
-        // for (i in seeds[left.production.lhs] ?: emptySet()) {
-        //   add(i, leftRow, leftRow, rightCol)
-        // }
-      }
-      is PartiallyParsedProduction -> {
+      is PartiallyParsedProduction ->
         if (byRowAndCol[leftRow][middle][parsedProduction].add(rightCol)) {
           // TODO: stop if nothing new added (for support of non-expanding productions)
           if (parsedProduction.nextSymbol in nullable) {
             add(parsedProduction, leftRow, rightCol, rightCol)
           }
         }
-        // byRowAndCol[leftRow][middle][parsedProduction] += rightCol
-        // if (parsedProduction.nextSymbol in nullable) {
-        //   add(parsedProduction, leftRow, rightCol, rightCol)
-        // }
-      }
     }
   }
 }

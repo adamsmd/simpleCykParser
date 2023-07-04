@@ -1,10 +1,9 @@
 package org.michaeldadams.simpleCykParser.collections.iterators
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertContentEquals
-import java.util.TreeMap
 import java.util.LinkedList
+import java.util.TreeMap
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
 
 class IteratorsTest {
   @Test fun testNavigableIterator(): Unit {
@@ -12,11 +11,13 @@ class IteratorsTest {
 
     assertContentEquals(
       sequenceOf("A" to 1, "B" to 2, "C" to 3),
-      NavigableIterator(map).asSequence().map { it.key to it.value })
+      NavigableIterator(map).asSequence().map { it.key to it.value }
+    )
 
     assertContentEquals(
       sequenceOf("C" to 3, "B" to 2, "A" to 1),
-      ReverseNavigableIterator(map).asSequence().map { it.key to it.value })
+      ReverseNavigableIterator(map).asSequence().map { it.key to it.value }
+    )
   }
 
   @Test fun testQueueIterator(): Unit {
@@ -33,9 +34,10 @@ class IteratorsTest {
       }
     }
 
-    assertContentEquals(
-      listOf(
-        "A", "B", "AA", "AB", "BA", "BB", "AAA", "AAB", "ABA", "ABB", "BAA", "BAB", "BBA", "BBB"),
-      results)
+    val expected = listOf(
+      "A", "B", "AA", "AB", "BA", "BB", "AAA", "AAB", "ABA", "ABB", "BAA", "BAB", "BBA", "BBB"
+    )
+
+    assertContentEquals(expected, results)
   }
 }

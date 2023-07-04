@@ -97,8 +97,8 @@ private inline fun <reified T : YamlNode> Map<String, YamlNode>.getYaml(key: Str
   (this[key] ?: throw MissingRequiredPropertyException(key, YamlPath.root)).cast<T>()
 
 private fun YamlMap.asPair(): Pair<String, String> {
-  if (this.entries.size < 1) TODO()
+  if (this.entries.size < 1) TODO() // TODO: require()
   if (this.entries.size > 1) TODO()
   val p = this.entries.toList().single()
-  return p.first.content to (p.second.cast<YamlScalar>()).content
+  return p.first.content to p.second.cast<YamlScalar>().content
 }

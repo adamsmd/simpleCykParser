@@ -1,9 +1,9 @@
 package org.michaeldadams.simpleCykParser.parsing
 
+import org.michaeldadams.simpleCykParser.grammar.yaml.mapFromYamlString
+import org.michaeldadams.simpleCykParser.grammar.yaml.parseRulesFromMap
 import kotlin.test.Test
-import kotlin.test.assertEquals
-
-import org.michaeldadams.simpleCykParser.grammar.yaml.*
+// import kotlin.test.assertEquals
 
 class ParserTest {
   @Test fun test1(): Unit {

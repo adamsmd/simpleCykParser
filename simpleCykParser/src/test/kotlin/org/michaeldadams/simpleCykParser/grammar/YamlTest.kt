@@ -1,9 +1,7 @@
 package org.michaeldadams.simpleCykParser.grammar.yaml
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
-
-import org.michaeldadams.simpleCykParser.grammar.yaml.*
+// import kotlin.test.assertEquals
 
 class YamlTest {
   @Test fun test1(): Unit {

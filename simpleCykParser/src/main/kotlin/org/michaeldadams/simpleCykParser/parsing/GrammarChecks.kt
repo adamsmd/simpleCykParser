@@ -2,7 +2,10 @@
 
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.grammar.*
+import org.michaeldadams.simpleCykParser.grammar.Grammar
+import org.michaeldadams.simpleCykParser.grammar.Nonterminal
+import org.michaeldadams.simpleCykParser.grammar.Production
+import org.michaeldadams.simpleCykParser.grammar.Symbol
 
 /**
  * Find productions that use undefined symbols.

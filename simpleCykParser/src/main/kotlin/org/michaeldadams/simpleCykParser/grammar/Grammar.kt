@@ -52,7 +52,7 @@ data class LexRule(val terminal: Terminal, val regex: Regex)
  * @property lexRules all of the non-whitespace lexical rules for the language
  */
 data class LexRules(val whitespace: Regex, val lexRules: List<LexRule>) {
-  /** The terminals defined in these lexical rules */
+  /** The terminals defined in these lexical rules. */
   val terminals: Set<Terminal> by lazy { lexRules.map { it.terminal }.toSet() }
 }
 
@@ -76,7 +76,7 @@ data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Sym
  * @property productions a map from a nonterminal to the set of productions for that nonterminal
  */
 data class ParseRules(val start: Symbol, val productions: Map<Nonterminal, Set<Production>>) {
-  /** The nonterminals defined in these parse rules */
+  /** The nonterminals defined in these parse rules. */
   val nonterminals: Set<Nonterminal> by lazy { productions.keys }
 }
 
@@ -91,9 +91,12 @@ data class ParseRules(val start: Symbol, val productions: Map<Nonterminal, Set<P
  * @property parseRules the parsing rules of the language
  */
 data class Grammar(val lexRules: LexRules, val parseRules: ParseRules) {
-  /** The terminals defined in these parse rules */
+  /** The terminals defined in this grammar. */
   val terminals get() = lexRules.terminals
-  /** The terminals defined in these parse rules */
+
+  /** The nonterminals defined in this grammar. */
   val nonterminals get() = parseRules.nonterminals
+
+  /** The symbols defined in this grammar. */
   val symbols: Set<Symbol> by lazy { terminals + nonterminals }
 }

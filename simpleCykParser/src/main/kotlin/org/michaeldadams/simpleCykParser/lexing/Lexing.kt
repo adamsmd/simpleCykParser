@@ -2,8 +2,8 @@
 
 package org.michaeldadams.simpleCykParser.lexing
 
-import org.michaeldadams.simpleCykParser.grammar.Terminal
 import org.michaeldadams.simpleCykParser.grammar.LexRules
+import org.michaeldadams.simpleCykParser.grammar.Terminal
 
 /**
  * A token produced by lexing.

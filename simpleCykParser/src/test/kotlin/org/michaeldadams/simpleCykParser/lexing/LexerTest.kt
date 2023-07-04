@@ -1,12 +1,11 @@
 package org.michaeldadams.simpleCykParser.lexing
 
+import org.michaeldadams.simpleCykParser.grammar.Terminal
+import org.michaeldadams.simpleCykParser.grammar.yaml.lexRulesFromMap
+import org.michaeldadams.simpleCykParser.grammar.yaml.mapFromYamlString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-
-import org.michaeldadams.simpleCykParser.grammar.yaml.mapFromYamlString
-import org.michaeldadams.simpleCykParser.grammar.yaml.lexRulesFromMap
-import org.michaeldadams.simpleCykParser.grammar.Terminal
 
 class LexerTest {
   @Test fun testTokenConstruction(): Unit {
@@ -35,10 +34,10 @@ class LexerTest {
       Token(Terminal("Y"), listOf(MatchGroup("123", IntRange(11, 13)), null)),
       Token(
         Terminal("Y"),
-        listOf(MatchGroup("123.45", IntRange(15, 20)), MatchGroup(".45", IntRange(18, 20)))))
+        listOf(MatchGroup("123.45", IntRange(15, 20)), MatchGroup(".45", IntRange(18, 20)))
+      )
+    )
 
-    assertEquals(
-      Pair(23, expectedTokens),
-      lex(l, " A B B  AA 123 123.45  "))
+    assertEquals(Pair(23, expectedTokens), lex(l, " A B B  AA 123 123.45  "))
   }
 }

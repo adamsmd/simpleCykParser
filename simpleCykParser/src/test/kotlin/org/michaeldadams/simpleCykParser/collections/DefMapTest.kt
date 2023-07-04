@@ -1,9 +1,10 @@
 package org.michaeldadams.simpleCykParser.lexing
 
+import org.michaeldadams.simpleCykParser.collections.defMap.DefMap
+import org.michaeldadams.simpleCykParser.collections.defMap.defHashMap
+import org.michaeldadams.simpleCykParser.collections.defMap.defTreeMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-import org.michaeldadams.simpleCykParser.collections.defMap.*
 
 class DefMapTest {
   fun <M : MutableMap<String, Int>> testDefMap(makeMap: (() -> Int) -> DefMap<String, Int, M>): Unit {
@@ -17,6 +18,8 @@ class DefMapTest {
     map["C"] = 20
     assertEquals(20, map["C"])
   }
+
   @Test fun testDefHashMap(): Unit = testDefMap(::defHashMap)
+
   @Test fun testDefTreeMap(): Unit = testDefMap(::defTreeMap)
 }

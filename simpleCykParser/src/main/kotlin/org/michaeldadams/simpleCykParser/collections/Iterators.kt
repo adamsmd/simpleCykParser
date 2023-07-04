@@ -36,7 +36,8 @@ open class NavigableIterator<K, V>(val map: NavigableMap<K, V>) : Iterator<Map.E
  * @param map the map to be iterated over
  */
 class ReverseNavigableIterator<K, V>(map: NavigableMap<K, V>) : NavigableIterator<K, V>(map) {
-  protected override fun nextEntry(): Map.Entry<K, V>? = if (key == null) map.lastEntry() else map.lowerEntry(key)
+  protected override fun nextEntry(): Map.Entry<K, V>? =
+    if (key == null) map.lastEntry() else map.lowerEntry(key)
 }
 
 /**
