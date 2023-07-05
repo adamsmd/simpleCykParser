@@ -5,18 +5,9 @@ package org.michaeldadams.simpleCykParser.collections
 class QueueSet<E>() : HashSet<E>() {
   private val elements: ArrayList<E> = ArrayList()
 
-  // val size: Int
-  // fun contains(element: E): Boolean
-  // fun getElement(element: E): E?
-  // fun isEmpty(): Boolean
-
-  override fun add(element: E): Boolean {
-    // TODO: some way to do this with 'also'?
-    val result = super.add(element)
-    if (result) elements.add(element)
-    return result
-  }
+  override fun add(element: E): Boolean = super.add(element).also { if(it) elements.add(element) }
   override fun clear() = throw UnsupportedOperationException()
+  override fun remove(element: E): Boolean = throw UnsupportedOperationException()
   override fun iterator(): MutableIterator<E> = object : MutableIterator<E> {
     private var indexOfNext: Int = 0
     override fun hasNext(): Boolean = indexOfNext < elements.size
@@ -24,12 +15,4 @@ class QueueSet<E>() : HashSet<E>() {
       if (this.hasNext()) elements[indexOfNext++] else throw NoSuchElementException()
     override fun remove(): Unit = throw UnsupportedOperationException()
   }
-  override fun remove(element: E): Boolean = throw UnsupportedOperationException()
-  // fun addAll(elements: Collection<E>): Boolean
-  // fun removeAll(elements: Collection<E>): Boolean
-  // fun retainAll(elements: Collection<E>): Boolean
-  // open fun addAll(elements: Collection<E>): Boolean
-  // open fun containsAll(elements: Collection<E>): Boolean
-  // open fun removeAll(elements: Collection<E>): Boolean
-  // open fun retainAll(elements: Collection<E>): Boolean
 }

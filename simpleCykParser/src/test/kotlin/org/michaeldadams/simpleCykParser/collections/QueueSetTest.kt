@@ -55,6 +55,7 @@ class QueueSetTest {
 
     assertFailsWith(UnsupportedOperationException::class) { queue.iterator().remove() }
     assertFailsWith(UnsupportedOperationException::class) { queue.remove("A") }
+    assertFailsWith(UnsupportedOperationException::class) { queue.removeAll(listOf("A")) }
     assertFailsWith(UnsupportedOperationException::class) { queue.clear() }
   }
 }
