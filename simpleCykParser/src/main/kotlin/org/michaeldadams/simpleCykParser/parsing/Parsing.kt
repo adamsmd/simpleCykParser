@@ -1,12 +1,11 @@
 package org.michaeldadams.simpleCykParser.parsing
 
 // TODO: DefMap for the default map
-import org.michaeldadams.simpleCykParser.collections.DefTreeMap
-import org.michaeldadams.simpleCykParser.collections.DefHashMap
+import org.michaeldadams.simpleCykParser.collections.DefMap
 import org.michaeldadams.simpleCykParser.collections.NavigableIterator
 import org.michaeldadams.simpleCykParser.collections.ReverseNavigableIterator
-import org.michaeldadams.simpleCykParser.collections.defTreeMap
-import org.michaeldadams.simpleCykParser.collections.defHashMap
+import org.michaeldadams.simpleCykParser.collections.defMap
+import org.michaeldadams.simpleCykParser.collections.defMap
 import org.michaeldadams.simpleCykParser.collections.QueueSet
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
@@ -83,12 +82,12 @@ class Chart(val grammar: ProcessedGrammar, val size: Int) {
   // TODO: investigate DefaultMap
   val symbols = Symbols()
   inner class Symbols {
-    private val keys: DefHashMap<Int, DefHashMap<Int, QueueSet<Symbol>>> =
-      defHashMap { defHashMap { QueueSet() } }
-    private val entries: DefHashMap<Int, DefHashMap<Int, DefHashMap<Symbol, QueueSet<Production?>>>> =
-      defHashMap { defHashMap { defHashMap { QueueSet() } } }
-    private val ends: DefHashMap<Int, DefHashMap<Symbol, QueueSet<Int>>> =
-      defHashMap { defHashMap { QueueSet() } }
+    private val keys: DefMap<Int, DefMap<Int, QueueSet<Symbol>>> =
+      defMap { defMap { QueueSet() } }
+    private val entries: DefMap<Int, DefMap<Int, DefMap<Symbol, QueueSet<Production?>>>> =
+      defMap { defMap { defMap { QueueSet() } } }
+    private val ends: DefMap<Int, DefMap<Symbol, QueueSet<Int>>> =
+      defMap { defMap { QueueSet() } }
 
     // Used to find parses
     operator fun get(start: Int, end: Int): Set<Symbol> = keys[start][end]
@@ -118,12 +117,12 @@ class Chart(val grammar: ProcessedGrammar, val size: Int) {
 
   val productions = Productions()
   inner class Productions {
-    private val keys: DefHashMap<Int, DefHashMap<Int, QueueSet<PartialProduction>>> =
-      defHashMap { defHashMap { QueueSet() } }
-    private val entries: DefHashMap<Int, DefHashMap<Int, DefHashMap<PartialProduction, QueueSet<Int?>>>> =
-      defHashMap { defHashMap { defHashMap { QueueSet() } } }
-    private val ends: DefHashMap<Int, DefHashMap<PartialProduction, QueueSet<Int>>> =
-      defHashMap { defHashMap { QueueSet() } }
+    private val keys: DefMap<Int, DefMap<Int, QueueSet<PartialProduction>>> =
+      defMap { defMap { QueueSet() } }
+    private val entries: DefMap<Int, DefMap<Int, DefMap<PartialProduction, QueueSet<Int?>>>> =
+      defMap { defMap { defMap { QueueSet() } } }
+    private val ends: DefMap<Int, DefMap<PartialProduction, QueueSet<Int>>> =
+      defMap { defMap { QueueSet() } }
 
     // Used to get 'leftChild'
     operator fun get(start: Int, end: Int): QueueSet<PartialProduction> = keys[start][end]
@@ -176,8 +175,8 @@ fun parse(chart: Chart) {
 //    *  - a set of indexes one step back in the parse
 //    */
 //   val byRowAndSymbol:
-//     DefTreeMap<Int, DefTreeMap<Symbol, DefTreeMap<Int, DefTreeMap<Production, MutableSet<Int>>>>> =
-//       defTreeMap { defTreeMap { defTreeMap { defTreeMap { mutableSetOf() } } } },
+//     DefMap<Int, DefMap<Symbol, DefMap<Int, DefMap<Production, MutableSet<Int>>>>> =
+//       defMap { defMap { defMap { defMap { mutableSetOf() } } } },
 
 //   /**
 //    * Table of partial parses.  Indexed by:
@@ -187,8 +186,8 @@ fun parse(chart: Chart) {
 //    *  - a set of indexes one step back in the parse
 //    */
 //   val byRowAndCol:
-//     DefTreeMap<Int, DefTreeMap<Int, DefTreeMap<PartiallyParsedProduction, MutableSet<Int>>>> =
-//       defTreeMap { defTreeMap { defTreeMap { mutableSetOf() } } }
+//     DefMap<Int, DefMap<Int, DefMap<PartiallyParsedProduction, MutableSet<Int>>>> =
+//       defMap { defMap { defMap { mutableSetOf() } } }
 // )
 //       // class Chart {
 // //   static fun fromTokens
@@ -220,8 +219,8 @@ fun parse(chart: Chart) {
 //    *  - a set of indexes one step back in the parse
 //    */
 //   val byRowAndSymbol:
-//     DefTreeMap<Int, DefTreeMap<Symbol, DefTreeMap<Int, DefTreeMap<Production, MutableSet<Int>>>>> =
-//       defTreeMap { defTreeMap { defTreeMap { defTreeMap { mutableSetOf() } } } }
+//     DefMap<Int, DefMap<Symbol, DefMap<Int, DefMap<Production, MutableSet<Int>>>>> =
+//       defMap { defMap { defMap { defMap { mutableSetOf() } } } }
 
 //   /**
 //    * Table of partial parses.  Indexed by:
@@ -231,8 +230,8 @@ fun parse(chart: Chart) {
 //    *  - a set of indexes one step back in the parse
 //    */
 //   val byRowAndCol:
-//     DefTreeMap<Int, DefTreeMap<Int, DefTreeMap<PartiallyParsedProduction, MutableSet<Int>>>> =
-//       defTreeMap { defTreeMap { defTreeMap { mutableSetOf() } } }
+//     DefMap<Int, DefMap<Int, DefMap<PartiallyParsedProduction, MutableSet<Int>>>> =
+//       defMap { defMap { defMap { mutableSetOf() } } }
 
 //   // TODO: function to check consistency of parse chart (takes set of null?)
 

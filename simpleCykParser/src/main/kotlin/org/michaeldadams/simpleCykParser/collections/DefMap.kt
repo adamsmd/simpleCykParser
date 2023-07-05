@@ -2,8 +2,7 @@
 
 package org.michaeldadams.simpleCykParser.collections
 
-import java.util.LinkedHashMap
-import java.util.TreeMap
+import kotlin.collections.MutableMap
 
 /**
  * Wrapper for maps that implements default values. Looking up a non-existant
@@ -15,43 +14,17 @@ import java.util.TreeMap
  * @property map the map to be wrapped
  * @property defaultValue a function generating default values
  */
-class DefMap<K, V, M : MutableMap<K, V>>(val map: M, val defaultValue: () -> V) :
+class DefMap<K, V>(val map: MutableMap<K, V>, val defaultValue: () -> V) :
   MutableMap<K, V> by map {
-  override fun get(key: K): V = map.getOrPut(key, defaultValue)
+  override operator fun get(key: K): V = map.getOrPut(key, defaultValue)
 }
 
 /**
- * [DefMap] specialized to wrap a [LinkedHashMap].
- *
- * @param K the type of map keys
- * @param V the type of map values
- */
-typealias DefHashMap<K, V> = DefMap<K, V, LinkedHashMap<K, V>>
-
-/**
- * Create a [DefHashMap] with a new [LinkedHashMap].
+ * Create a [DefMap] with a new [MutableMap].
  *
  * @param K the type of map keys
  * @param V the type of map values
  * @param defaultValue a function generating default values
- * @return a [DefHashMap] using [defaultValue]
+ * @return a [DefMap] using [defaultValue]
  */
-fun <K, V> defHashMap(defaultValue: () -> V): DefHashMap<K, V> = DefMap(LinkedHashMap(), defaultValue)
-
-/**
- * [DefMap] specialized to wrap a [TreeMap].
- *
- * @param K the type of map keys
- * @param V the type of map values
- */
-typealias DefTreeMap<K, V> = DefMap<K, V, TreeMap<K, V>>
-
-/**
- * Create a [DefTreeMap] with a new [TreeMap].
- *
- * @param K the type of map keys
- * @param V the type of map values
- * @param defaultValue a function generating default values
- * @return a [DefTreeMap] using [defaultValue]
- */
-fun <K, V> defTreeMap(defaultValue: () -> V): DefTreeMap<K, V> = DefMap(TreeMap(), defaultValue)
+fun <K, V> defMap(defaultValue: () -> V): DefMap<K, V> = DefMap(mutableMapOf(), defaultValue)
