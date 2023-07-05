@@ -1,7 +1,5 @@
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.collections.DefHashMap
-import org.michaeldadams.simpleCykParser.collections.DefMap
 import org.michaeldadams.simpleCykParser.collections.QueueIterator
 import org.michaeldadams.simpleCykParser.collections.defHashMap
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal
@@ -24,22 +22,25 @@ fun ParseRules.emptyProductions(): Set<Production> =
   this.productions.values.flatMap { productions -> productions.filter { it.rhs.isEmpty() } }.toSet()
 
 // Note that there are much more efficient algorithms for this
-fun ParseRules.nullable(): Set<Nonterminal> {
+fun ParseRules.nullable(): Set<Production> {
   val uses: Map<Symbol, Set<Production>> = this.productionsUsing()
-  var nullable: Set<Nonterminal> = this.emptyProductions().map { it.lhs }.toSet()
-  var queue: Queue<Nonterminal> = LinkedList(nullable)
+  var productions: Set<Production> = this.emptyProductions()
+  var nonterminals: Set<Nonterminal> = productions.map { it.lhs }.toSet()
+  var worklist: Queue<Production> = LinkedList(productions)
 
-  for (nt in QueueIterator(queue)) { // Work through the queue until it is empty
-    if (nt !in nullable) { // Skip already nullable nonterminals
-      for (production in uses.getOrDefault(nt, emptySet())) { // For each production using nt
-        // If everything in the rhs is a nullable nonterminal, then the lhs is nullable
-        if (production.rhs.all { it is Nonterminal && it in nullable }) {
-          nullable += production.lhs // Record that the lhs is nullable
-          queue += production.lhs // The lhs being nullable may more nullables, so enqueue it for processing
+  for (workitem in QueueIterator(worklist)) { // Work through the queue until it is empty
+    if (workitem !in productions) { // Skip if already nullable
+      // For each use of workitems's nonterminal
+      for (production in uses.getOrDefault(workitem.lhs, emptySet())) {
+        // If rhs is only nullable nonterminals, then the production is nullable
+        if (production.rhs.all { it is Nonterminal && it in nonterminals }) {
+          productions += production // Record the nullable production
+          nonterminals += production.lhs // Record the nullable nonterminal
+          worklist += production // Enqeue the production since it may cause more nullables
         }
       }
     }
   }
 
-  return nullable
+  return productions
 }
