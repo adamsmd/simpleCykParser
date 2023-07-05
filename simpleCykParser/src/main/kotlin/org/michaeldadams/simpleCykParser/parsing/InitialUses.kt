@@ -1,9 +1,8 @@
 package org.michaeldadams.simpleCykParser.parsing
 
 import org.michaeldadams.simpleCykParser.grammar.Grammar
-import org.michaeldadams.simpleCykParser.grammar.Nonterminal
-import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.Production
+import org.michaeldadams.simpleCykParser.grammar.Symbol
 
 // TODO: PartialProductionInitializers
 // fun seeds(grammar: Grammar, nullable: Set<Nonterminal>): Map<Symbol, Set<ParsedProduction>> {
@@ -29,6 +28,3 @@ fun initialUses(grammar: Grammar): Map<Symbol, Set<Production>> =
     .filter { it.rhs.isNotEmpty() }
     .groupBy { it.rhs.first() }
     .mapValues { it.value.toSet() }
-  // grammar.parseRules.productions.values.flatten().mapNotNull { production ->
-  //   production.rhs.firstOrNull?.let { it to production }
-  // }.groupBy { it.first }//  .mapValues { it.value..toSet() }

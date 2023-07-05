@@ -2,11 +2,11 @@
 
 package org.michaeldadams.simpleCykParser.collections
 
-class QueueSet<E>() : HashSet<E>() {
+class QueueSet<E> : HashSet<E>() {
   private val elements: ArrayList<E> = ArrayList()
 
-  override fun add(element: E): Boolean = super.add(element).also { if(it) elements.add(element) }
-  override fun clear() = throw UnsupportedOperationException()
+  override fun add(element: E): Boolean = super.add(element).also { if (it) elements.add(element) }
+  override fun clear(): Unit = throw UnsupportedOperationException()
   override fun remove(element: E): Boolean = throw UnsupportedOperationException()
   override fun iterator(): MutableIterator<E> = object : MutableIterator<E> {
     private var indexOfNext: Int = 0

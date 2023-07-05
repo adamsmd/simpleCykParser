@@ -3,7 +3,6 @@ package org.michaeldadams.simpleCykParser.parsing
 import org.michaeldadams.simpleCykParser.grammar.toParseRules
 import org.michaeldadams.simpleCykParser.grammar.toYamlMap
 import kotlin.test.Test
-// import kotlin.test.assertEquals
 
 class ParserTest {
   @Test fun test1(): Unit {
