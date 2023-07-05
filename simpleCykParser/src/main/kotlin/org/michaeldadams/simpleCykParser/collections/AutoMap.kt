@@ -14,7 +14,7 @@ import kotlin.collections.MutableMap
  * @property map the map to be wrapped
  * @property defaultValue a function generating default values
  */
-class AutoMap<K, V>(val map: MutableMap<K, V>, val defaultValue: () -> V) :
+class AutoMap<K, V>(private val map: MutableMap<K, V>, private val defaultValue: () -> V) :
   MutableMap<K, V> by map {
   override operator fun get(key: K): V = map.getOrPut(key, defaultValue)
 }

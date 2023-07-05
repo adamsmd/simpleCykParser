@@ -18,10 +18,10 @@ class QueueSet<E>() : HashSet<E>() {
   }
   override fun clear() = throw UnsupportedOperationException()
   override fun iterator(): MutableIterator<E> = object : MutableIterator<E> {
-    var elementIndex: Int = 0
-    override fun hasNext(): Boolean = elementIndex < elements.size
-    // TODO: increment elementIndex
-    override fun next(): E = if (hasNext()) elements[elementIndex] else throw NoSuchElementException()
+    private var indexOfNext: Int = 0
+    override fun hasNext(): Boolean = indexOfNext < elements.size
+    override fun next(): E =
+      if (this.hasNext()) elements[indexOfNext++] else throw NoSuchElementException()
     override fun remove(): Unit = throw UnsupportedOperationException()
   }
   override fun remove(element: E): Boolean = throw UnsupportedOperationException()
