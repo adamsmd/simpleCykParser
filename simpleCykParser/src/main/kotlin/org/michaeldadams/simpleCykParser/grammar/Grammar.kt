@@ -51,6 +51,7 @@ data class LexRule(val terminal: Terminal, val regex: Regex)
  * @property whitespace the regular expression defining the synatx of whitespace and comments
  * @property lexRules all of the non-whitespace lexical rules for the language
  */
+// TODO: rename lexRules to terminals
 data class LexRules(val whitespace: Regex, val lexRules: List<LexRule>) {
   /** The terminals defined in these lexical rules. */
   val terminals: Set<Terminal> by lazy { lexRules.map { it.terminal }.toSet() }
@@ -75,6 +76,7 @@ data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Sym
  * @property start the start symbol of the language
  * @property productions a map from a nonterminal to the set of productions for that nonterminal
  */
+// TODO: rename productions to productionMap
 data class ParseRules(val start: Symbol, val productions: Map<Nonterminal, Set<Production>>) {
   /** The nonterminals defined in these parse rules. */
   val nonterminals: Set<Nonterminal> by lazy { productions.keys }

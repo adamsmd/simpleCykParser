@@ -43,6 +43,8 @@ data class ProcessedGrammar(val grammar: Grammar) {
   val initialUses: Map<Symbol, Set<Production>> = grammar.initialUses()
 }
 
+fun Grammar.toProcessed(): ProcessedGrammar = ProcessedGrammar(this)
+
 // TODO: move to Chart.kt
 data class Chart(val grammar: ProcessedGrammar, val size: Int) {
   // get left
@@ -88,7 +90,8 @@ data class Chart(val grammar: ProcessedGrammar, val size: Int) {
         keys[start][end] += symbol
         entries[start][end][symbol] += production
         ends[start][symbol] += end
-        for (newProduction in grammar.initialUses[symbol]!!) { // TODO: handle null
+        // If not in map, then has no initial uses
+        for (newProduction in grammar.initialUses.getOrDefault(symbol, emptySet())) {
           // NOTE: Addition goes up not down (we don't have info for down)
           productions += Pair(start, end) to Pair(newProduction.toPartial(1), start)
         }
