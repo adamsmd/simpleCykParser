@@ -39,8 +39,8 @@ fun Production.toPartial(consumed: Int): PartialProduction {
 }
 
 data class ProcessedGrammar(val grammar: Grammar) {
-  val nullable: Set<Production> = TODO()
-  val initialUses: Map<Symbol, Set<Production>> = TODO()
+  val nullable: Set<Production> = grammar.parseRules.nullable()
+  val initialUses: Map<Symbol, Set<Production>> = grammar.initialUses()
 }
 
 // TODO: move to Chart.kt
@@ -51,8 +51,6 @@ data class Chart(val grammar: ProcessedGrammar, val size: Int) {
   // get parses at
   // fromTokens
   // fromSymbols
-
-  // TODO: initialize all tables with nullable
 
   val symbols = Symbols()
   inner class Symbols {
@@ -91,6 +89,7 @@ data class Chart(val grammar: ProcessedGrammar, val size: Int) {
         entries[start][end][symbol] += production
         ends[start][symbol] += end
         for (newProduction in grammar.initialUses[symbol]!!) { // TODO: handle null
+          // NOTE: Addition goes up not down (we don't have info for down)
           productions += Pair(start, end) to Pair(newProduction.toPartial(1), start)
         }
       }
@@ -130,7 +129,18 @@ data class Chart(val grammar: ProcessedGrammar, val size: Int) {
         entries[start][end][partial] += previous
         ends[start][partial] += end
         if (partial.isComplete) {
+          // NOTE: Addition goes up not down (we don't have info for down)
           symbols += Pair(start, end) to Pair(partial.production.lhs, partial.production)
+        }
+      }
+    }
+  }
+
+  init {
+    for (position in 0..size) {
+      for (production in grammar.nullable) {
+        for (consumed in 0..production.rhs.size) {
+          productions += Pair(position, position) to Pair(production.toPartial(consumed), position)
         }
       }
     }

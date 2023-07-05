@@ -23,8 +23,8 @@ import org.michaeldadams.simpleCykParser.grammar.Symbol
 //   return partialSymbols.groupBy { it.nextSymbol }.mapValues { it.value.toSet() }
 // }
 
-fun initialUses(grammar: Grammar): Map<Symbol, Set<Production>> =
-  grammar.parseRules.productions.values.flatten()
+fun Grammar.initialUses(): Map<Symbol, Set<Production>> =
+  this.parseRules.productions.values.flatten()
     .filter { it.rhs.isNotEmpty() }
     .groupBy { it.rhs.first() }
     .mapValues { it.value.toSet() }

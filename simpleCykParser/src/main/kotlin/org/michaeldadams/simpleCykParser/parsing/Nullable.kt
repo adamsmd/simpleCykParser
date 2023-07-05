@@ -16,7 +16,7 @@ fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
     .mapValues { entry -> entry.value.map { it.second }.toSet() }
 
 fun ParseRules.emptyProductions(): Set<Production> =
-  this.productions.values.flatMap { productions -> productions.filter { it.rhs.isEmpty() } }.toSet()
+  this.productions.values.flatten().filter { it.rhs.isEmpty() }.toSet()
 
 // Note that there are much more efficient algorithms for this
 fun ParseRules.nullable(): Set<Production> {
