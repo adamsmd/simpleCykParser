@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 class AutoMapTest {
   @Test fun testAutoMap(): Unit {
     var count = 0
-    val map = autoMap<String, Int> { count += 1; count }
+    val map = AutoMap<String, Int> { count += 1; count }
     map["A"] = 10
     assertEquals(10, map["A"])
     assertEquals(1, map["B"])

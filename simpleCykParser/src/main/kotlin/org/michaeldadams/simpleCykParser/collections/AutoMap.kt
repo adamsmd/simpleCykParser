@@ -17,14 +17,15 @@ import kotlin.collections.MutableMap
 class AutoMap<K, V>(private val map: MutableMap<K, V>, private val defaultValue: () -> V) :
   MutableMap<K, V> by map {
   override operator fun get(key: K): V = map.getOrPut(key, defaultValue)
-}
 
-/**
- * Create a [AutoMap] with a new [MutableMap].
- *
- * @param K the type of map keys
- * @param V the type of map values
- * @param defaultValue a function generating default values
- * @return a [AutoMap] using [defaultValue]
- */
-fun <K, V> autoMap(defaultValue: () -> V): AutoMap<K, V> = AutoMap(mutableMapOf(), defaultValue)
+  /**
+   * Create a [AutoMap] with a new [MutableMap].
+   *
+   * @param K the type of map keys
+   * @param V the type of map values
+   * @param defaultValue a function generating default values
+   * @return a [AutoMap] using [defaultValue]
+   */
+  constructor(defaultValue: () -> V) : this(mutableMapOf(), defaultValue)
+
+}
