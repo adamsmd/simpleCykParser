@@ -1,9 +1,7 @@
 package org.michaeldadams.simpleCykParser.parsing
 
 import org.michaeldadams.simpleCykParser.collections.AutoMap
-import org.michaeldadams.simpleCykParser.collections.NavigableIterator
 import org.michaeldadams.simpleCykParser.collections.QueueSet
-import org.michaeldadams.simpleCykParser.collections.ReverseNavigableIterator
 import org.michaeldadams.simpleCykParser.collections.autoMap
 import org.michaeldadams.simpleCykParser.grammar.Grammar
 import org.michaeldadams.simpleCykParser.grammar.Production
