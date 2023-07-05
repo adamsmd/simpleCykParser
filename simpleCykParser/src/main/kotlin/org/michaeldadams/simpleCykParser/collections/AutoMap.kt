@@ -5,8 +5,8 @@ package org.michaeldadams.simpleCykParser.collections
 import kotlin.collections.MutableMap
 
 /**
- * Wrapper for maps that implements default values. Looking up a non-existant
- * value adds the value returned by [defaultValue] to the map.
+ * Wrapper for maps that upon lookup automatically populates missing entries
+ * with default values (i.e., autovivification).
  *
  * @param K the type of map keys
  * @param V the type of map values
@@ -14,17 +14,17 @@ import kotlin.collections.MutableMap
  * @property map the map to be wrapped
  * @property defaultValue a function generating default values
  */
-class DefMap<K, V>(val map: MutableMap<K, V>, val defaultValue: () -> V) :
+class AutoMap<K, V>(val map: MutableMap<K, V>, val defaultValue: () -> V) :
   MutableMap<K, V> by map {
   override operator fun get(key: K): V = map.getOrPut(key, defaultValue)
 }
 
 /**
- * Create a [DefMap] with a new [MutableMap].
+ * Create a [AutoMap] with a new [MutableMap].
  *
  * @param K the type of map keys
  * @param V the type of map values
  * @param defaultValue a function generating default values
- * @return a [DefMap] using [defaultValue]
+ * @return a [AutoMap] using [defaultValue]
  */
-fun <K, V> defMap(defaultValue: () -> V): DefMap<K, V> = DefMap(mutableMapOf(), defaultValue)
+fun <K, V> autoMap(defaultValue: () -> V): AutoMap<K, V> = AutoMap(mutableMapOf(), defaultValue)

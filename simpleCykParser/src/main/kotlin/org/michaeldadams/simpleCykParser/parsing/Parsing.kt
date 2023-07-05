@@ -1,15 +1,13 @@
 package org.michaeldadams.simpleCykParser.parsing
 
-// TODO: DefMap for the default map
-import org.michaeldadams.simpleCykParser.collections.DefMap
+import org.michaeldadams.simpleCykParser.collections.AutoMap
 import org.michaeldadams.simpleCykParser.collections.NavigableIterator
-import org.michaeldadams.simpleCykParser.collections.ReverseNavigableIterator
-import org.michaeldadams.simpleCykParser.collections.defMap
-import org.michaeldadams.simpleCykParser.collections.defMap
 import org.michaeldadams.simpleCykParser.collections.QueueSet
+import org.michaeldadams.simpleCykParser.collections.ReverseNavigableIterator
+import org.michaeldadams.simpleCykParser.collections.autoMap
+import org.michaeldadams.simpleCykParser.grammar.Grammar
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
-import org.michaeldadams.simpleCykParser.grammar.Grammar
 
 // sealed interface ParsedProduction
 // data class CompletelyParsedProduction(val production: Production) : ParsedProduction
@@ -78,16 +76,14 @@ class Chart(val grammar: ProcessedGrammar, val size: Int) {
   // get parses at
    // TODO: initialize all tables with nullable
 
-  // TODO: defmap on normal map
-  // TODO: investigate DefaultMap
   val symbols = Symbols()
   inner class Symbols {
-    private val keys: DefMap<Int, DefMap<Int, QueueSet<Symbol>>> =
-      defMap { defMap { QueueSet() } }
-    private val entries: DefMap<Int, DefMap<Int, DefMap<Symbol, QueueSet<Production?>>>> =
-      defMap { defMap { defMap { QueueSet() } } }
-    private val ends: DefMap<Int, DefMap<Symbol, QueueSet<Int>>> =
-      defMap { defMap { QueueSet() } }
+    private val keys: AutoMap<Int, AutoMap<Int, QueueSet<Symbol>>> =
+      autoMap { autoMap { QueueSet() } }
+    private val entries: AutoMap<Int, AutoMap<Int, AutoMap<Symbol, QueueSet<Production?>>>> =
+      autoMap { autoMap { autoMap { QueueSet() } } }
+    private val ends: AutoMap<Int, AutoMap<Symbol, QueueSet<Int>>> =
+      autoMap { autoMap { QueueSet() } }
 
     // Used to find parses
     operator fun get(start: Int, end: Int): Set<Symbol> = keys[start][end]
@@ -117,12 +113,12 @@ class Chart(val grammar: ProcessedGrammar, val size: Int) {
 
   val productions = Productions()
   inner class Productions {
-    private val keys: DefMap<Int, DefMap<Int, QueueSet<PartialProduction>>> =
-      defMap { defMap { QueueSet() } }
-    private val entries: DefMap<Int, DefMap<Int, DefMap<PartialProduction, QueueSet<Int?>>>> =
-      defMap { defMap { defMap { QueueSet() } } }
-    private val ends: DefMap<Int, DefMap<PartialProduction, QueueSet<Int>>> =
-      defMap { defMap { QueueSet() } }
+    private val keys: AutoMap<Int, AutoMap<Int, QueueSet<PartialProduction>>> =
+      autoMap { autoMap { QueueSet() } }
+    private val entries: AutoMap<Int, AutoMap<Int, AutoMap<PartialProduction, QueueSet<Int?>>>> =
+      autoMap { autoMap { autoMap { QueueSet() } } }
+    private val ends: AutoMap<Int, AutoMap<PartialProduction, QueueSet<Int>>> =
+      autoMap { autoMap { QueueSet() } }
 
     // Used to get 'leftChild'
     operator fun get(start: Int, end: Int): QueueSet<PartialProduction> = keys[start][end]
@@ -175,8 +171,8 @@ fun parse(chart: Chart) {
 //    *  - a set of indexes one step back in the parse
 //    */
 //   val byRowAndSymbol:
-//     DefMap<Int, DefMap<Symbol, DefMap<Int, DefMap<Production, MutableSet<Int>>>>> =
-//       defMap { defMap { defMap { defMap { mutableSetOf() } } } },
+//     AutoMap<Int, AutoMap<Symbol, AutoMap<Int, AutoMap<Production, MutableSet<Int>>>>> =
+//       autoMap { autoMap { autoMap { autoMap { mutableSetOf() } } } },
 
 //   /**
 //    * Table of partial parses.  Indexed by:
@@ -186,8 +182,8 @@ fun parse(chart: Chart) {
 //    *  - a set of indexes one step back in the parse
 //    */
 //   val byRowAndCol:
-//     DefMap<Int, DefMap<Int, DefMap<PartiallyParsedProduction, MutableSet<Int>>>> =
-//       defMap { defMap { defMap { mutableSetOf() } } }
+//     AutoMap<Int, AutoMap<Int, AutoMap<PartiallyParsedProduction, MutableSet<Int>>>> =
+//       autoMap { autoMap { autoMap { mutableSetOf() } } }
 // )
 //       // class Chart {
 // //   static fun fromTokens
@@ -219,8 +215,8 @@ fun parse(chart: Chart) {
 //    *  - a set of indexes one step back in the parse
 //    */
 //   val byRowAndSymbol:
-//     DefMap<Int, DefMap<Symbol, DefMap<Int, DefMap<Production, MutableSet<Int>>>>> =
-//       defMap { defMap { defMap { defMap { mutableSetOf() } } } }
+//     AutoMap<Int, AutoMap<Symbol, AutoMap<Int, AutoMap<Production, MutableSet<Int>>>>> =
+//       autoMap { autoMap { autoMap { autoMap { mutableSetOf() } } } }
 
 //   /**
 //    * Table of partial parses.  Indexed by:
@@ -230,8 +226,8 @@ fun parse(chart: Chart) {
 //    *  - a set of indexes one step back in the parse
 //    */
 //   val byRowAndCol:
-//     DefMap<Int, DefMap<Int, DefMap<PartiallyParsedProduction, MutableSet<Int>>>> =
-//       defMap { defMap { defMap { mutableSetOf() } } }
+//     AutoMap<Int, AutoMap<Int, AutoMap<PartiallyParsedProduction, MutableSet<Int>>>> =
+//       autoMap { autoMap { autoMap { mutableSetOf() } } }
 
 //   // TODO: function to check consistency of parse chart (takes set of null?)
 

@@ -3,10 +3,10 @@ package org.michaeldadams.simpleCykParser.collections
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class DefMapTest {
-  @Test fun testDefMap(): Unit {
+class AutoMapTest {
+  @Test fun testAutoMap(): Unit {
     var count = 0
-    val map = defMap<String, Int> { count += 1; count }
+    val map = autoMap<String, Int> { count += 1; count }
     map["A"] = 10
     assertEquals(10, map["A"])
     assertEquals(1, map["B"])
