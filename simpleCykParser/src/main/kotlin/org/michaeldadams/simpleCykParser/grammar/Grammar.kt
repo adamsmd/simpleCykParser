@@ -56,6 +56,8 @@ data class LexRules(val whitespace: Regex, val lexRules: List<LexRule>) {
   /** The terminals defined in these lexical rules. */
   val terminals: Set<Terminal> by lazy { lexRules.map { it.terminal }.toSet() }
 }
+// TODO: replace whitespace with a post processing filter
+// TODO: implement indent as a post processing filter
 
 /**************************************/
 /* Parsing                            */

@@ -22,5 +22,6 @@ class AutoMap<K, V>(private val map: MutableMap<K, V>, private val defaultValue:
    */
   constructor(defaultValue: () -> V) : this(mutableMapOf(), defaultValue)
 
+  // TODO: does delegation cover everything or do I need inheritance?
   override operator fun get(key: K): V = map.getOrPut(key, defaultValue)
 }

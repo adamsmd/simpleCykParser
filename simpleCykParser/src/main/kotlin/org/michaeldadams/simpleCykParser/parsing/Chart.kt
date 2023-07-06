@@ -1,9 +1,36 @@
 package org.michaeldadams.simpleCykParser.parsing
 
+import com.charleskorn.kaml.IncorrectTypeException
+import com.charleskorn.kaml.MissingRequiredPropertyException
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlList
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
+import com.charleskorn.kaml.YamlPath
+import com.charleskorn.kaml.YamlScalar
 import org.michaeldadams.simpleCykParser.collections.AutoMap
 import org.michaeldadams.simpleCykParser.collections.QueueSet
+import org.michaeldadams.simpleCykParser.collections.mapToYaml
+import org.michaeldadams.simpleCykParser.collections.scalarToYaml
+import org.michaeldadams.simpleCykParser.collections.setToYaml
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
+
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.SetSerializer
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.serializer
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.Decoder
+
+
 
 // nt -> prod | prod | prod
 // prod -> prod/2 prod.2
@@ -38,6 +65,16 @@ fun Production.toPartial(consumed: Int): PartialProduction {
   return PartialProduction(this, consumed)
 }
 
+class AsStringSerializer<T>(name: String) : KSerializer<T> {
+  override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(name, PrimitiveKind.STRING)
+
+  override fun serialize(encoder: Encoder, value: T) {
+    encoder.encodeString(value.toString())
+  }
+
+  override fun deserialize(decoder: Decoder): T = TODO()
+}
+
 // TODO: move to Chart.kt
 data class Chart(val parseRules: ProcessedParseRules, val size: Int) {
   // get left
@@ -50,10 +87,12 @@ data class Chart(val parseRules: ProcessedParseRules, val size: Int) {
   val symbols = Symbols()
   inner class Symbols {
     // Symbols for a start and end.
+    // TODO: rename to symbols
     private val keys: AutoMap<Int, AutoMap<Int, QueueSet<Symbol>>> =
       AutoMap { AutoMap { QueueSet() } }
 
     // Productions for a start, end, and symbol.  Null if "Symbol" is present but has no production.
+    // TODO: rename to productions
     private val entries: AutoMap<Int, AutoMap<Int, AutoMap<Symbol, QueueSet<Production?>>>> =
       AutoMap { AutoMap { AutoMap { QueueSet() } } }
 
@@ -90,15 +129,59 @@ data class Chart(val parseRules: ProcessedParseRules, val size: Int) {
         }
       }
     }
+
+    private val toYamlImpl =
+      mapToYaml<Int, _>( // TODO: alternative to _
+        // scalarToYaml<Int>(),
+        mapToYaml<Int, _>(
+          // scalarToYaml<Int>(),
+          mapToYaml<Symbol, _>(
+            // scalarToYaml<Symbol>(),
+            setToYaml(
+              scalarToYaml<Production?>()))))
+
+    fun theSerializer() =
+      MapSerializer(
+        Int.serializer(),
+        MapSerializer(
+          Int.serializer(),
+          MapSerializer<Symbol, _>(
+            AsStringSerializer<Symbol>("Symbol"),
+            SetSerializer<Production?>(
+              AsStringSerializer<Production>("Production").nullable
+            )
+          )
+        )
+      )
+
+    inner class TheSerializer() : KSerializer<Symbols> {
+      private val delegateSerializer = theSerializer()
+      override val descriptor = SerialDescriptor("Symbols", delegateSerializer.descriptor)
+
+      override fun serialize(encoder: Encoder, value: Symbols): Unit {
+        encoder.encodeSerializableValue(delegateSerializer, this@Symbols.entries)
+      }
+
+      override fun deserialize(decoder: Decoder): Symbols {
+        val map = decoder.decodeSerializableValue(delegateSerializer)
+        val result = Symbols()
+        TODO() // TODO: put entries in result
+        return result
+      }
+    }
+
+    fun toYaml(path: YamlPath): YamlNode = toYamlImpl(this.entries, path)
   }
 
   val productions = Productions()
   inner class Productions {
     // PartialProductions for a start and end.
+    // TODO: rename to productions
     private val keys: AutoMap<Int, AutoMap<Int, QueueSet<PartialProduction>>> =
       AutoMap { AutoMap { QueueSet() } }
 
     // Splitting position for a start, end and PartialProduction.  Null if PartialProduction is present but has no splitting position.
+    // TODO: rename to splits
     private val entries: AutoMap<Int, AutoMap<Int, AutoMap<PartialProduction, QueueSet<Int?>>>> =
       AutoMap { AutoMap { AutoMap { QueueSet() } } }
 
@@ -140,5 +223,14 @@ data class Chart(val parseRules: ProcessedParseRules, val size: Int) {
         }
       }
     }
+  }
+
+  fun toYaml(path: YamlPath = YamlPath.root): YamlNode {
+    val location = path.endLocation
+    // this.symbols.entries
+    TODO()
+    // val symbolsYaml = 
+    // withPath
+    // val root = YamlMap(
   }
 }

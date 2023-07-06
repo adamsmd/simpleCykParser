@@ -1,5 +1,7 @@
 package org.michaeldadams.simpleCykParser.parsing
 
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlPath
 import org.michaeldadams.simpleCykParser.grammar.toParseRules
 import org.michaeldadams.simpleCykParser.grammar.toYamlMap
 import kotlin.test.Test
@@ -19,5 +21,7 @@ class ChartTest {
     // TODO: assertEquals(
     //   listOf(Token("A", 1, 1), Token("B", 3, 3), Token("C", 6, 7)),
     //   Lexer.lex(l, " A B  AA "))
+    println(chart.symbols.toYaml(YamlPath.root))
+    println(Yaml.default.encodeToString(chart.symbols.TheSerializer(), chart.symbols))
   }
 }

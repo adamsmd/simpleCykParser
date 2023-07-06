@@ -41,9 +41,8 @@ class Main : CliktCommand(
     // TODO: warn if no args
 
     // print grammar
-    // print lexer
+    // check grammar
     // lex
-    // parse
-    // derive regex
+    // parse (table as yaml)
   }
 }
