@@ -6,6 +6,19 @@ import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 
+data class ProcessedParseRules(val parseRules: ParseRules) {
+  val nullable: Set<Production> = parseRules.nullable()
+  val initialUses: Map<Symbol, Set<Production>> = parseRules.initialUses()
+}
+
+fun ParseRules.toProcessed(): ProcessedParseRules = ProcessedParseRules(this)
+
+fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
+  this.productions.values.flatten()
+    .filter { it.rhs.isNotEmpty() }
+    .groupBy { it.rhs.first() }
+    .mapValues { it.value.toSet() }
+
 /** Compute the productions using each nonterminal. */
 fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
   this.productions.values.flatMap { productions ->
