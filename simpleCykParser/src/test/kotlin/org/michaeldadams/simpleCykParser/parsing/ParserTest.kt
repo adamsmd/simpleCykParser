@@ -21,7 +21,7 @@ class ParserTest {
     val z = arrayOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")"))
     val chart = Chart(g, *z)
     parse(chart)
-    println(Yaml.default.encodeToString(chart.symbols.Serializer(), chart.symbols))
-    println(Yaml.default.encodeToString(chart.productions.Serializer(), chart.productions))
+    println(Yaml.default.encodeToString(SymbolsSerializer(), chart))
+    println(Yaml.default.encodeToString(ProductionsSerializer(), chart))
   }
 }

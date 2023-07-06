@@ -71,6 +71,7 @@ data class LexRules(val whitespace: Regex, val lexRules: List<LexRule>) {
  * @property rhs the symbols that this production expands to
  */
 data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Symbol>)
+// TODO: allow names of rhs fields
 
 /**
  * The combined parsing rules of a language.

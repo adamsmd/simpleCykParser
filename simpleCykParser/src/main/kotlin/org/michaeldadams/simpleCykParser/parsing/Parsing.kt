@@ -11,13 +11,15 @@ fun parse(chart: Chart): Unit {
       val rightStart = leftEnd
       // gets new elements if rightChild is nulled
       println("${leftStart}..${leftEnd}")
-      for (leftChild in chart.productions[leftStart, leftEnd]) {
-        println("  ${leftChild}")
-        leftChild.consume()?.let { (nextPartial, consumed) ->
-          // gets new elements if leftChild is nulled
-          println("    $nextPartial")
-          for (rightEnd in chart.symbols[rightStart, consumed]) {
-            chart.productions += Pair(leftStart, rightEnd) to Pair(nextPartial, leftEnd)
+      if (chart.productions[leftStart].contains(leftEnd)) { // TODO: better way to prevent fill-in
+        for (leftChild in chart.productions[leftStart][leftEnd].keysQueue) {
+          println("  ${leftChild}")
+          leftChild.consume()?.let { (nextPartial, consumed) ->
+            // gets new elements if leftChild is nulled
+            println("    $nextPartial")
+            for (rightEnd in chart.symbolEnds[rightStart][consumed]) {
+              chart.addProduction(Pair(leftStart, rightEnd) to Pair(nextPartial, leftEnd))
+            }
           }
         }
       }

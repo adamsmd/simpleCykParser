@@ -20,16 +20,16 @@ class ChartTest {
     """.trimIndent()
     val g = x.toYamlMap().toParseRules().toProcessed()
     val chart = Chart(g, 5)
-    chart.symbols += Pair(3, 4) to Pair(Terminal("("), null)
-    chart.symbols += Pair(2, 4) to Pair(Terminal("("), Production(Nonterminal("S"), "X", emptyList()))
+    chart.addSymbol(Pair(3, 4) to Pair(Terminal("("), null))
+    chart.addSymbol(Pair(2, 4) to Pair(Terminal("("), Production(Nonterminal("S"), "X", emptyList())))
     val p = PartialProduction(
       Production(Nonterminal("S"), null, listOf(Nonterminal("S"), Terminal("+"), Nonterminal("S"))),
       2
     )
 
-    chart.productions += Pair(2, 4) to Pair(p, null)
-    chart.productions += Pair(1, 4) to Pair(p.consume()!!.first, null)
-    println(Yaml.default.encodeToString(chart.symbols.Serializer(), chart.symbols))
-    println(Yaml.default.encodeToString(chart.productions.Serializer(), chart.productions))
+    chart.addProduction(Pair(2, 4) to Pair(p, null))
+    chart.addProduction(Pair(1, 4) to Pair(p.consume()!!.first, null))
+    println(Yaml.default.encodeToString(SymbolsSerializer(), chart))
+    println(Yaml.default.encodeToString(ProductionsSerializer(), chart))
   }
 }
