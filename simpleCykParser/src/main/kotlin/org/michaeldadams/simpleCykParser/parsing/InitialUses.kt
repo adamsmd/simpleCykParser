@@ -1,6 +1,6 @@
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.grammar.Grammar
+import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 
@@ -23,8 +23,8 @@ import org.michaeldadams.simpleCykParser.grammar.Symbol
 //   return partialSymbols.groupBy { it.nextSymbol }.mapValues { it.value.toSet() }
 // }
 
-fun Grammar.initialUses(): Map<Symbol, Set<Production>> =
-  this.parseRules.productions.values.flatten()
+fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
+  this.productions.values.flatten()
     .filter { it.rhs.isNotEmpty() }
     .groupBy { it.rhs.first() }
     .mapValues { it.value.toSet() }

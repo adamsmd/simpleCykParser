@@ -2,7 +2,7 @@ package org.michaeldadams.simpleCykParser.parsing
 
 import org.michaeldadams.simpleCykParser.collections.AutoMap
 import org.michaeldadams.simpleCykParser.collections.QueueSet
-import org.michaeldadams.simpleCykParser.grammar.Grammar
+import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 
@@ -27,7 +27,8 @@ data class PartialProduction(val production: Production, val consumed: Int) {
   }
   val lastConsumed: Symbol get() = production.rhs[consumed]
   val isComplete: Boolean get() = consumed == production.rhs.size
-  fun next(): PartialProduction? = TODO()
+  fun consume(): PartialProduction? =
+    if (this.isComplete) null else PartialProduction(production, consumed + 1)
 }
 
 // TODO: lastPartial?
@@ -38,15 +39,15 @@ fun Production.toPartial(consumed: Int): PartialProduction {
   return PartialProduction(this, consumed)
 }
 
-data class ProcessedGrammar(val grammar: Grammar) {
-  val nullable: Set<Production> = grammar.parseRules.nullable()
-  val initialUses: Map<Symbol, Set<Production>> = grammar.initialUses()
+data class ProcessedParseRules(val parseRules: ParseRules) {
+  val nullable: Set<Production> = parseRules.nullable()
+  val initialUses: Map<Symbol, Set<Production>> = parseRules.initialUses()
 }
 
-fun Grammar.toProcessed(): ProcessedGrammar = ProcessedGrammar(this)
+fun ParseRules.toProcessed(): ProcessedParseRules = ProcessedParseRules(this)
 
 // TODO: move to Chart.kt
-data class Chart(val grammar: ProcessedGrammar, val size: Int) {
+data class Chart(val parseRules: ProcessedParseRules, val size: Int) {
   // get left
   // get right
   // get children
@@ -91,7 +92,7 @@ data class Chart(val grammar: ProcessedGrammar, val size: Int) {
         entries[start][end][symbol] += production
         ends[start][symbol] += end
         // If not in map, then has no initial uses
-        for (newProduction in grammar.initialUses.getOrDefault(symbol, emptySet())) {
+        for (newProduction in parseRules.initialUses.getOrDefault(symbol, emptySet())) {
           // NOTE: Addition goes up not down (we don't have info for down)
           productions += Pair(start, end) to Pair(newProduction.toPartial(1), start)
         }
@@ -141,7 +142,7 @@ data class Chart(val grammar: ProcessedGrammar, val size: Int) {
 
   init {
     for (position in 0..size) {
-      for (production in grammar.nullable) {
+      for (production in parseRules.nullable) {
         for (consumed in 0..production.rhs.size) {
           productions += Pair(position, position) to Pair(production.toPartial(consumed), position)
         }
@@ -160,7 +161,7 @@ fun parse(chart: Chart): Unit {
     for (leftStart in 0..leftEnd) {
       // gets new elements if rightChild is nulled
       for (leftChild in chart.productions[leftStart, leftEnd]) {
-        leftChild.next()?.let { nextPartial ->
+        leftChild.consume()?.let { nextPartial ->
           // gets new elements if leftChild is nulled
           for (rightEnd in chart.symbols[rightStart, nextPartial.lastConsumed]) {
             chart.productions += Pair(leftStart, rightEnd) to Pair(nextPartial, leftEnd)
