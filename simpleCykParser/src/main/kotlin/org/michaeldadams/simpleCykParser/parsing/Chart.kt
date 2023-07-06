@@ -1,33 +1,19 @@
 package org.michaeldadams.simpleCykParser.parsing
 
-import com.charleskorn.kaml.IncorrectTypeException
-import com.charleskorn.kaml.MissingRequiredPropertyException
-import com.charleskorn.kaml.Yaml
-import com.charleskorn.kaml.YamlList
-import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.YamlNode
-import com.charleskorn.kaml.YamlPath
-import com.charleskorn.kaml.YamlScalar
 import org.michaeldadams.simpleCykParser.collections.AutoMap
 import org.michaeldadams.simpleCykParser.collections.QueueSet
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
-
-import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.serializer
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
-
-
+import kotlinx.serialization.encoding.Encoder
 
 // nt -> prod | prod | prod
 // prod -> prod/2 prod.2
@@ -128,7 +114,7 @@ data class Chart(val parseRules: ProcessedParseRules, val size: Int) {
     }
 
     // TODO: we don't need inner, but kotlin compilation errors if we omit inner
-    inner class Serializer() : KSerializer<Symbols> {
+    inner class Serializer : KSerializer<Symbols> {
       private val delegateSerializer =
         MapSerializer(
           Int.serializer(),
@@ -208,7 +194,7 @@ data class Chart(val parseRules: ProcessedParseRules, val size: Int) {
       }
     }
 
-    inner class Serializer() : KSerializer<Productions> {
+    inner class Serializer : KSerializer<Productions> {
       private val delegateSerializer =
         MapSerializer(
           Int.serializer(),

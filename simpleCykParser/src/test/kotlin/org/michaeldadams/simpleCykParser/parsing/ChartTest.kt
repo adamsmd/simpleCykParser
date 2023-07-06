@@ -1,7 +1,6 @@
 package org.michaeldadams.simpleCykParser.parsing
 
 import com.charleskorn.kaml.Yaml
-import com.charleskorn.kaml.YamlPath
 import org.michaeldadams.simpleCykParser.grammar.Terminal
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal

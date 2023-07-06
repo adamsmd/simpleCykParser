@@ -1,8 +1,6 @@
 package org.michaeldadams.simpleCykParser.grammar
 
 import kotlin.test.Test
-import kotlinx.serialization.Serializable
-import com.charleskorn.kaml.Yaml
 
 class YamlTest {
   @Test fun test1(): Unit {
