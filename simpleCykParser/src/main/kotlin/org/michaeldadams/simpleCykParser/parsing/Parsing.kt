@@ -3,16 +3,20 @@ package org.michaeldadams.simpleCykParser.parsing
 // toPartial: Productions are unchanged, Symbols get their initial use Productions
 
 // TODO: parseFromTokens
-
+// TODO: logging of parse sequence
 fun parse(chart: Chart): Unit {
-  for (leftEnd in chart.size..0) {
-    val rightStart = leftEnd
-    for (leftStart in 0..leftEnd) {
+  println("CHART(${chart.size})")
+  for (leftStart in chart.size downTo 0) {
+    for (leftEnd in leftStart..chart.size) {
+      val rightStart = leftEnd
       // gets new elements if rightChild is nulled
+      println("${leftStart}..${leftEnd}")
       for (leftChild in chart.productions[leftStart, leftEnd]) {
-        leftChild.consume()?.let { nextPartial ->
+        println("  ${leftChild}")
+        leftChild.consume()?.let { (nextPartial, consumed) ->
           // gets new elements if leftChild is nulled
-          for (rightEnd in chart.symbols[rightStart, nextPartial.lastConsumed]) {
+          println("    $nextPartial")
+          for (rightEnd in chart.symbols[rightStart, consumed]) {
             chart.productions += Pair(leftStart, rightEnd) to Pair(nextPartial, leftEnd)
           }
         }

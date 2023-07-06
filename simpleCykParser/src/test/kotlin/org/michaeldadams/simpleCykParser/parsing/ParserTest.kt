@@ -1,7 +1,10 @@
 package org.michaeldadams.simpleCykParser.parsing
 
+import com.charleskorn.kaml.Yaml
+import org.michaeldadams.simpleCykParser.grammar.Terminal
 import org.michaeldadams.simpleCykParser.grammar.toParseRules
 import org.michaeldadams.simpleCykParser.grammar.toYamlMap
+import org.michaeldadams.simpleCykParser.parsing.parse
 import kotlin.test.Test
 
 class ParserTest {
@@ -14,10 +17,11 @@ class ParserTest {
           - X: ""
     """.trimIndent()
     val y = x.toYamlMap()
-    /*val l = */y.toParseRules()
-    // println(l)
-    // TODO: assertEquals(
-    //   listOf(Token("A", 1, 1), Token("B", 3, 3), Token("C", 6, 7)),
-    //   Lexer.lex(l, " A B  AA "))
+    val g = x.toYamlMap().toParseRules().toProcessed()
+    val z = arrayOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")"))
+    val chart = Chart(g, *z)
+    parse(chart)
+    println(Yaml.default.encodeToString(chart.symbols.Serializer(), chart.symbols))
+    println(Yaml.default.encodeToString(chart.productions.Serializer(), chart.productions))
   }
 }

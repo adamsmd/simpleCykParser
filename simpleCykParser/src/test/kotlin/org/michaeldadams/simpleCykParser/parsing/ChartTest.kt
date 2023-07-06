@@ -28,7 +28,7 @@ class ChartTest {
     )
 
     chart.productions += Pair(2, 4) to Pair(p, null)
-    chart.productions += Pair(1, 4) to Pair(p.consume()!!, null)
+    chart.productions += Pair(1, 4) to Pair(p.consume()!!.first, null)
     println(Yaml.default.encodeToString(chart.symbols.Serializer(), chart.symbols))
     println(Yaml.default.encodeToString(chart.productions.Serializer(), chart.productions))
   }

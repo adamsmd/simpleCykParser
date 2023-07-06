@@ -4,6 +4,7 @@ import org.michaeldadams.simpleCykParser.collections.AutoMap
 import org.michaeldadams.simpleCykParser.collections.QueueSet
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
+import org.michaeldadams.simpleCykParser.grammar.Terminal
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
@@ -34,10 +35,10 @@ data class PartialProduction(val production: Production, val consumed: Int) {
     require(consumed >= 0)
     require(consumed <= production.rhs.size)
   }
-  val lastConsumed: Symbol get() = production.rhs[consumed]
   val isComplete: Boolean get() = consumed == production.rhs.size
-  fun consume(): PartialProduction? =
-    if (this.isComplete) null else PartialProduction(production, consumed + 1)
+  fun consume(): Pair<PartialProduction, Symbol>? =
+    if (this.isComplete) null
+    else Pair(PartialProduction(production, consumed + 1), production.rhs[consumed])
 }
 
 // TODO: lastPartial?
@@ -60,6 +61,15 @@ class AsStringSerializer<T>(name: String) : KSerializer<T> {
 
 // TODO: move to Chart.kt
 data class Chart(val parseRules: ProcessedParseRules, val size: Int) {
+  // TODO: size is inclusive?
+  constructor(parseRules: ProcessedParseRules, vararg terminals: Terminal) :
+    this(parseRules, terminals.size) {
+    for ((start, terminal) in terminals.withIndex()) {
+      symbols += Pair(start, start + 1) to Pair(terminal, null)
+    }
+  }
+  constructor(parseRules: ProcessedParseRules, vararg terminals: String) :
+    this(parseRules, *terminals.map(::Terminal).toTypedArray())
   // get left
   // get right
   // get children
@@ -82,6 +92,9 @@ data class Chart(val parseRules: ProcessedParseRules, val size: Int) {
     // End for a start and symbol.
     private val ends: AutoMap<Int, AutoMap<Symbol, QueueSet<Int>>> =
       AutoMap { AutoMap { QueueSet() } }
+
+    // TODO: operator fun get(): Set<Int> = entries.keys
+    // TODO: operator fun get(start: Int): Set<Int> = entries[start].keys
 
     // Used to find parses
     operator fun get(start: Int, end: Int): Set<Symbol> = keys[start][end]
