@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 class QueueMapTest {
   @Test fun testQueueMap(): Unit {
     var count = 0
-    val map = QueueMap<String, Int> { count += 1; count }
+    val map = queueMap<String, Int> { count += 1; count }
     // map["A"] = 10
     // assertEquals(10, map["A"])
     assertEquals(1, map["B"])

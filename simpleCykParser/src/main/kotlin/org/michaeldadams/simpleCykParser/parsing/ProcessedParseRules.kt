@@ -14,14 +14,14 @@ data class ProcessedParseRules(val parseRules: ParseRules) {
 fun ParseRules.toProcessed(): ProcessedParseRules = ProcessedParseRules(this)
 
 fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
-  this.productions.values.flatten()
+  this.productionMap.values.flatten()
     .filter { it.rhs.isNotEmpty() }
     .groupBy { it.rhs.first() }
     .mapValues { it.value.toSet() }
 
 /** Compute the productions using each nonterminal. */
 fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
-  this.productions.values.flatMap { productions ->
+  this.productionMap.values.flatMap { productions ->
     productions.flatMap { production ->
       production.rhs.map { it to production }
     }
@@ -29,7 +29,7 @@ fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
     .mapValues { entry -> entry.value.map { it.second }.toSet() }
 
 fun ParseRules.emptyProductions(): Set<Production> =
-  this.productions.values.flatten().filter { it.rhs.isEmpty() }.toSet()
+  this.productionMap.values.flatten().filter { it.rhs.isEmpty() }.toSet()
 
 // Note that there are much more efficient algorithms for this
 fun ParseRules.nullable(): Set<Production> {

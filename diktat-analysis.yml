@@ -21,6 +21,9 @@
 
 ## Explicitly disabled rules that are enabled by default
 
+# Checks that package name is in correct (lower) case
+- name: PACKAGE_NAME_INCORRECT_CASE
+  enabled: false
 # Checks that copyright exists on top of file and is properly formatted (as a block comment)
 - name: HEADER_MISSING_OR_WRONG_COPYRIGHT
   enabled: false
@@ -78,6 +81,10 @@
     maxParametersInOneLine: 100
     # 3 by default.
     maxCallsInOneLine: 100
+# Type aliases provide alternative names for existing types when type's reference text is longer 25 chars
+- name: TYPE_ALIAS
+  configuration:
+    typeReferenceLength: '40' # max length of type reference
 
 ## Rules that I am not sure about yet
 

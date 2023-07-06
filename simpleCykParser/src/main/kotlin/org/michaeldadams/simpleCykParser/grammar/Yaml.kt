@@ -43,6 +43,8 @@ fun YamlMap.toLexRules(): LexRules {
  * Extracts parsing rules from a [YamlMap].
  *
  * @return the parsing rules extracted from the [YamlMap]
+ * @throws IncorrectTypeException TODO
+ * @throws MissingRequiredPropertyException TODO
  */
 fun YamlMap.toParseRules(): ParseRules {
   val map = this.toMap()

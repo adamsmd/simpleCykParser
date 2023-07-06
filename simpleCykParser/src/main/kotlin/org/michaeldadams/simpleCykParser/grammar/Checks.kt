@@ -1,11 +1,6 @@
 /** Types for representing a grammar. */
 
-package org.michaeldadams.simpleCykParser.parsing
-
-import org.michaeldadams.simpleCykParser.grammar.Grammar
-import org.michaeldadams.simpleCykParser.grammar.Nonterminal
-import org.michaeldadams.simpleCykParser.grammar.Production
-import org.michaeldadams.simpleCykParser.grammar.Symbol
+package org.michaeldadams.simpleCykParser.grammar
 
 /**
  * Find productions that use undefined symbols.
@@ -15,10 +10,11 @@ import org.michaeldadams.simpleCykParser.grammar.Symbol
  * @return pairs of the productions using undefined symbols and the position
  * of the undefined symbol in the [rhs] of that production
  */
-fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> =
-  parseRules.productions.values.flatten().flatMap { prod ->
-    prod.rhs.mapIndexedNotNull { i, s -> if (s in symbols) null else Pair(prod, i) }
-  }.toSet()
+fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> = TODO()
+
+// parseRules.productions.values.flatten().flatMap { prod ->
+//   prod.rhs.mapIndexedNotNull { i, s -> if (s in symbols) null else Pair(prod, i) }
+// }.toSet()
 
 fun Grammar.unusedSymbols(): Set<Symbol> = TODO()
 fun Grammar.recursivelyUnusedSymbols(): Set<Symbol> = TODO()

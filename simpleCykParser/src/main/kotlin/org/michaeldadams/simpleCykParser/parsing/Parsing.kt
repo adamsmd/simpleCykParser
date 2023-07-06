@@ -1,3 +1,4 @@
+/** A simple implementation of the CYK parsing algorithm. */
 package org.michaeldadams.simpleCykParser.parsing
 
 // toPartial: Productions are unchanged, Symbols get their initial use Productions
@@ -16,9 +17,9 @@ fun parse(chart: Chart): Unit {
           println("  ${leftChild}")
           leftChild.consume()?.let { (nextPartial, consumed) ->
             // gets new elements if leftChild is nulled
-            println("    $nextPartial")
+            println("    ${nextPartial}")
             for (rightEnd in chart.symbolEnds[rightStart][consumed]) {
-              chart.addProduction(Pair(leftStart, rightEnd) to Pair(nextPartial, leftEnd))
+              chart.addProduction(leftStart, rightEnd, nextPartial, leftEnd)
             }
           }
         }

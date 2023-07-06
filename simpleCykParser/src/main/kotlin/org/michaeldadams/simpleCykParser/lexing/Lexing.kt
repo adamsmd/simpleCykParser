@@ -24,13 +24,13 @@ import org.michaeldadams.simpleCykParser.grammar.Terminal
  * @property groups the capture groups from the token's regular expression
  */
 data class Token(val terminal: Terminal, val groups: List<MatchGroup?>) {
+  /** The [MatchGroup] for the entire region matched by the token. */
+  val region: MatchGroup get() = groups.first()!!
+
   init {
     require(groups.isNotEmpty()) { "Groups list must not be empty" }
     requireNotNull(groups.first()) { "First element of groups list must not be null" }
   }
-
-  /** The [MatchGroup] for the entire region matched by the token. */
-  val region: MatchGroup get() = groups.first()!!
 }
 
 /**
@@ -46,23 +46,23 @@ fun MatchResult.toToken(terminal: Terminal): Token = Token(terminal, this.groups
  *
  * Stops at the end of [chars] or if no nonterminals match
  *
- * @param lexerRules the rules to use for lexing
+ * @param lexRules the rules to use for lexing
  * @param chars the text to lex
  * @return a pair of where the lexer stopped (exclusive) and the list of tokens lexed up to that
  * point
  */
-fun lex(lexerRules: LexRules, chars: CharSequence): Pair<Int, List<Token>> {
+fun lex(lexRules: LexRules, chars: CharSequence): Pair<Int, List<Token>> {
   val tokens: MutableList<Token> = mutableListOf() // result tokens to be returned
 
   var pos = 0 // The current position in [chars]
   while (true) {
     // Move [pos] to skip over whitespace
-    pos = lexerRules.whitespace.matchAt(chars, pos)?.let { it.range.endInclusive + 1 } ?: pos
+    pos = lexRules.whitespace.matchAt(chars, pos)?.let { it.range.endInclusive + 1 } ?: pos
 
-    val token = lexerRules.lexRules
+    val token = lexRules.rules
       // At the current position, try the regular expression for each [LexRule]
       .mapNotNull { it.regex.matchAt(chars, pos)?.toToken(it.terminal) }
-      // Take the longest match.  In case of a tie, use the first one to occur in [lexRules].
+      // Take the longest match.  In case of a tie, use the first one to occur in [rules].
       .maxByOrNull { it.region.range.endInclusive }
       // If no matches, exit the loop
       ?: break

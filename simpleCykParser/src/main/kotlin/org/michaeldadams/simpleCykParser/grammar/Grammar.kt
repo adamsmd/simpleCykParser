@@ -44,18 +44,14 @@ data class LexRule(val terminal: Terminal, val regex: Regex)
  * The combined lexical rules of a language.
  *
  * Note that multiple lexical rules match, the longest match wins.  If there are
- * multiple longest matches, which ever rule is earliest in [lexRules] wins.
+ * multiple longest matches, which ever rule is earliest in [terminals] wins.
  *
  * Also note that multiple rules for the same terminal are allowed.
  *
  * @property whitespace the regular expression defining the synatx of whitespace and comments
- * @property lexRules all of the non-whitespace lexical rules for the language
+ * @property rules the list of all the terminals and their all of the non-whitespace lexical rules for the language
  */
-// TODO: rename lexRules to terminals
-data class LexRules(val whitespace: Regex, val lexRules: List<LexRule>) {
-  /** The terminals defined in these lexical rules. */
-  val terminals: Set<Terminal> by lazy { lexRules.map { it.terminal }.toSet() }
-}
+data class LexRules(val whitespace: Regex, val rules: List<LexRule>)
 // TODO: replace whitespace with a post processing filter
 // TODO: implement indent as a post processing filter
 
@@ -77,13 +73,9 @@ data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Sym
  * The combined parsing rules of a language.
  *
  * @property start the start symbol of the language
- * @property productions a map from a nonterminal to the set of productions for that nonterminal
+ * @property productionMap a map from a nonterminal to the set of productions for that nonterminal
  */
-// TODO: rename productions to productionMap
-data class ParseRules(val start: Symbol, val productions: Map<Nonterminal, Set<Production>>) {
-  /** The nonterminals defined in these parse rules. */
-  val nonterminals: Set<Nonterminal> by lazy { productions.keys }
-}
+data class ParseRules(val start: Symbol, val productionMap: Map<Nonterminal, Set<Production>>)
 
 /**************************************/
 /* Lexing and Parsing Together        */
@@ -95,13 +87,4 @@ data class ParseRules(val start: Symbol, val productions: Map<Nonterminal, Set<P
  * @property lexRules the lexing rules of the language
  * @property parseRules the parsing rules of the language
  */
-data class Grammar(val lexRules: LexRules, val parseRules: ParseRules) {
-  /** The terminals defined in this grammar. */
-  val terminals get() = lexRules.terminals
-
-  /** The nonterminals defined in this grammar. */
-  val nonterminals get() = parseRules.nonterminals
-
-  /** The symbols defined in this grammar. */
-  val symbols: Set<Symbol> by lazy { terminals + nonterminals }
-}
+data class Grammar(val lexRules: LexRules, val parseRules: ParseRules)

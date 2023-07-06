@@ -1,37 +1,62 @@
-/** Wrappers for maps that implement default values. */
+/** Code and helpers for [QueueMap]. */
 
 package org.michaeldadams.simpleCykParser.collections
 
-import kotlin.collections.MutableMap
-
+/**
+ * [Map] that upon lookup automatically populates missing entries with default
+ * values (i.e., autovivification) and maintains a [QueueSet] of the keys.
+ *
+ * This interface provides a read-only wrapper around the mutable implementation.
+ * So the only way to add new entries is with [get].
+ *
+ * @param K the type of map keys
+ * @param V the type of map values
+ */
 interface QueueMap<K, out V> : Map<K, V> {
+  /** TODO: backed by a QueueSet, but is Set so that it is not user modifiable. */
   val keysQueue: Set<K>
+
+  /**
+   * TODO: never null (unless V is nullable).
+   *
+   * @param key
+   * @return TODO
+   */
   override operator fun get(key: K): V
 }
 
-fun <K, V> QueueMap(defaultValue: () -> V): QueueMap<K, V> = QueueMapImpl(defaultValue)
-
 /**
- * [MutableMap] that upon lookup automatically populates missing entries with
- * default values (i.e., autovivification).
+ * TODO.
  *
  * @param K the type of map keys
  * @param V the type of map values
  * @property defaultValue a function generating default values
  */
 private class QueueMapImpl<K, V>(val defaultValue: () -> V) : HashMap<K, V>(), QueueMap<K, V> {
-  /**
-   * Create an [AutoMap] with a new, empty [MutableMap].
-   *
-   * @param defaultValue a function generating default values
-   */
-  // constructor(defaultValue: () -> V) : this(mutableMapOf(), defaultValue)
-  override val keysQueue: MutableSet<K> = QueueSet()
+  override val keysQueue: QueueSet<K> = QueueSet()
+  
+  // Putting also adds to [keysQueue]
   override fun put(key: K, value: V): V? = super.put(key, value).also { keysQueue += key }
-  // TODO: remove is UnsupportedException
-
-  // TODO: does delegation cover everything or do I need inheritance?
+  
+  // Getting adds if not already present
   override operator fun get(key: K): V =
-    if (this.contains(key)) super.get(key) as V
-    else defaultValue().also { this.put(key, it) }
+    if (this.contains(key)) {
+      super.get(key) as V
+    } else {
+      defaultValue().also { this.put(key, it) }
+    }
+
+  // Removal operations are unsupported because they break [elements] and thus iterators.
+  override fun clear(): Unit = throw UnsupportedOperationException()
+  override fun remove(key: K): V? = throw UnsupportedOperationException()
 }
+
+/**
+ * TODO.
+ *
+ * @param K the type of map keys
+ * @param V the type of map values
+ * @param defaultValue a function generating default values
+ * @return TODO
+ */
+fun <K, V> queueMap(defaultValue: () -> V): QueueMap<K, V> = QueueMapImpl(defaultValue)
