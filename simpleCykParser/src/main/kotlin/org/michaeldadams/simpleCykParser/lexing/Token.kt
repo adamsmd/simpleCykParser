@@ -32,6 +32,8 @@ data class Token(val terminal: Terminal, val groups: List<MatchGroup?>) {
   }
 }
 
+// TODO: List vs Collection or Sequence?
+
 /**
  * Construct a [Token] from a [MatchResult] and a [Token].
  *
@@ -39,4 +41,4 @@ data class Token(val terminal: Terminal, val groups: List<MatchGroup?>) {
  * @param terminal the terminal that the token is for
  * @return the token constructed for the [terminal] and the [MatchResult]
  */
-fun MatchResult.toToken(terminal: Terminal): Token = Token(terminal, this.groups.map { it })
+fun MatchResult.toToken(terminal: Terminal): Token = Token(terminal, this.groups.toList())
