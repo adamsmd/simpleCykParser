@@ -28,7 +28,7 @@ class ChartTest {
     )
 
     chart.addProduction(2, 4, p, null)
-    chart.addProduction(1, 4, p.consume()!!.first, null)
+    chart.addProduction(1, 4, p.toNext()!!.first, null)
     println(Yaml.default.encodeToString(SymbolsSerializer(), chart))
     println(Yaml.default.encodeToString(ProductionsSerializer(), chart))
   }

@@ -1,4 +1,5 @@
 /** Main entry point for simpleCykParser. */
+
 package org.michaeldadams.simpleCykParser.main
 
 import com.github.ajalt.clikt.completion.completionOption
@@ -26,16 +27,16 @@ class Main : CliktCommand(
     See https://github.com/adamsmd/simpleCykParser/README.md for more details.
     """
 ) {
-  init {
-    context { helpFormatter = CliktHelpFormatter(showDefaultValues = true) }
-    completionOption(help = "Generate an autocomplete script for the given shell")
-  }
-
   val arg: List<String> by argument(
     help = """
       TODO
       """
   ).multiple()
+
+  init {
+    context { helpFormatter = CliktHelpFormatter(showDefaultValues = true) }
+    completionOption(help = "Generate an autocomplete script for the given shell")
+  }
 
   override fun run(): Unit {
     // TODO: warn if no args

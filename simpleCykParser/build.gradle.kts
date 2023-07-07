@@ -32,7 +32,7 @@ dependencies {
   implementation("com.charleskorn.kaml:kaml:0.53.0")
 }
 
-// ////////////////////////////////////////////////////////////////
+// ================================================================== //
 // Main
 application {
   mainClass.set("org.michaeldadams.simpleCykParser.MainKt")

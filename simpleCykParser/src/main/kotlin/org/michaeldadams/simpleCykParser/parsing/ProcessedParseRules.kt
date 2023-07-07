@@ -1,3 +1,5 @@
+/** TODO. */
+
 package org.michaeldadams.simpleCykParser.parsing
 
 import org.michaeldadams.simpleCykParser.collections.QueueSet
@@ -6,20 +8,24 @@ import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 
-data class ProcessedParseRules(val parseRules: ParseRules) {
-  val nullable: Set<Production> = parseRules.nullable()
-  val initialUses: Map<Symbol, Set<Production>> = parseRules.initialUses()
-}
-
-fun ParseRules.toProcessed(): ProcessedParseRules = ProcessedParseRules(this)
-
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
   this.productionMap.values.flatten()
     .filter { it.rhs.isNotEmpty() }
     .groupBy { it.rhs.first().second }
     .mapValues { it.value.toSet() }
 
-/** Compute the productions using each nonterminal. */
+/**
+ * TODO: Compute the productions using each nonterminal.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
   this.productionMap.values
     .flatMap { productions ->
@@ -30,10 +36,23 @@ fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
     .groupBy { it.first }
     .mapValues { entry -> entry.value.map { it.second }.toSet() }
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun ParseRules.emptyProductions(): Set<Production> =
   this.productionMap.values.flatten().filter { it.rhs.isEmpty() }.toSet()
 
-// Note that there are much more efficient algorithms for this
+/**
+ * TODO.
+ *
+ * TODO: Note that there are much more efficient algorithms for this.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun ParseRules.nullable(): Set<Production> {
   val uses: Map<Symbol, Set<Production>> = this.productionsUsing()
   // TODO: Note that productions serves as both a record (Set) and worklist (Queue)
@@ -53,3 +72,24 @@ fun ParseRules.nullable(): Set<Production> {
 
   return productions.toSet()
 }
+
+/**
+ * TODO.
+ *
+ * @property parseRules TODO
+ */
+data class ProcessedParseRules(val parseRules: ParseRules) {
+  /** TODO. */
+  val nullable: Set<Production> = parseRules.nullable()
+
+  /** TODO. */
+  val initialUses: Map<Symbol, Set<Production>> = parseRules.initialUses()
+}
+
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
+fun ParseRules.toProcessed(): ProcessedParseRules = ProcessedParseRules(this)

@@ -8,6 +8,8 @@ import org.michaeldadams.simpleCykParser.grammar.toYamlMap
 import kotlin.test.Test
 
 class ParserTest {
+  val yaml = Yaml(configuration = YamlConfiguration(breakScalarsAt = 1_000))
+
   @Test fun test1(): Unit {
     val x = """
       start: S
@@ -16,13 +18,12 @@ class ParserTest {
           - ( S )
           - X: ""
     """.trimIndent()
-    val y = x.toYamlMap()
     val g = x.toYamlMap().toParseRules().toProcessed()
     val z = arrayOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")"))
     val chart = Chart(g, *z)
     parse(chart)
-    println(Yaml.default.encodeToString(SymbolsSerializer(), chart))
-    println(Yaml.default.encodeToString(ProductionsSerializer(), chart))
+    println(yaml.encodeToString(SymbolsSerializer(), chart))
+    println(yaml.encodeToString(ProductionsSerializer(), chart))
   }
 
   @Test fun test2(): Unit {
@@ -34,11 +35,9 @@ class ParserTest {
           - E: "" # Empty
           - T: a # Terminal
     """.trimIndent()
-    val y = x.toYamlMap()
     val g = x.toYamlMap().toParseRules().toProcessed()
     val chart = Chart(g, "a", "a", "a", "a")
     parse(chart)
-    val yaml = Yaml(configuration = YamlConfiguration(breakScalarsAt = 1000))
     println(yaml.encodeToString(SymbolsSerializer(), chart))
     println(yaml.encodeToString(ProductionsSerializer(), chart))
   }

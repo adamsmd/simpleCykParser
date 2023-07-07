@@ -30,6 +30,9 @@
 # Checks that file does not contain lines > maxSize
 - name: FILE_IS_TOO_LONG
   enabled: false
+# Checks top level order
+- name: TOP_LEVEL_ORDER
+  enabled: false
 # Checks that function length isn't too long
 - name: TOO_LONG_FUNCTION
   enabled: false
