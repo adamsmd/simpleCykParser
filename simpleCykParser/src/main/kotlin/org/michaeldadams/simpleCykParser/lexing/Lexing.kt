@@ -59,7 +59,7 @@ fun lex(lexRules: LexRules, chars: CharSequence): Pair<Int, List<Token>> {
     // Move [pos] to skip over whitespace
     pos = lexRules.whitespace.matchAt(chars, pos)?.let { it.range.endInclusive + 1 } ?: pos
 
-    val token = lexRules.rules
+    val token = lexRules.terminalRules
       // At the current position, try the regular expression for each [LexRule]
       .mapNotNull { it.regex.matchAt(chars, pos)?.toToken(it.terminal) }
       // Take the longest match.  In case of a tie, use the first one to occur in [rules].

@@ -38,7 +38,7 @@ data class Nonterminal(val name: String) : Symbol
  * @property terminal the terminal that this lexical rule is for
  * @property regex the regular expression defining the syntax of the terminal
  */
-data class LexRule(val terminal: Terminal, val regex: Regex)
+data class TerminalRule(val terminal: Terminal, val regex: Regex)
 
 /**
  * The combined lexical rules of a language.
@@ -49,10 +49,10 @@ data class LexRule(val terminal: Terminal, val regex: Regex)
  * Also note that multiple rules for the same terminal are allowed.
  *
  * @property whitespace the regular expression defining the synatx of whitespace and comments
- * @property rules the list of all the terminals and their all of the non-whitespace lexical rules for the language
+ * @property terminalRules the list of all the terminals and their all of the non-whitespace lexical rules for the language
  */
 // TODO: rename rules to terminals to match Yaml
-data class LexRules(val whitespace: Regex, val rules: List<LexRule>)
+data class LexRules(val whitespace: Regex, val terminalRules: List<TerminalRule>)
 // TODO: replace whitespace with a post processing filter
 // TODO: implement indent as a post processing filter
 

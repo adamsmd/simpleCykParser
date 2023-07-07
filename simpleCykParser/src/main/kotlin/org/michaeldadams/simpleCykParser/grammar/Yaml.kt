@@ -34,7 +34,7 @@ fun YamlMap.toLexRules(): LexRules {
 
   val terminals = map["terminals", this.path].yamlList.items.map {
     it.yamlMap.toPair { it.yamlScalar.content }
-  }.map { LexRule(Terminal(it.first), it.second.toRegex()) }
+  }.map { TerminalRule(Terminal(it.first), it.second.toRegex()) }
   // TODO: regex RegexOption.COMMENTS
 
   return LexRules(whitespace, terminals)
