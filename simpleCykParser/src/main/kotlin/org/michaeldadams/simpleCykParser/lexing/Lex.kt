@@ -20,11 +20,11 @@ fun lex(lexRules: LexRules, chars: CharSequence): Pair<Int, List<Token>> {
   var pos = 0 // The current position in [chars]
   while (true) {
     // Move [pos] to skip over whitespace
-    pos = lexRules.whitespace.matchAt(chars, pos)?.let { it.range.endInclusive + 1 } ?: pos
+    pos = lexRules.whitespace.regex.matchAt(chars, pos)?.let { it.range.endInclusive + 1 } ?: pos
 
     val token = lexRules.terminalRules
       // At the current position, try the regular expression for each [LexRule]
-      .mapNotNull { it.regex.matchAt(chars, pos)?.toToken(it.terminal) }
+      .mapNotNull { it.regex.regex.matchAt(chars, pos)?.toToken(it.terminal) }
       // Take the longest match.  In case of a tie, use the first one to occur in [rules].
       .maxByOrNull { it.region.range.endInclusive }
       // If no matches, exit the loop

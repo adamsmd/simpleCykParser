@@ -1,12 +1,53 @@
 package org.michaeldadams.simpleCykParser.grammar
 
-// import kotlin.test.Test
-// import kotlin.test.assertEquals
+import org.michaeldadams.simpleCykParser.util.toEqRegex
+import kotlin.test.Test
+import kotlin.test.assertEquals
 // import kotlin.test.assertContentEquals
 // import java.util.TreeMap
 // import java.util.LinkedList
 
 class GrammarTest {
+  @Test fun testProperties(): Unit {
+    // Terminal
+    val terminal = Terminal("x")
+    assertEquals("x", terminal.name)
+
+    // Nonterminal
+    val nonterminal = Nonterminal("A")
+    assertEquals("A", nonterminal.name)
+
+    // TerminalRule
+    val terminalRegex = "x+".toRegex().toEqRegex()
+    val terminalRule = TerminalRule(terminal, terminalRegex)
+    assertEquals(terminal, terminalRule.terminal)
+    assertEquals(terminalRegex, terminalRule.regex)
+
+    // LexRules
+    val whitespaceRegex = "\\s+".toRegex().toEqRegex()
+    val lexRules = LexRules(whitespaceRegex, listOf(terminalRule))
+    assertEquals(whitespaceRegex, lexRules.whitespace)
+    assertEquals(listOf(terminalRule), lexRules.terminalRules)
+
+    // Production
+    val rhs = listOf("T" to terminal, "N" to nonterminal, null to terminal, null to nonterminal)
+    val production = Production(nonterminal, "P", rhs)
+    assertEquals(nonterminal, production.lhs)
+    assertEquals("P", production.name)
+    assertEquals(rhs, production.rhs)
+
+    // ParseRules
+    val productionMap = mapOf(nonterminal to setOf(production))
+    val parseRules = ParseRules(nonterminal, productionMap)
+    assertEquals(nonterminal, parseRules.start)
+    assertEquals(productionMap, parseRules.productionMap)
+
+    // Grammar
+    val grammar = Grammar(lexRules, parseRules)
+    assertEquals(lexRules, grammar.lexRules)
+    assertEquals(parseRules, grammar.parseRules)
+  }
+
   // TODO
   // @Test fun testUndefined(): Unit {
   //   val x = Terminal("x")

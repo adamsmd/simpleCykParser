@@ -10,7 +10,7 @@ import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import java.io.File
 
-// ////////////////////////////////////////////////////////////////
+// TODO: KDoc
 // Set the version based on Git tags
 // Create a new version with something like: git tag -a v2023.01.01
 class GitVersionPlugin : Plugin<Project> {

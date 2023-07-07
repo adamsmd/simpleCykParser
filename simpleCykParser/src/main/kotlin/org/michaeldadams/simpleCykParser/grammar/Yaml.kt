@@ -13,6 +13,7 @@ import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
+import org.michaeldadams.simpleCykParser.util.toEqRegex
 import kotlin.text.Regex
 import kotlin.text.toRegex
 
@@ -34,11 +35,11 @@ fun String.toYamlMap(): YamlMap = Yaml.default.parseToYamlNode(this).yamlMap
  */
 fun YamlMap.toLexRules(): LexRules {
   val map = this.toMap()
-  val whitespace: Regex = map["whitespace", this.path].yamlScalar.content.toRegex()
+  val whitespace = map["whitespace", this.path].yamlScalar.content.toRegex().toEqRegex()
 
   val terminals = map["terminals", this.path].yamlList.items.map { item ->
     item.yamlMap.toPair { it.yamlScalar.content }
-  }.map { TerminalRule(Terminal(it.first), it.second.toRegex()) }
+  }.map { TerminalRule(Terminal(it.first), it.second.toRegex().toEqRegex()) }
 
   // TODO: regex RegexOption.COMMENTS
 
@@ -72,28 +73,30 @@ private fun parseRhs(rhs: YamlNode): List<Pair<String?, String>> =
   when (rhs) {
     is YamlScalar ->
       rhs.content.split(whitespaceRegex).filter { it.isNotEmpty() }.map { null to it }
+    // TODO: rename item?
     is YamlList -> rhs.items.map { rhsItem ->
       when (rhsItem) {
         is YamlScalar -> null to rhsItem.content
         is YamlMap -> rhsItem.toPair { it.yamlScalar.content }
-        else -> incorrectType("YamlScalar or YamlMap", rhsItem)
+        else -> throw incorrectType("YamlScalar or YamlMap", rhsItem)
       }
     }
-    else -> incorrectType("YamlScalar or YamlList", rhs)
+    else -> throw incorrectType("YamlScalar or YamlList", rhs)
   }
 
 private fun parseProduction(nonterminals: Set<String>, nonterminal: Nonterminal, yamlNode: YamlNode): Production {
-  val (name, rhs) = when (yamlNode) {
-    is YamlScalar -> null to parseRhs(yamlNode)
+  val (name, rawRhs) = when (yamlNode) {
     is YamlMap -> yamlNode.toPair(::parseRhs)
-    else -> incorrectType("YamlScalar or YamlMap", yamlNode)
+    else -> null to parseRhs(yamlNode)
   }
-  val rhs2 = rhs.map { it.first to if (it.second in nonterminals) Nonterminal(it.second) else Terminal(it.second) }
-  return Production(nonterminal, name, rhs2)
+  val rhs = rawRhs.map {
+    it.first to if (it.second in nonterminals) Nonterminal(it.second) else Terminal(it.second)
+  }
+  return Production(nonterminal, name, rhs)
 }
 
-private fun incorrectType(expectedType: String, yamlNode: YamlNode): Nothing =
-  throw IncorrectTypeException(
+private fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeException =
+  IncorrectTypeException(
     "Expected element to be ${expectedType} but is ${yamlNode::class.simpleName}",
     yamlNode.path
   )

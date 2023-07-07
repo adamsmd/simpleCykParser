@@ -39,7 +39,7 @@ dependencies {
   testImplementation(kotlin("test"))
 }
 
-// ////////////////////////////////////////////////////////////////
+// ================================================================== //
 // Checking
 // tasks.register("checkAll") { // TODO
 //   dependsOn(gradle.includedBuild("gradle-plugins").task(":clean"))
@@ -48,7 +48,7 @@ dependencies {
 //   dependsOn(task("check"))
 // }
 
-// ////////////////////////////////////////////////////////////////
+// ================================================================== //
 // Documentation
 tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
   dokkaSourceSets {
@@ -58,7 +58,7 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
   }
 }
 
-// ////////////////////////////////////////////////////////////////
+// ================================================================== //
 // Linting
 
 detekt {
@@ -105,7 +105,7 @@ sonarlint {
   )
 }
 
-// ////////////////////////////////////////////////////////////////
+// ================================================================== //
 // Testing
 tasks.withType<Test> {
   useJUnitPlatform()

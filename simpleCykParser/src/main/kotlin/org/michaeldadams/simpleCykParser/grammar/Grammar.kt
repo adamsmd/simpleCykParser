@@ -2,7 +2,7 @@
 
 package org.michaeldadams.simpleCykParser.grammar
 
-import kotlin.text.Regex
+import org.michaeldadams.simpleCykParser.util.EqRegex
 
 // ================================== //
 // Terminals and Nonterminals
@@ -38,7 +38,7 @@ data class Nonterminal(val name: String) : Symbol
  * @property terminal the terminal that this lexical rule is for
  * @property regex the regular expression defining the syntax of the terminal
  */
-data class TerminalRule(val terminal: Terminal, val regex: Regex)
+data class TerminalRule(val terminal: Terminal, val regex: EqRegex)
 
 /**
  * The combined lexical rules of a language.
@@ -51,7 +51,7 @@ data class TerminalRule(val terminal: Terminal, val regex: Regex)
  * @property whitespace the regular expression defining the synatx of whitespace and comments
  * @property terminalRules the list of all the terminals and their all of the non-whitespace lexical rules for the language
  */
-data class LexRules(val whitespace: Regex, val terminalRules: List<TerminalRule>)
+data class LexRules(val whitespace: EqRegex, val terminalRules: List<TerminalRule>)
 
 // TODO: replace whitespace with a post processing filter
 // TODO: implement indent as a post processing filter
