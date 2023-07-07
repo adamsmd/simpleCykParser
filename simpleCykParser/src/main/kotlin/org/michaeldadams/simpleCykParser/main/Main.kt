@@ -43,7 +43,10 @@ class Main : CliktCommand(
 
     // print grammar
     // check grammar
+    // processed grammar
     // lex
-    // parse (table as yaml)
+    // parseString (includes lex)
+    // parseTokens
+    // parseAssertions
   }
 }

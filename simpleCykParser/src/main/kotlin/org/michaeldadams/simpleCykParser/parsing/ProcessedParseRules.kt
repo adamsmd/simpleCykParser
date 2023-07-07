@@ -7,6 +7,7 @@ import org.michaeldadams.simpleCykParser.grammar.Nonterminal
 import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
+import org.michaeldadams.simpleCykParser.grammar.productionsUsing
 
 /**
  * TODO.
@@ -19,22 +20,6 @@ fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
     .filter { it.rhs.isNotEmpty() }
     .groupBy { it.rhs.first().second }
     .mapValues { it.value.toSet() }
-
-/**
- * TODO: Compute the productions using each nonterminal.
- *
- * @receiver TODO
- * @return TODO
- */
-fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
-  this.productionMap.values
-    .flatMap { productions ->
-      productions.flatMap { production ->
-        production.rhs.map { it.second to production }
-      }
-    }
-    .groupBy { it.first }
-    .mapValues { entry -> entry.value.map { it.second }.toSet() }
 
 /**
  * TODO.

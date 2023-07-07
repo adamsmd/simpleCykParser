@@ -5,6 +5,22 @@ package org.michaeldadams.simpleCykParser.grammar
 // TODO: check @throws
 
 /**
+ * TODO: Compute the productions using each nonterminal.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
+fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
+  this.productionMap.values
+    .flatMap { productions ->
+      productions.flatMap { production ->
+        production.rhs.map { it.second to production }
+      }
+    }
+    .groupBy { it.first }
+    .mapValues { entry -> entry.value.map { it.second }.toSet() }
+
+/**
  * Find productions that use undefined symbols.
  *
  * In a well-formed grammar, this function will return the empty set.
@@ -25,23 +41,30 @@ fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> = TODO()
  * @receiver TODO
  * @return TODO
  */
-fun Grammar.unusedSymbols(): Set<Symbol> = TODO()
+fun Grammar.productionlessNonterminals(): Set<Nonterminal> = TODO()
 
 /**
  * TODO.
  *
- * @receiver TODO
- * @return TODO
- */
-fun Grammar.recursivelyUnusedSymbols(): Set<Symbol> = TODO()
-
-/**
- * TODO.
+ * Recursive version of productionless
  *
  * @receiver TODO
  * @return TODO
  */
 fun Grammar.emptyNonterminals(): Set<Nonterminal> = TODO()
+// {
+//   val uses: Map<Symbol, Set<Production>> = this.productionsUsing()
+//   val empty = this.productionlessNonTerminals().toCollection { QueueSet() }
+
+//   for (nonterminal in empty) {
+//     for (usingProduction in uses.getOrDefault(workitem, emptySet())) {
+//       val lhsIsEmpty = this.parseRules.productionMap[usingProduction.lhs].all { production ->
+//         production.rhs.any { it.second in empty }
+//       }
+//       if (lhsIsEmpty) empty += usingProduction.lhs
+//     }
+//   }
+// }
 
 /**
  * TODO.
@@ -49,4 +72,14 @@ fun Grammar.emptyNonterminals(): Set<Nonterminal> = TODO()
  * @receiver TODO
  * @return TODO
  */
-fun Grammar.recursivelyEmptyNonterminals(): Set<Nonterminal> = TODO()
+fun Grammar.unusedSymbols(): Set<Symbol> = TODO()
+
+/**
+ * TODO.
+ *
+ * Recursive version of unused
+ *
+ * @receiver TODO
+ * @return TODO
+ */
+fun Grammar.unreachableSymbols(emptyNonTerminals: Set<Nonterminal>): Set<Symbol> = TODO()
