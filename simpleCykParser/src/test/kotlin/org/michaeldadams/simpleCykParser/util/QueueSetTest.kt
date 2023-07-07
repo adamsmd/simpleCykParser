@@ -1,4 +1,4 @@
-package org.michaeldadams.simpleCykParser.collections
+package org.michaeldadams.simpleCykParser.util
 
 import kotlin.test.Test
 import kotlin.test.assertContentEquals

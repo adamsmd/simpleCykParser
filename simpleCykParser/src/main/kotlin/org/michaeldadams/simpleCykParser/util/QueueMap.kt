@@ -1,6 +1,6 @@
 /** Code and helpers for [QueueMap]. */
 
-package org.michaeldadams.simpleCykParser.collections
+package org.michaeldadams.simpleCykParser.util
 
 /**
  * A [Map] that upon lookup automatically populates missing entries with default

@@ -13,9 +13,9 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import org.michaeldadams.simpleCykParser.collections.QueueMap
-import org.michaeldadams.simpleCykParser.collections.QueueSet
-import org.michaeldadams.simpleCykParser.collections.queueMap
+import org.michaeldadams.simpleCykParser.util.QueueMap
+import org.michaeldadams.simpleCykParser.util.QueueSet
+import org.michaeldadams.simpleCykParser.util.queueMap
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.Terminal

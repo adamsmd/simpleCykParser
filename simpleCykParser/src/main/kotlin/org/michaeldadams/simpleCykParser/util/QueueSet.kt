@@ -1,6 +1,6 @@
-/** Wrappers for maps that implement default values. */
+/** TODO. */
 
-package org.michaeldadams.simpleCykParser.collections
+package org.michaeldadams.simpleCykParser.util
 
 /**
  * A [Set] implementation that allows one to iterate through it while adding to
