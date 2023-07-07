@@ -6,6 +6,7 @@ import com.charleskorn.kaml.IncorrectTypeException
 import com.charleskorn.kaml.MissingRequiredPropertyException
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.YamlPath
 import com.charleskorn.kaml.YamlScalar
@@ -32,7 +33,7 @@ fun YamlMap.toLexRules(): LexRules {
   val whitespace: Regex = map["whitespace", this.path].yamlScalar.content.toRegex()
 
   val terminals = map["terminals", this.path].yamlList.items.map {
-    it.yamlMap.toPair()
+    it.yamlMap.toPair { it.yamlScalar.content }
   }.map { LexRule(Terminal(it.first), it.second.toRegex()) }
   // TODO: regex RegexOption.COMMENTS
 
@@ -52,28 +53,45 @@ fun YamlMap.toParseRules(): ParseRules {
   val productionsYaml: Map<YamlScalar, YamlNode> = map["productions", this.path].yamlMap.entries
   val nonterminals: Set<String> = productionsYaml.keys.map { it.content }.toSet()
 
-  val whitespaceRegex = "\\p{IsWhite_Space}+".toRegex()
   val productionsMap = productionsYaml.entries.map { entry ->
-    Nonterminal(entry.key.content) to
-      entry.value.yamlList.items.map { yamlNode ->
-        val (name, rhsString) = when (yamlNode) {
-          is YamlMap -> yamlNode.toPair()
-          is YamlScalar -> null to yamlNode.content
-          else -> throw IncorrectTypeException(
-            "Expected element to be YamlScalar or YamlMap but is ${YamlNode::class.simpleName}",
-            yamlNode.path
-          )
-        }
-        val rhs = rhsString
-          .split(whitespaceRegex)
-          .filter { it.isNotEmpty() }
-          .map { if (it in nonterminals) Nonterminal(it) else Terminal(it) }
-        Production(Nonterminal(entry.key.content), name, rhs)
-      }.toSet()
+    val nt = Nonterminal(entry.key.content)
+    nt to entry.value.yamlList.items.map { parseProduction(nonterminals, nt, it) }.toSet()
   }.toMap()
-
+  
   return ParseRules(Nonterminal(start), productionsMap)
 }
+private val whitespaceRegex = "\\p{IsWhite_Space}+".toRegex()
+
+fun parseRhs(rhs: YamlNode): List<Pair<String?, String>> =
+  when (rhs) {
+    is YamlScalar ->
+      rhs.content.split(whitespaceRegex).filter { it.isNotEmpty() }.map { null to it }
+    is YamlList -> rhs.items.map { rhsItem ->
+      when (rhsItem) {
+        is YamlScalar -> null to rhsItem.content
+        is YamlMap -> rhsItem.toPair { it.yamlScalar.content }
+        else -> incorrectType("YamlScalar or YamlMap", rhsItem)
+      }
+    }
+    else -> incorrectType("YamlScalar or YamlList", rhs)
+  }
+
+fun parseProduction(nonterminals: Set<String>, nonterminal: Nonterminal, yamlNode: YamlNode): Production {
+  val (name, rhs) = when (yamlNode) {
+    is YamlScalar -> null to parseRhs(yamlNode)
+    is YamlMap -> yamlNode.toPair(::parseRhs)
+    else -> incorrectType("YamlScalar or YamlMap", yamlNode)
+  }
+  val rhs2 = rhs.map { it.first to if (it.second in nonterminals) Nonterminal(it.second) else Terminal(it.second) }
+  return Production(nonterminal, name, rhs2)
+}
+
+private fun incorrectType(expectedType: String, yamlNode: YamlNode): Nothing =
+  throw IncorrectTypeException(
+    "Expected element to be ${expectedType} but is ${yamlNode::class.simpleName}",
+    yamlNode.path
+  )
+
 
 /*
 
@@ -94,6 +112,12 @@ productions:
     - F: '" S "'
     - S S
     - ""
+    - []
+    - [X: S, Y: S]
+    - F: [X: S, S]
+    - F:
+       - X: S
+       - S
   T: []
 
 */
@@ -114,8 +138,8 @@ private operator fun Map<String, YamlNode>.get(key: String, path: YamlPath): Yam
 
 private fun YamlMap.toMap(): Map<String, YamlNode> = this.entries.mapKeys { it.key.content }
 
-private fun YamlMap.toPair(): Pair<String, String> {
+private fun <T> YamlMap.toPair(f: (YamlNode) -> T): Pair<String, T> {
   require(this.entries.size == 1) { "TODO" }
   val p = this.entries.toList().single()
-  return p.first.content to p.second.yamlScalar.content
+  return p.first.content to f(p.second)
 }

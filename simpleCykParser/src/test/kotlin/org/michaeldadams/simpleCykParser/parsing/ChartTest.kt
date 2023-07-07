@@ -23,7 +23,7 @@ class ChartTest {
     chart.addSymbol(3, 4, Terminal("("), null)
     chart.addSymbol(2, 4, Terminal("("), Production(Nonterminal("S"), "X", emptyList()))
     val p = PartialProduction(
-      Production(Nonterminal("S"), null, listOf(Nonterminal("S"), Terminal("+"), Nonterminal("S"))),
+      Production(Nonterminal("S"), null, listOf(null to Nonterminal("S"), null to Terminal("+"), null to Nonterminal("S"))),
       2
     )
 

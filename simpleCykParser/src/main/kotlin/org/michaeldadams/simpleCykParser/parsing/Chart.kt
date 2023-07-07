@@ -40,7 +40,7 @@ data class PartialProduction(val production: Production, val consumed: Int) {
   val isComplete: Boolean get() = consumed == production.rhs.size
   fun consume(): Pair<PartialProduction, Symbol>? =
     if (this.isComplete) { null }
-    else { Pair(PartialProduction(production, consumed + 1), production.rhs[consumed]) }
+    else { Pair(PartialProduction(production, consumed + 1), production.rhs[consumed].second) }
 }
 
 // TODO: lastPartial?

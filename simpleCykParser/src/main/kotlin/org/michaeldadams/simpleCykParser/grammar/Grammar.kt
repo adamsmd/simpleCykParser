@@ -51,6 +51,7 @@ data class LexRule(val terminal: Terminal, val regex: Regex)
  * @property whitespace the regular expression defining the synatx of whitespace and comments
  * @property rules the list of all the terminals and their all of the non-whitespace lexical rules for the language
  */
+// TODO: rename rules to terminals to match Yaml
 data class LexRules(val whitespace: Regex, val rules: List<LexRule>)
 // TODO: replace whitespace with a post processing filter
 // TODO: implement indent as a post processing filter
@@ -64,10 +65,9 @@ data class LexRules(val whitespace: Regex, val rules: List<LexRule>)
  *
  * @property lhs the nonterminal that this production is for
  * @property name an optional name for this production
- * @property rhs the symbols that this production expands to
+ * @property rhs optionally named symbols that this production expands to
  */
-data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Symbol>)
-// TODO: allow names of rhs fields
+data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Pair<String?, Symbol>>)
 
 /**
  * The combined parsing rules of a language.

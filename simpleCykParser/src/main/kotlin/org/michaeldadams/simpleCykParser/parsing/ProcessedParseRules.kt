@@ -16,16 +16,18 @@ fun ParseRules.toProcessed(): ProcessedParseRules = ProcessedParseRules(this)
 fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
   this.productionMap.values.flatten()
     .filter { it.rhs.isNotEmpty() }
-    .groupBy { it.rhs.first() }
+    .groupBy { it.rhs.first().second }
     .mapValues { it.value.toSet() }
 
 /** Compute the productions using each nonterminal. */
 fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
-  this.productionMap.values.flatMap { productions ->
-    productions.flatMap { production ->
-      production.rhs.map { it to production }
+  this.productionMap.values
+    .flatMap { productions ->
+      productions.flatMap { production ->
+        production.rhs.map { it.second to production }
+      }
     }
-  }.groupBy { it.first }
+    .groupBy { it.first }
     .mapValues { entry -> entry.value.map { it.second }.toSet() }
 
 fun ParseRules.emptyProductions(): Set<Production> =
@@ -42,7 +44,7 @@ fun ParseRules.nullable(): Set<Production> {
     // For each use of workitems's nonterminal
     for (production in uses.getOrDefault(workitem.lhs, emptySet())) {
       // If rhs is only nullable nonterminals, then the production is nullable
-      if (production.rhs.all { it is Nonterminal && it in nonterminals }) {
+      if (production.rhs.all { it.second is Nonterminal && it.second in nonterminals }) {
         productions += production // Enqueue the nullable production
         nonterminals += production.lhs // Record the nullable nonterminal
       }
