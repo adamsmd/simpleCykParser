@@ -18,7 +18,7 @@ class ChartTest {
           - S + S
           - X: ""
     """.trimIndent()
-    val g = x.toYamlMap().toParseRules().toProcessed()
+    val g = x.toYamlMap().toParseRules().toParser()
     val chart = Chart(g, 5)
     chart.addSymbol(3, 4, Terminal("("), null)
     chart.addSymbol(2, 4, Terminal("("), Production(Nonterminal("S"), "X", emptyList()))

@@ -81,11 +81,11 @@ fun Production.toPartial(consumed: Int): PartialProduction {
 /**
  * TODO.
  *
- * @property parseRules TODO
+ * @property parser TODO
  * @property size TODO
  */
 @Suppress("TYPE_ALIAS")
-class Chart(val parseRules: ProcessedParseRules, val size: Int) {
+class Chart(val parser: Parser, val size: Int) {
   // TODO: size is inclusive
   // get left
   // get right
@@ -131,7 +131,7 @@ class Chart(val parseRules: ProcessedParseRules, val size: Int) {
 
   init {
     for (position in 0..size) {
-      for (production in parseRules.nullable) {
+      for (production in parser.nullable) {
         for (consumed in 0..production.rhs.size) {
           val split = if (consumed == 0) null else position
           this.addProduction(position, position, production.toPartial(consumed), split)
@@ -141,15 +141,14 @@ class Chart(val parseRules: ProcessedParseRules, val size: Int) {
   }
 
   // TODO: document
-  constructor(parseRules: ProcessedParseRules, vararg terminals: Terminal) :
-    this(parseRules, terminals.size) {
+  constructor(parser: Parser, vararg terminals: Terminal) : this(parser, terminals.size) {
     for ((start, terminal) in terminals.withIndex()) {
       this.addSymbol(start, start + 1, terminal, null)
     }
   }
 
-  constructor(parseRules: ProcessedParseRules, vararg terminals: String) :
-    this(parseRules, *terminals.map(::Terminal).toTypedArray())
+  constructor(parser: Parser, vararg terminals: String) :
+    this(parser, *terminals.map(::Terminal).toTypedArray())
 
   /**
    * TODO.
@@ -167,7 +166,7 @@ class Chart(val parseRules: ProcessedParseRules, val size: Int) {
       _symbols[start][end][symbol].add(production) // TODO: '+='?
       _symbolEnds[start][symbol].add(end)
       // If not in map, then has no initial uses
-      for (newProduction in parseRules.initialUses.getOrDefault(symbol, emptySet())) {
+      for (newProduction in parser.initialUses.getOrDefault(symbol, emptySet())) {
         // NOTE: Addition goes up not down (we don't have info for down)
         this.addProduction(start, end, newProduction.toPartial(1), start)
       }

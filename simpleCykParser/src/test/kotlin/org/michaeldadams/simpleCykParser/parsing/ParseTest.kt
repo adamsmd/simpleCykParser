@@ -7,7 +7,7 @@ import org.michaeldadams.simpleCykParser.grammar.toParseRules
 import org.michaeldadams.simpleCykParser.grammar.toYamlMap
 import kotlin.test.Test
 
-class ParserTest {
+class ParseTest {
   val yaml = Yaml(configuration = YamlConfiguration(breakScalarsAt = 1_000))
 
   @Test fun test1(): Unit {
@@ -18,7 +18,7 @@ class ParserTest {
           - ( S )
           - X: ""
     """.trimIndent()
-    val g = x.toYamlMap().toParseRules().toProcessed()
+    val g = x.toYamlMap().toParseRules().toParser()
     val z = arrayOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")"))
     val chart = Chart(g, *z)
     parse(chart)
@@ -35,7 +35,7 @@ class ParserTest {
           - E: "" # Empty
           - T: a # Terminal
     """.trimIndent()
-    val g = x.toYamlMap().toParseRules().toProcessed()
+    val g = x.toYamlMap().toParseRules().toParser()
     val chart = Chart(g, "a", "a", "a", "a")
     parse(chart)
     println(yaml.encodeToString(SymbolsSerializer(), chart))

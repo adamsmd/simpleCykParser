@@ -15,7 +15,7 @@ import org.michaeldadams.simpleCykParser.grammar.nullable
  *
  * @property parseRules TODO
  */
-data class ProcessedParseRules(val parseRules: ParseRules) {
+data class Parser(val parseRules: ParseRules) {
   /** TODO. */
   val nullable: Set<Production> = parseRules.nullable()
 
@@ -29,4 +29,4 @@ data class ProcessedParseRules(val parseRules: ParseRules) {
  * @receiver TODO
  * @return TODO
  */
-fun ParseRules.toProcessed(): ProcessedParseRules = ProcessedParseRules(this)
+fun ParseRules.toParser(): Parser = Parser(this)
