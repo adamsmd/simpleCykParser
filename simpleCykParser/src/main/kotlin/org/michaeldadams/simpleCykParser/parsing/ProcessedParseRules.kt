@@ -27,7 +27,7 @@ fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
  * @receiver TODO
  * @return TODO
  */
-fun ParseRules.emptyProductions(): Set<Production> =
+fun ParseRules.epsilons(): Set<Production> =
   this.productionMap.values.flatten().filter { it.rhs.isEmpty() }.toSet()
 
 /**
@@ -41,7 +41,7 @@ fun ParseRules.emptyProductions(): Set<Production> =
 fun ParseRules.nullable(): Set<Production> {
   val uses: Map<Symbol, Set<Production>> = this.productionsUsing()
   // TODO: Note that productions serves as both a record (Set) and worklist (Queue)
-  var productions: QueueSet<Production> = this.emptyProductions().toCollection(QueueSet())
+  var productions: QueueSet<Production> = this.epsilons().toCollection(QueueSet())
   var nonterminals: Set<Nonterminal> = productions.map { it.lhs }.toSet()
 
   for (workitem in productions) { // Work through the queue until it is empty

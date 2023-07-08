@@ -2,6 +2,8 @@
 
 package org.michaeldadams.simpleCykParser.grammar
 
+import org.michaeldadams.simpleCykParser.util.QueueSet
+
 // TODO: check @throws
 
 /**
@@ -20,6 +22,16 @@ fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
     .groupBy { it.first }
     .mapValues { entry -> entry.value.map { it.second }.toSet() }
 
+fun ParseRules.usedSymbols(): Set<Symbol> =
+  this.productionMap.values.flatten().flatMap { it.rhs }.map { it.second }.toSet() + this.start
+
+fun LexRules.definedTerminals(): Set<Terminal> = this.terminalRules.map { it.terminal }.toSet()
+
+fun ParseRules.definedNonterminals(): Set<Nonterminal> = this.productionMap.keys
+
+fun Grammar.definedSymbols(): Set<Symbol> =
+  this.lexRules.definedTerminals() + this.parseRules.definedNonterminals()
+
 /**
  * Find productions that use undefined symbols.
  *
@@ -29,11 +41,14 @@ fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
  * @return pairs of the productions using undefined symbols and the position
  * of the undefined symbol in the [rhs] of that production
  */
-fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> = TODO()
-
-// parseRules.productions.values.flatten().flatMap { prod ->
-//   prod.rhs.mapIndexedNotNull { i, s -> if (s in symbols) null else Pair(prod, i) }
-// }.toSet()
+fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> =
+  this.definedSymbols().let { symbols ->
+    this.parseRules.productionMap.values.flatten().flatMap { production ->
+      production.rhs.mapIndexedNotNull { i, c ->
+        if (c.second in symbols) null else Pair(production, i)
+      }
+    }.toSet()
+  }
 
 /**
  * TODO.
@@ -41,7 +56,8 @@ fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> = TODO()
  * @receiver TODO
  * @return TODO
  */
-fun Grammar.productionlessNonterminals(): Set<Nonterminal> = TODO()
+fun ParseRules.productionlessNonterminals(): Set<Nonterminal> =
+  this.productionMap.entries.filter { it.value.isEmpty() }.map { it.key }.toSet()
 
 /**
  * TODO.
@@ -51,20 +67,22 @@ fun Grammar.productionlessNonterminals(): Set<Nonterminal> = TODO()
  * @receiver TODO
  * @return TODO
  */
-fun Grammar.emptyNonterminals(): Set<Nonterminal> = TODO()
-// {
-//   val uses: Map<Symbol, Set<Production>> = this.productionsUsing()
-//   val empty = this.productionlessNonTerminals().toCollection { QueueSet() }
+fun ParseRules.emptyNonterminals(): Set<Nonterminal> {
+  val uses: Map<Symbol, Set<Production>> = this.productionsUsing()
+  val empty = this.productionlessNonterminals().toCollection(QueueSet())
 
-//   for (nonterminal in empty) {
-//     for (usingProduction in uses.getOrDefault(workitem, emptySet())) {
-//       val lhsIsEmpty = this.parseRules.productionMap[usingProduction.lhs].all { production ->
-//         production.rhs.any { it.second in empty }
-//       }
-//       if (lhsIsEmpty) empty += usingProduction.lhs
-//     }
-//   }
-// }
+  for (nonterminal in empty) {
+    for (usingProduction in uses.getOrDefault(nonterminal, emptySet())) {
+      // TODO: remove !!
+      val lhsIsEmpty = this.productionMap[usingProduction.lhs]!!.all { production ->
+        production.rhs.any { it.second in empty }
+      }
+      if (lhsIsEmpty) empty += usingProduction.lhs
+    }
+  }
+
+  return empty.toSet()
+}
 
 /**
  * TODO.
@@ -72,7 +90,24 @@ fun Grammar.emptyNonterminals(): Set<Nonterminal> = TODO()
  * @receiver TODO
  * @return TODO
  */
-fun Grammar.unusedSymbols(): Set<Symbol> = TODO()
+fun Grammar.unusedSymbols(): Set<Symbol> = this.definedSymbols() - this.parseRules.usedSymbols()
+
+fun ParseRules.reachableSymbols(): Set<Symbol> {
+  val reachable = QueueSet<Symbol>()
+
+  reachable += this.start
+  for (symbol in reachable) {
+    if (symbol is Nonterminal) {
+      for (production in this.productionMap[symbol]!!) {
+        for (component in production.rhs) {
+          reachable += component.second
+        }
+      }
+    }
+  }
+
+  return reachable.toSet()
+}
 
 /**
  * TODO.
@@ -82,4 +117,5 @@ fun Grammar.unusedSymbols(): Set<Symbol> = TODO()
  * @receiver TODO
  * @return TODO
  */
-fun Grammar.unreachableSymbols(emptyNonTerminals: Set<Nonterminal>): Set<Symbol> = TODO()
+fun Grammar.unreachableSymbols(emptyNonterminals: Set<Nonterminal>): Set<Symbol> =
+  this.definedSymbols() - this.parseRules.reachableSymbols()
