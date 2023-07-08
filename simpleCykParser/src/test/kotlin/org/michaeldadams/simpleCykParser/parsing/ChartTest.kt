@@ -22,10 +22,8 @@ class ChartTest {
     val chart = Chart(g, 5)
     chart.addSymbol(3, 4, Terminal("("), null)
     chart.addSymbol(2, 4, Terminal("("), Production(Nonterminal("S"), "X", emptyList()))
-    val p = PartialProduction(
-      Production(Nonterminal("S"), null, listOf(null to Nonterminal("S"), null to Terminal("+"), null to Nonterminal("S"))),
-      2
-    )
+    val rhs = listOf(null to Nonterminal("S"), null to Terminal("+"), null to Nonterminal("S"))
+    val p = PartialProduction(Production(Nonterminal("S"), null, rhs), 2)
 
     chart.addProduction(2, 4, p, null)
     chart.addProduction(1, 4, p.toNext()!!.first, null)

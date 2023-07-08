@@ -4,7 +4,6 @@ import org.michaeldadams.simpleCykParser.grammar.Terminal
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotEquals
 
 class TokenTest {
   @Test fun testProperties(): Unit {
@@ -13,7 +12,7 @@ class TokenTest {
     val match = "x(y*)".toRegex().matchEntire("xyy")!!
     val groups = match.groups.toList()
 
-    fun testToken(token: Token) {
+    fun testToken(token: Token): Unit {
       assertEquals(terminal, token.terminal)
       assertEquals(groups, token.groups)
       assertEquals(groups.first(), token.region)

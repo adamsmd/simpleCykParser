@@ -2,12 +2,11 @@ package org.michaeldadams.simpleCykParser.grammar
 
 import com.charleskorn.kaml.IncorrectTypeException
 import com.charleskorn.kaml.MissingRequiredPropertyException
-import kotlin.test.Test
-import kotlin.test.assertFailsWith
-import kotlin.test.assertEquals
-import kotlin.text.toRegex
-import org.michaeldadams.simpleCykParser.util.EqRegex
 import org.michaeldadams.simpleCykParser.util.toEqRegex
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.text.toRegex
 
 class YamlTest {
   // @Test fun test1(): Unit {

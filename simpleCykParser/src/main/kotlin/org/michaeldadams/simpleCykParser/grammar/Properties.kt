@@ -1,4 +1,8 @@
-/** Types for representing a grammar. */
+/**
+ * TODO.
+ *
+ * TODO: Not everything here is actually used for parsing.
+ */
 
 package org.michaeldadams.simpleCykParser.grammar
 
@@ -22,13 +26,37 @@ fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
     .groupBy { it.first }
     .mapValues { entry -> entry.value.map { it.second }.toSet() }
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun ParseRules.usedSymbols(): Set<Symbol> =
   this.productionMap.values.flatten().flatMap { it.rhs }.map { it.second }.toSet() + this.start
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun LexRules.definedTerminals(): Set<Terminal> = this.terminalRules.map { it.terminal }.toSet()
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun ParseRules.definedNonterminals(): Set<Nonterminal> = this.productionMap.keys
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun Grammar.definedSymbols(): Set<Symbol> =
   this.lexRules.definedTerminals() + this.parseRules.definedNonterminals()
 
@@ -92,6 +120,12 @@ fun ParseRules.emptyNonterminals(): Set<Nonterminal> {
  */
 fun Grammar.unusedSymbols(): Set<Symbol> = this.definedSymbols() - this.parseRules.usedSymbols()
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun ParseRules.reachableSymbols(): Set<Symbol> {
   val reachable = QueueSet<Symbol>()
 
@@ -117,7 +151,7 @@ fun ParseRules.reachableSymbols(): Set<Symbol> {
  * @receiver TODO
  * @return TODO
  */
-fun Grammar.unreachableSymbols(emptyNonterminals: Set<Nonterminal>): Set<Symbol> =
+fun Grammar.unreachableSymbols(): Set<Symbol> =
   this.definedSymbols() - this.parseRules.reachableSymbols()
 
 /**

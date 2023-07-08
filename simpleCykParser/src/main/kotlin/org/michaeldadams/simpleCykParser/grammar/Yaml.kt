@@ -14,7 +14,6 @@ import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
 import org.michaeldadams.simpleCykParser.util.toEqRegex
-import kotlin.text.Regex
 import kotlin.text.toRegex
 
 // TODO: check that all KDoc have @receiver
@@ -85,10 +84,8 @@ private fun parseRhs(rhs: YamlNode): List<Pair<String?, String>> =
   }
 
 private fun parseProduction(nonterminals: Set<String>, nonterminal: Nonterminal, yamlNode: YamlNode): Production {
-  val (name, rawRhs) = when (yamlNode) {
-    is YamlMap -> yamlNode.toPair(::parseRhs)
-    else -> null to parseRhs(yamlNode)
-  }
+  val (name, rawRhs) =
+    if (yamlNode is YamlMap) yamlNode.toPair(::parseRhs) else null to parseRhs(yamlNode)
   val rhs = rawRhs.map {
     it.first to if (it.second in nonterminals) Nonterminal(it.second) else Terminal(it.second)
   }

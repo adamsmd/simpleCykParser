@@ -5,7 +5,6 @@ import org.michaeldadams.simpleCykParser.grammar.toLexRules
 import org.michaeldadams.simpleCykParser.grammar.toYamlMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class LexerTest {
   @Test fun testLex(): Unit {

@@ -13,12 +13,12 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import org.michaeldadams.simpleCykParser.util.QueueMap
-import org.michaeldadams.simpleCykParser.util.QueueSet
-import org.michaeldadams.simpleCykParser.util.queueMap
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.Terminal
+import org.michaeldadams.simpleCykParser.util.QueueMap
+import org.michaeldadams.simpleCykParser.util.QueueSet
+import org.michaeldadams.simpleCykParser.util.queueMap
 
 // nt -> prod | prod | prod
 // prod -> prod/2 prod.2
@@ -61,6 +61,7 @@ data class PartialProduction(val production: Production, val consumed: Int) {
 }
 
 // TODO: lastPartial?
+// TODO: production.toCompletePartialProduction
 
 /**
  * TODO.
@@ -75,7 +76,6 @@ fun Production.toPartial(consumed: Int): PartialProduction {
   return PartialProduction(this, consumed)
 }
 
-// TODO: move to Chart.kt
 // @Serializable
 
 /**
@@ -95,30 +95,37 @@ class Chart(val parseRules: ProcessedParseRules, val size: Int) {
   // fromSymbols
 
   // Productions for a start, end, and symbol.  Null if "Symbol" is present but has no production.
+  /** Mutable backing field for [symbols]. */
   private val _symbols: QueueMap<Int, QueueMap<Int, QueueMap<Symbol, QueueSet<Production?>>>> =
     queueMap { queueMap { queueMap { QueueSet() } } }
+
   /** TODO. */
   val symbols: QueueMap<Int, QueueMap<Int, QueueMap<Symbol, Set<Production?>>>> = _symbols
 
   // End for a start and symbol.
   // Used to get 'rightEnd'
-  // TODO: production.toCompletePartialProduction
+  /** Mutable backing field for [symbolEnds]. */
   private val _symbolEnds: QueueMap<Int, QueueMap<Symbol, QueueSet<Int>>> =
     queueMap { queueMap { QueueSet() } }
+
   /** TODO. */
   val symbolEnds: QueueMap<Int, QueueMap<Symbol, Set<Int>>> = _symbolEnds
 
   // TODO: can _productions come after productions?
   // Splitting position for a start, end and PartialProduction.  Null if PartialProduction is present but has no splitting position (e.g., due to empty or just being asserted).
+  /** Mutable backing field for [productions]. */
   private val _productions: QueueMap<Int, QueueMap<Int, QueueMap<PartialProduction, QueueSet<Int?>>>> =
     queueMap { queueMap { queueMap { QueueSet() } } }
+
   /** TODO. */
   val productions: QueueMap<Int, QueueMap<Int, QueueMap<PartialProduction, Set<Int?>>>> = _productions
 
   // End for a start and PartialProduction.
   // Used to get division between children
+  /** Mutable backing field for [productionEnds]. */
   private val _productionEnds: QueueMap<Int, QueueMap<PartialProduction, QueueSet<Int>>> =
     queueMap { queueMap { QueueSet() } }
+
   /** TODO. */
   val productionEnds: QueueMap<Int, QueueMap<PartialProduction, Set<Int>>> = _productionEnds
 
