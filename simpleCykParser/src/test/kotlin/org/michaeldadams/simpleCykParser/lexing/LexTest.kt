@@ -6,7 +6,7 @@ import org.michaeldadams.simpleCykParser.grammar.toYamlMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class LexerTest {
+class LexTest {
   @Test fun testLex(): Unit {
     val l = """
       whitespace: "\\s+"
