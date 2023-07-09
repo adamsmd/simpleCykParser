@@ -113,4 +113,7 @@ tasks.withType<Test> {
   testLogging {
     showStandardStreams = true
   }
+
+  finalizedBy(tasks.jacocoTestReport)
+  finalizedBy(tasks.koverReport)
 }
