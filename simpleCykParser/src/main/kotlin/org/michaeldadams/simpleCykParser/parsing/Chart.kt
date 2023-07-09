@@ -2,17 +2,6 @@
 
 package org.michaeldadams.simpleCykParser.parsing
 
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.SetSerializer
-import kotlinx.serialization.builtins.nullable
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.Terminal
@@ -20,71 +9,18 @@ import org.michaeldadams.simpleCykParser.util.QueueMap
 import org.michaeldadams.simpleCykParser.util.QueueSet
 import org.michaeldadams.simpleCykParser.util.queueMap
 
-// nt -> prod | prod | prod
-// prod -> prod/2 prod.2
-// prod/2 -> prod/1 prod.1
-// prod/1 -> prod/0 prod.0
-// prod/0 -> epsilon
-
-// fun Production.toCompletePartialProduction
-// fun Production.toInitialPartialProduction
-// toPartial(0)
-// toPartial(1)
-// toPartial(-1)
-
 // TODO: when to do "this."
 
-/**
- * TODO.
- *
- * @property production TODO
- * @property consumed TODO
- */
-data class PartialProduction(val production: Production, val consumed: Int) {
-  /** TODO. */
-  val isComplete: Boolean get() = consumed == production.rhs.size
+typealias ChartEntryMap<T> =
+  QueueMap<Int, QueueMap<Int, QueueMap<Symbol, QueueMap<Production?, QueueMap<Int, T>>>>>
 
-  init {
-    require(consumed >= 0) { "TODO" }
-    require(consumed <= production.rhs.size) { "TODO" }
-  }
-
-  /**
-   * TODO.
-   *
-   * @return TODO
-   */
-  fun toNext(): Pair<PartialProduction, Symbol>? =
-    production.rhs.getOrNull(consumed)?.let {
-      Pair(PartialProduction(production, consumed + 1), it.second)
-    }
-}
-
-// TODO: lastPartial?
-// TODO: production.toCompletePartialProduction
-
-/**
- * TODO.
- *
- * @receiver TODO
- * @param consumed TODO
- * @return TODO
- */
-fun Production.toPartial(consumed: Int): PartialProduction {
-  require(consumed >= 0) { "TODO" }
-  require(consumed <= this.rhs.size) { "TODO" }
-  return PartialProduction(this, consumed)
-}
-
-// @Serializable
-
+// @Suppress("TYPE_ALIAS")
 /**
  * TODO.
  *
  * @property parser TODO
  * @property size TODO
  */
-@Suppress("TYPE_ALIAS")
 class Chart(val parser: Parser, val size: Int) {
   // TODO: size is inclusive
   // get left
@@ -93,14 +29,22 @@ class Chart(val parser: Parser, val size: Int) {
   // get parses at
   // fromTokens
   // fromSymbols
+  // Used to get division between children
 
-  // Productions for a start, end, and symbol.  Null if "Symbol" is present but has no production.
-  /** Mutable backing field for [symbols]. */
-  private val _symbols: QueueMap<Int, QueueMap<Int, QueueMap<Symbol, QueueSet<Production?>>>> =
-    queueMap { queueMap { queueMap { QueueSet() } } }
+  // TODO: typealias for _entries
+  /** Mutable backing field for [entries]. */
+  private val _entries: ChartEntryMap<QueueSet<Int?>> =
+    queueMap { queueMap { queueMap { queueMap { queueMap { QueueSet() } } } } }
 
-  /** TODO. */
-  val symbols: QueueMap<Int, QueueMap<Int, QueueMap<Symbol, Set<Production?>>>> = _symbols
+  /** TODO.
+   * Start
+   * End
+   * Symbol
+   * Production (null means no justification)
+   * Consumed
+   * Split (null if consumed == 0 or no justification(TODO: remove))
+   */
+  val entries: ChartEntryMap<Set<Int?>> = _entries
 
   // End for a start and symbol.
   // Used to get 'rightEnd'
@@ -111,30 +55,14 @@ class Chart(val parser: Parser, val size: Int) {
   /** TODO. */
   val symbolEnds: QueueMap<Int, QueueMap<Symbol, Set<Int>>> = _symbolEnds
 
-  // TODO: can _productions come after productions?
-  // Splitting position for a start, end and PartialProduction.  Null if PartialProduction is present but has no splitting position (e.g., due to empty or just being asserted).
-  /** Mutable backing field for [productions]. */
-  private val _productions: QueueMap<Int, QueueMap<Int, QueueMap<PartialProduction, QueueSet<Int?>>>> =
-    queueMap { queueMap { queueMap { QueueSet() } } }
-
-  /** TODO. */
-  val productions: QueueMap<Int, QueueMap<Int, QueueMap<PartialProduction, Set<Int?>>>> = _productions
-
-  // End for a start and PartialProduction.
-  // Used to get division between children
-  /** Mutable backing field for [productionEnds]. */
-  private val _productionEnds: QueueMap<Int, QueueMap<PartialProduction, QueueSet<Int>>> =
-    queueMap { queueMap { QueueSet() } }
-
-  /** TODO. */
-  val productionEnds: QueueMap<Int, QueueMap<PartialProduction, Set<Int>>> = _productionEnds
+  // TODO: Splitting position for a start, end and PartialProduction.  Null if PartialProduction is present but has no splitting position (e.g., due to empty or just being asserted).
 
   init {
     for (position in 0..size) {
       for (production in parser.nullable) {
         for (consumed in 0..production.rhs.size) {
           val split = if (consumed == 0) null else position
-          this.addProduction(position, position, production.toPartial(consumed), split)
+          this.addProduction(position, position, production, consumed, split)
         }
       }
     }
@@ -143,7 +71,7 @@ class Chart(val parser: Parser, val size: Int) {
   // TODO: document
   constructor(parser: Parser, vararg terminals: Terminal) : this(parser, terminals.size) {
     for ((start, terminal) in terminals.withIndex()) {
-      this.addSymbol(start, start + 1, terminal, null)
+      this.addSymbol(start, start + 1, terminal)
     }
   }
 
@@ -158,18 +86,19 @@ class Chart(val parser: Parser, val size: Int) {
    * @param symbol TODO
    * @param production TODO
    */
-  fun addSymbol(start: Int, end: Int, symbol: Symbol, production: Production?): Unit {
+  fun addSymbol(start: Int, end: Int, symbol: Symbol): Unit {
+    _entries[start][end][symbol][null]
+    _addSymbol(start, end, symbol)
+  }
+  private fun _addSymbol(start: Int, end: Int, symbol: Symbol): Unit {
     // NOTE: just an assertion and does not show how built
     // TODO: add always adds ProductionEntry (via initialUses)
-    // chart.symbols += Pair(start, end) to Pair(symbol, production)
-    if (production !in symbols[start][end][symbol]) {
-      _symbols[start][end][symbol].add(production) // TODO: '+='?
-      _symbolEnds[start][symbol].add(end)
-      // If not in map, then has no initial uses
-      for (newProduction in parser.initialUses.getOrDefault(symbol, emptySet())) {
-        // NOTE: Addition goes up not down (we don't have info for down)
-        this.addProduction(start, end, newProduction.toPartial(1), start)
-      }
+    require(_entries[start][end][symbol].isNotEmpty()) { "TODO" }
+    _symbolEnds[start][symbol].add(end)
+    // If not in map, then has no initial uses
+    for (newProduction in parser.initialUses.getOrDefault(symbol, emptySet())) {
+      // NOTE: Addition goes up not down (we don't have info for down)
+      this.addProduction(start, end, newProduction, 1, start)
     }
   }
 
@@ -182,112 +111,44 @@ class Chart(val parser: Parser, val size: Int) {
    * @param partial TODO
    * @param split TODO
    */
-  fun addProduction(start: Int, end: Int, partial: PartialProduction, split: Int?): Unit {
+  fun addProduction(start: Int, end: Int, production: Production, consumed: Int, split: Int?): Unit {
+    require(consumed >= 0) { "TODO" }
+    require(consumed <= production.rhs.size) { "TODO" }
     // TODO: add always adds Symbol of the partialProd is complete
-    if (split !in productions[start][end][partial]) {
-      // keys[start][end] += partial
-      _productions[start][end][partial].add(split)
-      _productionEnds[start][partial].add(end)
-      if (partial.isComplete) {
+    if (_entries[start][end][production.lhs][production][consumed].add(split)) {
+      if (production.rhs.size == consumed) {
         // NOTE: Addition goes up not down (we don't have info for down)
-        this.addSymbol(start, end, partial.production.lhs, partial.production)
+        this._addSymbol(start, end, production.lhs)
+      }
+    }
+  }
+
+  fun printEntries(): Unit {
+    for ((start, startValue) in this.entries.entries) {
+      for ((end, endValue) in startValue.entries) {
+        for ((symbol, symbolValue) in endValue.entries) {
+          for ((production, productionValue) in symbolValue.entries) {
+            if (production == null) {
+              println("- [${start}, ${end}, ${symbol}]")
+            } else {
+              for ((consumed, consumedValue) in productionValue.entries) {
+                for (split in consumedValue) {
+                  println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}, ${split}]")
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
 }
 
-/**
- * TODO.
- *
- * @param T TODO
- * @param name TODO
- */
-class AsStringSerializer<T>(name: String) : KSerializer<T> {
-  override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(name, PrimitiveKind.STRING)
+/*
 
-  override fun serialize(encoder: Encoder, value: T): Unit {
-    encoder.encodeString(value.toString())
-  }
+- [5, 6, A]
+- [5, 6, A, X: [B, C: D]]
+- [5, 6, A, X: [B, C: D], 1]
+- [5, 6, A, X: [B, C: D], 5, 5]
 
-  override fun deserialize(decoder: Decoder): T = TODO()
-}
-
-/** TODO. */
-class SymbolsSerializer : KSerializer<Chart> {
-  private val delegateSerializer =
-    MapSerializer(
-      Int.serializer(),
-      MapSerializer(
-        Int.serializer(),
-        MapSerializer(
-          AsStringSerializer<Symbol>("Symbol"),
-          SetSerializer(
-            AsStringSerializer<Production>("Production").nullable
-          )
-        )
-      )
-    )
-  override val descriptor = SerialDescriptor("Symbols", delegateSerializer.descriptor)
-
-  override fun serialize(encoder: Encoder, value: Chart): Unit {
-    encoder.encodeSerializableValue(delegateSerializer, value.symbols)
-  }
-
-  override fun deserialize(decoder: Decoder): Chart {
-    TODO()
-    // val map = decoder.decodeSerializableValue(delegateSerializer)
-    // val result = Symbols()
-
-    // for ((start, startValue) in map) {
-    //   for ((end, endValue) in startValue) {
-    //     for ((symbol, symbolValue) in endValue) {
-    //       for (production in symbolValue) {
-    //         result += Pair(start, end) to Pair(symbol, production)
-    //       }
-    //     }
-    //   }
-    // }
-
-    // return result
-  }
-}
-
-/** TODO. */
-class ProductionsSerializer : KSerializer<Chart> {
-  private val delegateSerializer =
-    MapSerializer(
-      Int.serializer(),
-      MapSerializer(
-        Int.serializer(),
-        MapSerializer(
-          AsStringSerializer<PartialProduction>("PartialProduction"),
-          SetSerializer(
-            Int.serializer().nullable
-          )
-        )
-      )
-    )
-  override val descriptor = SerialDescriptor("Productions", delegateSerializer.descriptor)
-
-  override fun serialize(encoder: Encoder, value: Chart): Unit {
-    encoder.encodeSerializableValue(delegateSerializer, value.productions)
-  }
-
-  override fun deserialize(decoder: Decoder): Chart {
-    TODO()
-    // val map = decoder.decodeSerializableValue(delegateSerializer)
-    // val result = Productions()
-
-    // for ((start, startValue) in map) {
-    //   for ((end, endValue) in startValue) {
-    //     for ((partial, partialValue) in endValue) {
-    //       for (split in partialValue) {
-    //         result += Pair(start, end) to Pair(partial, split)
-    //       }
-    //     }
-    //   }
-    // }
-
-    // return result
-  }
-}
+*/

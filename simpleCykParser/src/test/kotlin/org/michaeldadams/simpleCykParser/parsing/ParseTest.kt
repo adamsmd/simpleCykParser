@@ -15,15 +15,14 @@ class ParseTest {
       start: S
       productions:
         S:
-          - ( S )
-          - X: ""
+          - P: ( S )
+          - E: ""
     """.trimIndent()
     val g = x.toYamlMap().toParseRules().toParser()
     val z = arrayOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")"))
     val chart = Chart(g, *z)
     parse(chart)
-    println(yaml.encodeToString(SymbolsSerializer(), chart))
-    println(yaml.encodeToString(ProductionsSerializer(), chart))
+    chart.printEntries()
   }
 
   @Test fun test2(): Unit {
@@ -37,8 +36,7 @@ class ParseTest {
     """.trimIndent()
     val g = x.toYamlMap().toParseRules().toParser()
     val chart = Chart(g, "a", "a", "a", "a")
+    chart.printEntries()
     parse(chart)
-    println(yaml.encodeToString(SymbolsSerializer(), chart))
-    println(yaml.encodeToString(ProductionsSerializer(), chart))
   }
 }

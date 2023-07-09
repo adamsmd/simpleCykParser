@@ -2,6 +2,7 @@
 
 package org.michaeldadams.simpleCykParser.parsing
 
+import org.michaeldadams.simpleCykParser.grammar.Symbol
 // toPartial: Productions are unchanged, Symbols get their initial use Productions
 
 // TODO: parseFromTokens
@@ -18,12 +19,22 @@ fun parse(chart: Chart): Unit {
       val rightStart = leftEnd
       // gets new elements if rightChild is nulled
       // TODO: better way to prevent fill-in
-      if (chart.productions[leftStart].contains(leftEnd)) {
-        for (leftChild in chart.productions[leftStart][leftEnd].keys) {
-          leftChild.toNext()?.let { (nextPartial, consumed) ->
-            // gets new elements if leftChild is nulled
-            for (rightEnd in chart.symbolEnds[rightStart][consumed]) {
-              chart.addProduction(leftStart, rightEnd, nextPartial, leftEnd)
+      if (chart.entries[leftStart].contains(leftEnd)) {
+        // TODO: override QueueMap.entries
+        // for ((leftSymbol, leftProductions) in chart.entries[leftStart][leftEnd].entries) {
+        for (leftSymbol in chart.entries[leftStart][leftEnd].keys) {
+          for (leftProduction in chart.entries[leftStart][leftEnd][leftSymbol].keys) {
+            if (leftProduction != null) {
+              for (consumed in chart.entries[leftStart][leftEnd][leftSymbol][leftProduction].keys) {
+                if (consumed < leftProduction.rhs.size) {
+                  // TODO: ?? gets new elements if leftChild is nulled
+                  val consumedSymbol: Symbol = leftProduction.rhs[consumed].second // TODO: toNext() trick
+                  for (rightEnd in chart.symbolEnds[rightStart][consumedSymbol]) {
+                    // chart.addProduction(leftStart, rightEnd, nextPartial, rightStart)
+                    chart.addProduction(leftStart, rightEnd, leftProduction, consumed + 1, rightStart)
+                  }
+                }
+              }
             }
           }
         }

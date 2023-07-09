@@ -67,7 +67,10 @@ data class LexRules(val whitespace: EqRegex, val terminalRules: List<TerminalRul
  * @property name an optional name for this production
  * @property rhs optionally named symbols that this production expands to
  */
-data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Pair<String?, Symbol>>)
+data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Pair<String?, Symbol>>) {
+  fun toYamlString(): String =
+    "${name}: [${rhs.map { "${it.first}: ${it.second}" }.joinToString() }]"
+}
 
 /**
  * The combined parsing rules of a language.

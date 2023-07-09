@@ -14,20 +14,22 @@ class ChartTest {
       start: S
       productions:
         S:
-          - ( S )
-          - S + S
-          - X: ""
+          - P: ( S )
+          - A: S + S
+          - E: ""
     """.trimIndent()
     val g = x.toYamlMap().toParseRules().toParser()
     val chart = Chart(g, 5)
-    chart.addSymbol(3, 4, Terminal("("), null)
-    chart.addSymbol(2, 4, Terminal("("), Production(Nonterminal("S"), "X", emptyList()))
+    chart.addSymbol(3, 4, Terminal("("))
+    chart.addSymbol(2, 4, Nonterminal("S")) // TODO: should this be "S"?
     val rhs = listOf(null to Nonterminal("S"), null to Terminal("+"), null to Nonterminal("S"))
-    val p = PartialProduction(Production(Nonterminal("S"), null, rhs), 2)
+    val prod = Production(Nonterminal("S"), "A", rhs)
+    // val p = PartialProduction(prod, 2)
 
-    chart.addProduction(2, 4, p, null)
-    chart.addProduction(1, 4, p.toNext()!!.first, null)
-    println(Yaml.default.encodeToString(SymbolsSerializer(), chart))
-    println(Yaml.default.encodeToString(ProductionsSerializer(), chart))
+    chart.addProduction(2, 4, prod, 2, null)
+    chart.addProduction(1, 4, prod, 3, null)
+    chart.printEntries()
+    // println(Yaml.default.encodeToString(SymbolsSerializer(), chart))
+    // println(Yaml.default.encodeToString(ProductionsSerializer(), chart))
   }
 }
