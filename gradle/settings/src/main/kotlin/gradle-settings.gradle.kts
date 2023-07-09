@@ -110,7 +110,7 @@ sonarlint {
 tasks.withType<Test> {
   useJUnitPlatform()
 
-  this.testLogging {
-    this.showStandardStreams = true
+  testLogging {
+    showStandardStreams = true
   }
 }
