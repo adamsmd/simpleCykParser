@@ -2,7 +2,7 @@ package org.michaeldadams.simpleCykParser
 
 import com.pinterest.ktlint.core.Rule
 import com.pinterest.ktlint.core.ast.ElementType
-import com.pinterest.ktlint.ruleset.standard.StringTemplateRule
+import com.pinterest.ktlint.ruleset.standard.rules.StringTemplateRule
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
 class LongStringTemplateRule : Rule("long-string-template") {

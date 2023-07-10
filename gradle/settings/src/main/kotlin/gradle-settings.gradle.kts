@@ -72,8 +72,7 @@ diktat {
 }
 
 ktlint {
-  // Not using 0.48.0+ due to https://github.com/JLLeitschuh/ktlint-gradle/issues/622
-  version.set("0.47.1")
+  version.set("0.49.1") // Must match version in plugins/build.gradle.kts
   verbose.set(true)
   ignoreFailures.set(true)
   enableExperimentalRules.set(true) // TODO: vs .editorconfig

@@ -5,9 +5,9 @@ plugins {
 }
 
 dependencies {
-  // Must match the version in `ktlint { version.set }` in gradle-settings.gradle.kts
-  implementation("com.pinterest.ktlint:ktlint-ruleset-standard:0.47.1")
-  implementation("com.pinterest.ktlint:ktlint-core:0.47.1")
+  // Must match version in `ktlint { version.set }` in gradle-settings.gradle.kts
+  implementation("com.pinterest.ktlint:ktlint-ruleset-standard:0.49.1")
+  implementation("com.pinterest.ktlint:ktlint-core:0.49.1")
   implementation("org.eclipse.jgit:org.eclipse.jgit:6.6.0.202305301015-r")
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22")
 }
