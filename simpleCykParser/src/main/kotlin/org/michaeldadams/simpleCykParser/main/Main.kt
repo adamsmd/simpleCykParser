@@ -4,8 +4,6 @@ package org.michaeldadams.simpleCykParser.main
 
 import com.github.ajalt.clikt.completion.completionOption
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.context
-import com.github.ajalt.clikt.output.CliktHelpFormatter
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 
@@ -34,7 +32,7 @@ class Main : CliktCommand(
   ).multiple()
 
   init {
-    context { helpFormatter = CliktHelpFormatter(showDefaultValues = true) }
+    // TODO: context { helpFormatter = CliktHelpFormatter(showDefaultValues = true) }
     completionOption(help = "Generate an autocomplete script for the given shell")
   }
 

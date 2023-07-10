@@ -33,7 +33,7 @@ repositories {
 
 dependencies {
   // Linting
-  sonarlintPlugins("org.sonarsource.kotlin:sonar-kotlin-plugin:2.12.0.1956")
+  sonarlintPlugins("org.sonarsource.kotlin:sonar-kotlin-plugin:2.14.0.2352")
 
   // Testing
   testImplementation(kotlin("test"))

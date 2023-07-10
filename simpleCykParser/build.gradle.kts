@@ -6,7 +6,6 @@ description = "Complete But Simple-To-Implement CYK Parsing"
 plugins {
   id("gradle-settings")
   id("git-version")
-  kotlin("plugin.serialization") version "1.4.20"
   application // Provides "./gradlew installDist" then "./build/install/simpleCykParser/bin/simpleCykParser"
 }
 
@@ -16,10 +15,10 @@ plugins {
 
 dependencies {
   // Command-line argument parsing
-  implementation("com.github.ajalt.clikt:clikt:3.5.1")
+  implementation("com.github.ajalt.clikt:clikt:4.0.0")
 
   // Logging
-  implementation("ch.qos.logback:logback-classic:1.4.5")
+  implementation("ch.qos.logback:logback-classic:1.4.8")
   // implementation("io.github.microutils:kotlin-logging-jvm:3.0.4")
 
   // Test diffs
@@ -29,7 +28,7 @@ dependencies {
   implementation("org.junit.platform:junit-platform-reporting:1.9.2")
 
   // YAML Parsing
-  implementation("com.charleskorn.kaml:kaml:0.53.0")
+  implementation("com.charleskorn.kaml:kaml:0.54.0")
 }
 
 // ================================================================== //
