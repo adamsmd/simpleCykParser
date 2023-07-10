@@ -24,12 +24,9 @@ class ChartTest {
     chart.addSymbol(2, 4, Nonterminal("S")) // TODO: should this be "S"?
     val rhs = listOf(null to Nonterminal("S"), null to Terminal("+"), null to Nonterminal("S"))
     val prod = Production(Nonterminal("S"), "A", rhs)
-    // val p = PartialProduction(prod, 2)
 
     chart.addProduction(2, 4, prod, 2, null)
     chart.addProduction(1, 4, prod, 3, null)
     chart.printEntries()
-    // println(Yaml.default.encodeToString(SymbolsSerializer(), chart))
-    // println(Yaml.default.encodeToString(ProductionsSerializer(), chart))
   }
 }
