@@ -33,7 +33,7 @@ repositories {
 
 dependencies {
   // Linting
-  sonarlintPlugins("org.sonarsource.kotlin:sonar-kotlin-plugin:2.14.0.2352")
+  sonarlintPlugins("org.sonarsource.kotlin:sonar-kotlin-plugin:2.15.0.2579")
 
   // Testing
   testImplementation(kotlin("test"))
@@ -114,5 +114,5 @@ tasks.withType<Test> {
   }
 
   finalizedBy(tasks.jacocoTestReport)
-  finalizedBy(tasks.koverReport)
+  finalizedBy(tasks.koverHtmlReport)
 }
