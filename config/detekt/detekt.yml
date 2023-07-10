@@ -1,188 +1,86 @@
+build: {}
+
+config: {}
+
+processors:
+  exclude: []
+
+console-reports:
+  exclude:
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'NotificationReport'
+    - 'FindingsReport'
+    - 'FileBasedFindingsReport'
+    # - 'LiteFindingsReport'
+
+output-reports: {}
+
 comments:
-  DeprecatedBlockTag:
-    active: true
-  EndOfSentenceFormat:
-    active: true
-  KDocReferencesNonPublicProperty:
-    active: true
-  OutdatedDocumentation:
-    active: true
   UndocumentedPublicClass:
-    active: true
     searchInProtectedClass: true
   UndocumentedPublicFunction:
-    active: true
     searchProtectedFunction: true
   UndocumentedPublicProperty:
-    active: true
     searchProtectedProperty: true
 
 complexity:
-  ComplexCondition:
-    active: false
-  CyclomaticComplexMethod:
-    active: false
-  LargeClass:
-    active: false
-  LongMethod:
-    active: false
-  LongParameterList:
-    active: false
-  NestedBlockDepth:
-    active: false
-  ReplaceSafeCallChainWithRun:
-    active: true
+  # ComplexCondition:
+  #   active: false
+  # CyclomaticComplexMethod:
+  #   active: false
+  # LargeClass:
+  #   active: false
+  # LongMethod:
+  #   active: false
+  # LongParameterList:
+  #   active: false
+  # NestedBlockDepth:
+  #   active: false
   StringLiteralDuplication:
-    active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
-    threshold: 3
-    ignoreAnnotation: true
-    excludeStringsWithLessThan5Characters: true
-    ignoreStringsRegex: '$^'
-  TooManyFunctions:
-    active: false
+    excludeStringsWithLessThan5Characters: false
+  # TooManyFunctions:
+  #   active: false
 
-coroutines:
-  GlobalCoroutineUsage:
-    active: true
-  SuspendFunWithCoroutineScopeReceiver:
-    active: true
+coroutines: {}
+
+empty-blocks: {}
 
 exceptions:
-  ObjectExtendsThrowable:
-    active: true
-  ThrowingExceptionInMain:
-    active: true
+  SwallowedException:
+    ignoredExceptionTypes: []
 
-naming:
-  BooleanPropertyNaming:
-    active: true
-  LambdaParameterNaming:
-    active: true
-  NonBooleanPropertyPrefixedWithIs:
-    active: true
+naming: {}
 
-performance:
-  UnnecessaryPartOfBinaryExpression:
-    active: true
+performance: {}
 
 potential-bugs:
-  CastToNullableType:
-    active: true
-  Deprecation:
-    active: true
-  DontDowncastCollectionTypes:
-    active: true
-  ElseCaseInsteadOfExhaustiveWhen:
-    active: true
-  ExitOutsideMain:
-    active: true
+  # TODO
   IgnoredReturnValue:
     restrictToConfig: false
   ImplicitUnitReturnType:
-    active: true
     allowExplicitReturnType: true
-  LateinitUsage:
-    active: true
-  MissingPackageDeclaration:
-    active: true
-  NullCheckOnMutableProperty:
-    active: true
-  NullableToStringCall:
-    active: true
-  UnconditionalJumpStatementInLoop:
-    active: true
-  UnnecessaryNotNullCheck:
-    active: true
 
 style:
-  active: true
-  AlsoCouldBeApply:
-    active: true
-  CanBeNonNullable:
-    active: true
-  CascadingCallWrapping:
-    active: true
-  ClassOrdering:
-    active: true
-  CollapsibleIfStatements:
-    active: true
-  DataClassContainsFunctions:
-    active: true
-  DataClassShouldBeImmutable:
-    active: true
-  DestructuringDeclarationWithTooManyEntries:
-    active: false
-  EqualsOnSignatureLine:
-    active: true
-  ExplicitCollectionElementAccessMethod:
-    active: true
   ExpressionBodySyntax:
-    active: true
     includeLineWrapping: true
   ForbiddenComment:
     active: false
   ForbiddenMethodCall:
+    methods: []
+  # LoopWithTooManyJumpStatements:
+  #   active: false
+  MaxLineLength:
     active: true
-  LoopWithTooManyJumpStatements:
-    active: false
-  MandatoryBracesIfStatements:
-    active: true
-  MandatoryBracesLoops:
-    active: true
-  MultilineLambdaItParameter:
-    active: true
+    maxLineLength: 120
   MultilineRawStringIndentation:
-    active: true
     indentSize: 2
-  NoTabs:
-    active: true
-  NullableBooleanCheck:
-    active: true
-  OptionalUnit:
-    active: false
-  OptionalWhenBraces:
-    active: true
-  PreferToOverPairSyntax:
-    active: true
-  RedundantVisibilityModifierRule:
-    active: true
-  ReturnCount:
-    active: false
-  SpacingBetweenPackageAndImports:
-    active: true
-  ThrowsCount:
-    active: false
-  TrailingWhitespace:
-    active: true
-  TrimMultilineRawString:
-    active: true
-  UnderscoresInNumericLiterals:
-    active: true
-    acceptableLength: 3
-  UnnecessaryAnnotationUseSiteTarget:
-    active: true
-  UnnecessaryBackticks:
-    active: true
-  UnnecessaryInnerClass:
-    active: true
-  UnnecessaryLet:
-    active: true
-  UnnecessaryParentheses:
-    active: true
-  UntilInsteadOfRangeTo:
-    active: true
-  UnusedImports:
-    active: true
-  UseDataClass:
-    active: true
-  UseEmptyCounterpart:
-    active: true
-  UseIfEmptyOrIfBlank:
-    active: true
-  UseIfInsteadOfWhen:
-    active: true
-  UseSumOfInsteadOfFlatMapSize:
-    active: true
+  # OptionalUnit:
+  #   active: false
+  # ReturnCount:
+  #   active: false
+  # ThrowsCount:
+  #   active: false
   WildcardImport:
-    active: true # TODO: needed?
+    active: true
+    excludeImports: []

@@ -63,7 +63,7 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
 
 detekt {
   allRules = true
-  buildUponDefaultConfig = true
+  // buildUponDefaultConfig = true # Note used due to https://github.com/detekt/detekt/issues/4926
   ignoreFailures = true
 }
 
