@@ -34,6 +34,6 @@ dependencies {
   implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.22.0")
   // implementation("com.ncorti.ktfmt.gradle:0.11.0")
   implementation("org.cqfn.diktat.diktat-gradle-plugin:org.cqfn.diktat.diktat-gradle-plugin.gradle.plugin:1.2.5")
-  implementation("org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin:11.1.0")
+  implementation("org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin:11.5.0")
   implementation("se.solrike.sonarlint:sonarlint-gradle-plugin:1.0.0-beta.15")
 }

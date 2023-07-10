@@ -21,11 +21,8 @@ dependencies {
   implementation("ch.qos.logback:logback-classic:1.4.8")
   // implementation("io.github.microutils:kotlin-logging-jvm:3.0.4")
 
-  // Test diffs
-  implementation("io.github.java-diff-utils:java-diff-utils:4.12")
-
   // Test-report generation
-  implementation("org.junit.platform:junit-platform-reporting:1.9.2")
+  implementation("org.junit.platform:junit-platform-reporting:1.9.3")
 
   // YAML Parsing
   implementation("com.charleskorn.kaml:kaml:0.54.0")
