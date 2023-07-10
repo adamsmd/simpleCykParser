@@ -49,7 +49,7 @@ data class TerminalRule(val terminal: Terminal, val regex: EqRegex)
  * Also note that multiple rules for the same terminal are allowed.
  *
  * @property whitespace the regular expression defining the synatx of whitespace and comments
- * @property terminalRules the list of all the terminals and their all of the non-whitespace lexical rules for the language
+ * @property terminalRules the terminal rules for language
  */
 data class LexRules(val whitespace: EqRegex, val terminalRules: List<TerminalRule>)
 
@@ -67,10 +67,7 @@ data class LexRules(val whitespace: EqRegex, val terminalRules: List<TerminalRul
  * @property name an optional name for this production
  * @property rhs optionally named symbols that this production expands to
  */
-data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Pair<String?, Symbol>>) {
-  fun toYamlString(): String =
-    "${name}: [${rhs.map { "${it.first}: ${it.second}" }.joinToString() }]"
-}
+data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Pair<String?, Symbol>>)
 
 /**
  * The combined parsing rules of a language.

@@ -6,20 +6,20 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class TokenTest {
-  @Test fun testProperties(): Unit {
+  @Test fun testConstruction(): Unit {
     val terminal = Terminal("x")
 
     val match = "x(y*)".toRegex().matchEntire("xyy")!!
     val groups = match.groups.toList()
 
-    fun testToken(token: Token): Unit {
+    fun test(token: Token): Unit {
       assertEquals(terminal, token.terminal)
       assertEquals(groups, token.groups)
       assertEquals(groups.first(), token.region)
     }
 
-    testToken(Token(terminal, groups))
-    testToken(match.toToken(terminal))
+    test(Token(terminal, groups))
+    test(match.toToken(terminal))
   }
 
   @Test fun testRequires(): Unit {

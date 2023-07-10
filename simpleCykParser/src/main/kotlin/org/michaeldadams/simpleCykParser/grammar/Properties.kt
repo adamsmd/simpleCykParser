@@ -127,7 +127,7 @@ fun Grammar.unusedSymbols(): Set<Symbol> = this.definedSymbols() - this.parseRul
  * @return TODO
  */
 fun ParseRules.reachableSymbols(): Set<Symbol> {
-  val reachable = QueueSet<Symbol>()
+  val reachable: QueueSet<Symbol> = QueueSet()
 
   reachable += this.start
   for (symbol in reachable) {
@@ -189,7 +189,8 @@ fun ParseRules.nullable(): Set<Production> {
   var productions: QueueSet<Production> = this.epsilons().toCollection(QueueSet())
   var nonterminals: Set<Nonterminal> = productions.map { it.lhs }.toSet()
 
-  for (workitem in productions) { // Work through the queue until it is empty
+  // For each item in the queue until it is empty
+  for (workitem in productions) {
     // For each use of workitems's nonterminal
     for (production in uses.getOrDefault(workitem.lhs, emptySet())) {
       // If rhs is only nullable nonterminals, then the production is nullable

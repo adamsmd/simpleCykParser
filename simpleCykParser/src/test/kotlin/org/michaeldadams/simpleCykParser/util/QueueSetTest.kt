@@ -6,9 +6,9 @@ import kotlin.test.assertFailsWith
 
 class QueueSetTest {
   @Test fun testNonConcurrent(): Unit {
-    var result = emptyList<String>()
+    var result: List<String> = emptyList()
 
-    val queue = QueueSet<String>()
+    val queue: QueueSet<String> = QueueSet()
     queue.add("A")
     queue.add("B")
     queue.add("B")
@@ -28,12 +28,11 @@ class QueueSetTest {
   }
 
   @Test fun testConcurrent(): Unit {
-    var result = emptyList<String>()
+    var result: List<String> = emptyList()
 
-    val queue = QueueSet<String>()
+    val queue: QueueSet<String> = QueueSet()
     queue.add("A")
     queue.add("B")
-    // TODO:
     for (x in queue) {
       result += x
       if (x.length < 3) {
@@ -50,7 +49,7 @@ class QueueSetTest {
   }
 
   @Test fun testUnsupportedOperations(): Unit {
-    val queue = QueueSet<String>()
+    val queue: QueueSet<String> = QueueSet()
     queue.add("A")
 
     assertFailsWith(UnsupportedOperationException::class) { queue.iterator().remove() }

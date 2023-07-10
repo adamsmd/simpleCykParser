@@ -85,7 +85,7 @@ private fun parseRhs(rhs: YamlNode): List<Pair<String?, String>> =
 
 private fun parseProduction(nonterminals: Set<String>, nonterminal: Nonterminal, yamlNode: YamlNode): Production {
   val (name, rawRhs) =
-    if (yamlNode is YamlMap) yamlNode.toPair(::parseRhs) else null to parseRhs(yamlNode)
+    if (yamlNode is YamlMap) yamlNode.toPair { parseRhs(it) } else null to parseRhs(yamlNode)
   val rhs = rawRhs.map {
     it.first to if (it.second in nonterminals) Nonterminal(it.second) else Terminal(it.second)
   }
@@ -134,6 +134,15 @@ productions:
  * @return the grammar extracted from the [YamlMap]
  */
 fun YamlMap.toGrammar(): Grammar = Grammar(this.toLexRules(), this.toParseRules())
+
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
+fun Production.toYamlString(): String =
+  "${name}: [${rhs.map { "${it.first}: ${it.second}" }.joinToString() }]"
 
 // ================================== //
 // Private Helpers

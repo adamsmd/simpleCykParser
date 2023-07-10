@@ -24,6 +24,7 @@ import org.michaeldadams.simpleCykParser.grammar.Terminal
  */
 data class Token(val terminal: Terminal, val groups: List<MatchGroup?>) {
   /** The [MatchGroup] for the entire region matched by the token. */
+  @Suppress("CUSTOM_GETTERS_SETTERS")
   val region: MatchGroup get() = groups.first()!!
 
   init {

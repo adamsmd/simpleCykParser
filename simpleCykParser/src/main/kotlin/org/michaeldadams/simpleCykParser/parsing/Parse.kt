@@ -22,6 +22,7 @@ fun parse(chart: Chart): Unit {
       if (chart.entries[leftStart].contains(leftEnd)) {
         // TODO: override QueueMap.entries
         // for ((leftSymbol, leftProductions) in chart.entries[leftStart][leftEnd].entries) {
+        // TODO: less relookup
         for (leftSymbol in chart.entries[leftStart][leftEnd].keys) {
           for (leftProduction in chart.entries[leftStart][leftEnd][leftSymbol].keys) {
             if (leftProduction != null) {
@@ -30,7 +31,6 @@ fun parse(chart: Chart): Unit {
                   // TODO: ?? gets new elements if leftChild is nulled
                   val consumedSymbol: Symbol = leftProduction.rhs[consumed].second // TODO: toNext() trick
                   for (rightEnd in chart.symbolEnds[rightStart][consumedSymbol]) {
-                    // chart.addProduction(leftStart, rightEnd, nextPartial, rightStart)
                     chart.addProduction(leftStart, rightEnd, leftProduction, consumed + 1, rightStart)
                   }
                 }

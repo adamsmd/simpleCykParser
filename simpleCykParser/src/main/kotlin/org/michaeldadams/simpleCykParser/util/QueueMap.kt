@@ -53,6 +53,7 @@ private class QueueMapImpl<K, V>(val defaultValue: () -> V) : HashMap<K, V>(), Q
   // Getting adds if not already present
   override operator fun get(key: K): V =
     if (this.contains(key)) {
+      @Suppress("UNCHECKED_CAST")
       super.get(key) as V
     } else {
       defaultValue().also { this.put(key, it) }

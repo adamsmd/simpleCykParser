@@ -10,23 +10,16 @@ class EqRegexTest {
     val option = RegexOption.IGNORE_CASE
     val options = setOf(option)
 
-    run {
-      val eqRegex = EqRegex(pattern, options)
+    fun test(eqRegex: EqRegex, options: Set<RegexOption>): Unit {
       assertEquals(pattern, eqRegex.pattern)
       assertEquals(options, eqRegex.options)
+      assertEquals(pattern, eqRegex.regex.pattern)
+      assertEquals(options, eqRegex.regex.options)
     }
 
-    run {
-      val eqRegex = EqRegex(pattern, option)
-      assertEquals(pattern, eqRegex.pattern)
-      assertEquals(setOf(option), eqRegex.options)
-    }
-
-    run {
-      val eqRegex = EqRegex(pattern)
-      assertEquals(pattern, eqRegex.pattern)
-      assertEquals(setOf(), eqRegex.options)
-    }
+    test(EqRegex(pattern, options), options)
+    test(EqRegex(pattern, option), setOf(option))
+    test(EqRegex(pattern), setOf())
   }
 
   @Test fun testEquality(): Unit {
