@@ -8,49 +8,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.text.toRegex
 
+@Suppress("LONG_LINE")
 class YamlTest {
-  // @Test fun test1(): Unit {
-  //   val x = """
-  //     whitespace: "\\s+"
-  //     terminals:
-  //       - A: "A"
-  //       - B: "B"
-  //       - X: "[A-Z]+"
-  //     start: S
-  //     productions:
-  //       S:
-  //         - ( S )
-  //         - X: ""
-  //   """.trimIndent()
-  //   val y = x.toYamlMap()
-  //   /*var g = */y.toGrammar()
-  //   // println(g)
-  //   // TODO: assertEqual(grammar, g)
-  // }
-
-  // @Test fun test2(): Unit {
-  //   val x = """
-  //     whitespace: \s+
-  //     terminals:
-  //       - STRING: '"[^"]"'
-  //       - NUM: \d+
-  //       - IF: if
-  //       - (: \(
-  //     start: S
-  //     productions:
-  //       S:
-  //         - F: if ( S ) then { else }
-  //         - F: '" S "'
-  //         - S S
-  //         - ""
-  //       T: []
-  //   """.trimIndent()
-  //   val y = x.toYamlMap()
-  //   /*var g = */y.toGrammar()
-  //   // println(g)
-  //   // TODO: assertEqual(grammar, g)
-  // }
-
   @Test fun testValid(): Unit {
     // TODO: explain
     // key or not
@@ -58,10 +17,15 @@ class YamlTest {
     // item is scalar or pair
     // symbol is token or not
     // string with spaces at begining or end
+    // TODO:
+    // - ( S )
+    // - X: ""
+    // - F: if ( S ) then { else }
+    // - F: '" S "'
     val actual = """
       whitespace: \s+
       terminals:
-        - STRING: '"[^"]"'
+        - STRING: "'[^']'"
         - NUM: \d+
         - IF: if
         - (: \(
@@ -89,16 +53,20 @@ class YamlTest {
     """.trimIndent().toYamlMap().toGrammar()
 
     // TODO: list vs sequence
-    @Suppress("MaxLineLength")
+    @Suppress(
+      "MaxLineLength",
+      "ktlint:standard:argument-list-wrapping",
+      "ktlint:standard:max-line-length",
+    )
     val expected = Grammar(
       LexRules(
         "\\s+".toRegex().toEqRegex(),
         listOf(
-          TerminalRule(Terminal("STRING"), "\"[^\"]\"".toRegex().toEqRegex()),
+          TerminalRule(Terminal("STRING"), "'[^']'".toRegex().toEqRegex()),
           TerminalRule(Terminal("NUM"), "\\d+".toRegex().toEqRegex()),
           TerminalRule(Terminal("IF"), "if".toRegex().toEqRegex()),
-          TerminalRule(Terminal("("), "\\(".toRegex().toEqRegex())
-        )
+          TerminalRule(Terminal("("), "\\(".toRegex().toEqRegex()),
+        ),
       ),
       ParseRules(
         Nonterminal("S"),
@@ -121,10 +89,10 @@ class YamlTest {
             Production(Nonterminal("S"), null, listOf(null to Nonterminal("A"), null to Terminal("w"), null to Nonterminal("C"))),
             Production(Nonterminal("S"), null, listOf()),
             Production(Nonterminal("S"), null, listOf(null to Nonterminal("A"), null to Terminal("x"), null to Nonterminal("C"))),
-            Production(Nonterminal("S"), null, listOf("AA" to Nonterminal("A"), "BB" to Terminal("x"), null to Nonterminal("C"), null to Terminal("y"), "DD" to Nonterminal("D")))
-          )
-        )
-      )
+            Production(Nonterminal("S"), null, listOf("AA" to Nonterminal("A"), "BB" to Terminal("x"), null to Nonterminal("C"), null to Terminal("y"), "DD" to Nonterminal("D"))),
+          ),
+        ),
+      ),
     )
 
     assertEquals(expected, actual)

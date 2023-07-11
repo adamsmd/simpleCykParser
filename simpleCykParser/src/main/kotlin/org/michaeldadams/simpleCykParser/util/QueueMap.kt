@@ -13,7 +13,6 @@ package org.michaeldadams.simpleCykParser.util
  * @param K the type of map keys
  * @param V the type of map values
  */
-@Suppress("kotlin:S6517")
 interface QueueMap<K, out V> : Map<K, V> {
   /**
    * TODO: never null (unless V is nullable).

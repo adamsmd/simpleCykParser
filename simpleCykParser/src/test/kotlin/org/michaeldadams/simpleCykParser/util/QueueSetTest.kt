@@ -42,7 +42,7 @@ class QueueSetTest {
     }
 
     val expected = listOf(
-      "A", "B", "AA", "AB", "BA", "BB", "AAA", "AAB", "ABA", "ABB", "BAA", "BAB", "BBA", "BBB"
+      "A", "B", "AA", "AB", "BA", "BB", "AAA", "AAB", "ABA", "ABB", "BAA", "BAB", "BBA", "BBB",
     )
 
     assertContentEquals(expected, result)

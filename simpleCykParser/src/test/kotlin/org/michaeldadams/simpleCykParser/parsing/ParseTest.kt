@@ -12,31 +12,32 @@ class ParseTest {
   val yaml = Yaml(configuration = YamlConfiguration(breakScalarsAt = 1_000))
 
   @Test fun test1(): Unit {
-    val x = """
+    val parser = """
       start: S
       productions:
         S:
           - P: ( S )
           - E: ""
-    """.trimIndent()
-    val g = x.toYamlMap().toParseRules().toParser()
-    val z = listOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")"))
-    val chart = Chart(g, z)
+    """.trimIndent().toYamlMap().toParseRules().toParser()
+
+    val terminals = listOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")"))
+    val chart = Chart(parser, terminals)
     parse(chart)
     chart.printEntries()
   }
 
   @Test fun test2(): Unit {
-    val x = """
+    val parser = """
       start: S
       productions:
         S:
           - R: S S S # Recursive
           - E: "" # Empty
           - T: a # Terminal
-    """.trimIndent()
-    val g = x.toYamlMap().toParseRules().toParser()
-    val chart = Chart(g, listOf("a", "a", "a", "a").map { Terminal(it) })
+    """.trimIndent().toYamlMap().toParseRules().toParser()
+
+    val terminals = listOf("a", "a", "a", "a").map { Terminal(it) }
+    val chart = Chart(parser, terminals)
     chart.printEntries()
     parse(chart)
   }

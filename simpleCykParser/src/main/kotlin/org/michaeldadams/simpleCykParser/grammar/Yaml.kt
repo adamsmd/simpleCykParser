@@ -66,12 +66,12 @@ fun YamlMap.toParseRules(): ParseRules {
 
   return ParseRules(Nonterminal(start), productionsMap)
 }
-private val whitespaceRegex = "\\p{IsWhite_Space}+".toRegex()
+private val WHITESPACE_REGEX = "\\p{IsWhite_Space}+".toRegex()
 
 private fun parseRhs(rhs: YamlNode): List<Pair<String?, String>> =
   when (rhs) {
     is YamlScalar ->
-      rhs.content.split(whitespaceRegex).filter { it.isNotEmpty() }.map { null to it }
+      rhs.content.split(WHITESPACE_REGEX).filter { it.isNotEmpty() }.map { null to it }
     // TODO: rename item?
     is YamlList -> rhs.items.map { rhsItem ->
       when (rhsItem) {
@@ -95,7 +95,7 @@ private fun parseProduction(nonterminals: Set<String>, nonterminal: Nonterminal,
 private fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeException =
   IncorrectTypeException(
     "Expected element to be ${expectedType} but is ${yamlNode::class.simpleName}",
-    yamlNode.path
+    yamlNode.path,
   )
 
 /*
@@ -153,8 +153,8 @@ private operator fun Map<String, YamlNode>.get(key: String, path: YamlPath): Yam
 
 private fun YamlMap.toMap(): Map<String, YamlNode> = this.entries.mapKeys { it.key.content }
 
-private fun <T> YamlMap.toPair(f: (YamlNode) -> T): Pair<String, T> {
-  require(this.entries.size == 1) { "TODO" }
-  val p = this.entries.toList().single()
-  return p.first.content to f(p.second)
+private fun <T> YamlMap.toPair(mapSecond: (YamlNode) -> T): Pair<String, T> {
+  require(this.entries.size == 1) { "Expected one map element but found ${this.entries.size}" }
+  val pair = this.entries.toList().single()
+  return pair.first.content to mapSecond(pair.second)
 }

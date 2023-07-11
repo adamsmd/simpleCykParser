@@ -25,8 +25,8 @@ class LexTest {
       Token(Terminal("Y"), listOf(MatchGroup("123", IntRange(10, 12)), null)),
       Token(
         Terminal("Y"),
-        listOf(MatchGroup("123.45", IntRange(15, 20)), MatchGroup(".45", IntRange(18, 20)))
-      )
+        listOf(MatchGroup("123.45", IntRange(15, 20)), MatchGroup(".45", IntRange(18, 20))),
+      ),
     )
 
     assertEquals(Pair(23, expectedTokens), lex(lexRules, " A B B  AA123  123.45  "))

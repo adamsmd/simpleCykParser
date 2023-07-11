@@ -72,8 +72,8 @@ fun Grammar.definedSymbols(): Set<Symbol> =
 fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> =
   this.definedSymbols().let { symbols ->
     this.parseRules.productionMap.values.flatten().flatMap { production ->
-      production.rhs.mapIndexedNotNull { i, c ->
-        if (c.second in symbols) null else Pair(production, i)
+      production.rhs.mapIndexedNotNull { i, component ->
+        if (component.second in symbols) null else Pair(production, i)
       }
     }.toSet()
   }

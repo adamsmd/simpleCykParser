@@ -91,9 +91,6 @@ class Chart(val parser: Parser, val size: Int) {
    */
   constructor(parser: Parser, terminals: List<Terminal>) : this(parser, terminals.size) {
     terminals.forEachIndexed { start, terminal -> this.addSymbol(start, start + 1, terminal) }
-    // for ((start, terminal) in terminals.withIndex()) {
-    //   this.addSymbol(start, start + 1, terminal)
-    // }
   }
 
   /**
@@ -122,7 +119,7 @@ class Chart(val parser: Parser, val size: Int) {
   private fun addInitializedSymbol(start: Int, end: Int, symbol: Symbol): Unit {
     // NOTE: just an assertion and does not show how built
     // TODO: add always adds ProductionEntry (via initialUses)
-    require(_entries[start][end][symbol].isNotEmpty()) { "TODO" }
+    require(_entries[start][end][symbol].isNotEmpty()) { TODO() }
     _symbolEnds[start][symbol].add(end)
     // If not in map, then has no initial uses
     for (newProduction in parser.initialUses.getOrDefault(symbol, emptySet())) {
@@ -144,8 +141,8 @@ class Chart(val parser: Parser, val size: Int) {
    * @param split TODO
    */
   fun addProduction(start: Int, end: Int, production: Production, consumed: Int, split: Int?): Unit {
-    require(consumed >= 0) { "TODO" }
-    require(consumed <= production.rhs.size) { "TODO" }
+    require(consumed >= 0) { TODO() }
+    require(consumed <= production.rhs.size) { TODO() }
     // TODO: add always adds Symbol of the partialProd is complete
     if (_entries[start][end][production.lhs][production][consumed].add(split) &&
       production.rhs.size == consumed
@@ -172,6 +169,7 @@ class Chart(val parser: Parser, val size: Int) {
             } else {
               for ((consumed, consumedValue) in productionValue.entries) {
                 for (split in consumedValue) {
+                  @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
                   println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}, ${split}]")
                 }
               }
