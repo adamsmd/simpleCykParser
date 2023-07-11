@@ -14,11 +14,6 @@
 - name: PACKAGE_NAME_INCORRECT_PATH
   enabled: true
 
-## Temporarily disabled rules
-
-- name: COMMENT_WHITE_SPACE
-  enabled: false
-
 ## Explicitly disabled rules that are enabled by default
 
 # Checks that package name is in correct (lower) case
@@ -42,39 +37,27 @@
 # Checks that function doesn't have too many nested blocks
 - name: NESTED_BLOCK
   enabled: false
-# Identifier length should be in range [2,64] except names that used in industry like {i, j} and 'e' for catching exceptions
-- name: IDENTIFIER_LENGTH
-  enabled: false
-# Checks if null-check was used explicitly (for example: if (a == null))
-# Try to avoid explicit null checks (explicit comparison with `null`)
-# Kotlin is declared as [Null-safe](https://kotlinlang.org/docs/reference/null-safety.html) language.
-# But Kotlin architects wanted Kotlin to be fully compatible with Java, that's why `null` keyword was also introduced in Kotlin.
-# There are several code-structures that can be used in Kotlin to avoid null-checks. For example: `?:`,  `.let {}`, `.also {}`, e.t.c
-- name: AVOID_NULL_CHECKS
-  enabled: false
 # Warns if there are nested functions
 - name: AVOID_NESTED_FUNCTIONS
-  enabled: false
-# Checks that properties with comments are separated by a blank line
-- name: BLANK_LINE_BETWEEN_PROPERTIES
-  enabled: false
-# Checks that file does not contain commented out code
-- name: COMMENTED_OUT_CODE
   enabled: false
 # Inspection that checks if string template has redundant curly braces
 - name: STRING_TEMPLATE_CURLY_BRACES
   enabled: false
-# # Checks that non-empty code blocks with braces follow the K&R style (1TBS or OTBS style)
-# - name: BRACES_BLOCK_STRUTURE_ERROR
 # Orders imports alphabetically
 - name: FILE_UNORDERED_IMPORTS
   enabled: false # Disabled because ktlint wants a different order
 
 ## Rules with custom configurations
 
+# Checks that the Class/Enum/Interface name matches Pascal case
+- name: CLASS_NAME_INCORRECT
+  # all code blocks with MyAnnotation will be ignored and not checked
+  ignoreAnnotated: []
 # Checks that indentation is correct
 - name: WRONG_INDENTATION
   configuration:
+    # If true: if first parameter in parameter list is on the same line as opening parenthesis, then other parameters can be aligned with it
+    # alignedParameters: true
     # The indentation size for each file
     indentationSize: 2
 # Checks that line breaks follow code style guide: rule 3.6
@@ -84,16 +67,12 @@
     maxParametersInOneLine: 100
     # 3 by default.
     maxCallsInOneLine: 100
-# Type aliases provide alternative names for existing types when type's reference text is longer 25 chars
-- name: TYPE_ALIAS
+# Checks that the line length is < lineLength parameter
+- name: LONG_LINE
   configuration:
-    typeReferenceLength: '40' # max length of type reference
-
-## Rules that I am not sure about yet
-
+    lineLength: '100'
 # Checks trailing comma
 - name: TRAILING_COMMA
-  enabled: true
   configuration:
     # VALUE_ARGUMENT
     valueArgument: false
@@ -111,3 +90,7 @@
     typeParameter: false
     # DESTRUCTURING_DECLARATION_ENTRY
     destructuringDeclaration: false
+# Type aliases provide alternative names for existing types when type's reference text is longer 25 chars
+- name: TYPE_ALIAS
+  configuration:
+    typeReferenceLength: '40' # max length of type reference

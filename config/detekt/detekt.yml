@@ -17,6 +17,10 @@ console-reports:
 output-reports: {}
 
 comments:
+  CommentOverPrivateFunction:
+    active: false
+  CommentOverPrivateProperty:
+    active: false
   UndocumentedPublicClass:
     searchInProtectedClass: true
   UndocumentedPublicFunction:
@@ -25,22 +29,8 @@ comments:
     searchProtectedProperty: true
 
 complexity:
-  # ComplexCondition:
-  #   active: false
-  # CyclomaticComplexMethod:
-  #   active: false
-  # LargeClass:
-  #   active: false
-  # LongMethod:
-  #   active: false
-  # LongParameterList:
-  #   active: false
-  # NestedBlockDepth:
-  #   active: false
   StringLiteralDuplication:
     excludeStringsWithLessThan5Characters: false
-  # TooManyFunctions:
-  #   active: false
 
 coroutines: {}
 
@@ -55,7 +45,6 @@ naming: {}
 performance: {}
 
 potential-bugs:
-  # TODO
   IgnoredReturnValue:
     restrictToConfig: false
   ImplicitUnitReturnType:
@@ -68,19 +57,13 @@ style:
     active: false
   ForbiddenMethodCall:
     methods: []
-  # LoopWithTooManyJumpStatements:
-  #   active: false
   MaxLineLength:
-    active: true
-    maxLineLength: 120
+    maxLineLength: 100
+  # Indentation rule not consistent with https://kotlinlang.org/docs/coding-conventions.html#strings
   MultilineRawStringIndentation:
-    indentSize: 2
-  # OptionalUnit:
-  #   active: false
-  # ReturnCount:
-  #   active: false
-  # ThrowsCount:
-  #   active: false
+    active: false
+  OptionalUnit:
+    active: false
   WildcardImport:
     active: true
     excludeImports: []

@@ -20,7 +20,7 @@ plugins {
   // Linting
   id("io.gitlab.arturbosch.detekt") // Tasks: detekt
   // id("com.ncorti.ktfmt.gradle") // Tasks: ktfmtCheck (omitted because issues errors not warnings)
-  id("org.cqfn.diktat.diktat-gradle-plugin") // Tasks: diktatCheck
+  id("org.cqfn.diktat.diktat-gradle-plugin") // Tasks: diktatCheck (NOTE: breaks if ktlint_code_style is set in .editorconfig)
   id("org.jlleitschuh.gradle.ktlint") // Tasks: ktlintCheck
   id("se.solrike.sonarlint") // Tasks: sonarlint{Main,Test}
 
@@ -33,7 +33,7 @@ repositories {
 
 dependencies {
   // Linting
-  sonarlintPlugins("org.sonarsource.kotlin:sonar-kotlin-plugin:2.15.0.2579")
+  sonarlintPlugins("org.sonarsource.kotlin:sonar-kotlin-plugin:2.15.0.2579") // TODO: causes build exception
 
   // Testing
   testImplementation(kotlin("test"))
@@ -63,11 +63,11 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
 
 detekt {
   allRules = true
-  // buildUponDefaultConfig = true # Note used due to https://github.com/detekt/detekt/issues/4926
+  // buildUponDefaultConfig = true # Not used due to https://github.com/detekt/detekt/issues/4926
   ignoreFailures = true
 }
 
-diktat {
+diktat { // NOTE: breaks if ktlint_code_style is set in .editorconfig
   ignoreFailures = true
 }
 
@@ -75,13 +75,6 @@ ktlint {
   version.set("0.49.1") // Must match version in plugins/build.gradle.kts
   verbose.set(true)
   ignoreFailures.set(true)
-  enableExperimentalRules.set(true) // TODO: vs .editorconfig
-  disabledRules.set(
-    setOf(
-      "no-unit-return",
-      "string-template",
-    )
-  )
 }
 
 tasks.register<se.solrike.sonarlint.SonarlintListRules>("sonarlintListRules") {
