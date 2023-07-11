@@ -31,5 +31,5 @@ dependencies {
 // ================================================================== //
 // Main
 application {
-  mainClass.set("org.michaeldadams.simpleCykParser.MainKt")
+  mainClass.set("org.michaeldadams.simpleCykParser.main.MainKt")
 }
