@@ -2,36 +2,44 @@
 
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.grammar.Symbol
-// toPartial: Productions are unchanged, Symbols get their initial use Productions
-
-// TODO: parseFromTokens
+// TODO: fun parse(parser, tokens: List<String>)
+// TODO: fun parse(parser, tokens: List<Nonterminal>)
+// TODO: fun parse(chart, tokens: List<String>)
+// TODO: fun parse(chart, tokens: List<Nonterminal>)
 
 /**
  * TODO.
  *
  * @param chart
  */
+@Suppress(
+  "CognitiveComplexMethod",
+  "NestedBlockDepth",
+  "kotlin:S3776", // Cognitive Complexity of functions should not be too high
+)
 fun parse(chart: Chart): Unit {
   // TODO: document
-  for (leftStart in chart.size downTo 0) {
-    for (leftEnd in leftStart..chart.size) {
-      val rightStart = leftEnd
+  // TODO: .sorted().reverse()
+  val size = chart.entries.keys.max() + 1 // TODO: alternative to "size"
+  for (leftStart in size downTo 0) {
+    // Note that rightStart == leftEnd
+    for (leftEnd in leftStart..size) {
       // gets new elements if rightChild is nulled
       // TODO: better way to prevent fill-in
       if (chart.entries[leftStart].contains(leftEnd)) {
         // TODO: override QueueMap.entries
         // for ((leftSymbol, leftProductions) in chart.entries[leftStart][leftEnd].entries) {
-        // TODO: less relookup
         for (leftSymbol in chart.entries[leftStart][leftEnd].keys) {
           for (leftProduction in chart.entries[leftStart][leftEnd][leftSymbol].keys) {
             if (leftProduction != null) {
               for (consumed in chart.entries[leftStart][leftEnd][leftSymbol][leftProduction].keys) {
                 if (consumed < leftProduction.rhs.size) {
                   // TODO: ?? gets new elements if leftChild is nulled
-                  val consumedSymbol: Symbol = leftProduction.rhs[consumed].second // TODO: toNext() trick
-                  for (rightEnd in chart.symbolEnds[rightStart][consumedSymbol]) {
-                    chart.addProduction(leftStart, rightEnd, leftProduction, consumed + 1, rightStart)
+                  // TODO: toNext() trick
+                  val newConsumed = consumed + 1
+                  val consumedSymbol = leftProduction.rhs[consumed].second
+                  for (rightEnd in chart.symbolEnds[leftEnd][consumedSymbol]) {
+                    chart.addProduction(leftStart, rightEnd, leftProduction, newConsumed, leftEnd)
                   }
                 }
               }

@@ -75,7 +75,15 @@ data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Pai
  * @property start the start symbol of the language
  * @property productionMap a map from a nonterminal to the set of productions for that nonterminal
  */
-data class ParseRules(val start: Symbol, val productionMap: Map<Nonterminal, Set<Production>>)
+data class ParseRules(val start: Symbol, val productionMap: Map<Nonterminal, Set<Production>>) {
+  init {
+    for ((lhs, productions) in productionMap.entries) {
+      for (production in productions) {
+        require(lhs == production.lhs) { TODO() }
+      }
+    }
+  }
+}
 
 // ================================== //
 // Lexing and Parsing Together

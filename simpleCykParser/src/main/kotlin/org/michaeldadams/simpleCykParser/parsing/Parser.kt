@@ -6,7 +6,8 @@ import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Production
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.initialUses
-import org.michaeldadams.simpleCykParser.grammar.nullable
+import org.michaeldadams.simpleCykParser.grammar.nullableSymbols
+import org.michaeldadams.simpleCykParser.grammar.partiallyNullable
 
 // TODO: rename to Parser
 
@@ -17,10 +18,13 @@ import org.michaeldadams.simpleCykParser.grammar.nullable
  */
 data class Parser(val parseRules: ParseRules) {
   /** TODO. */
-  val nullable: Set<Production> = parseRules.nullable()
+  val nullableSymbols: Set<Symbol> = parseRules.nullableSymbols()
 
   /** TODO. */
   val initialUses: Map<Symbol, Set<Production>> = parseRules.initialUses()
+
+  /** TODO. */
+  val partiallyNullable: Map<Production, Set<Int>> = parseRules.partiallyNullable()
 }
 
 /**

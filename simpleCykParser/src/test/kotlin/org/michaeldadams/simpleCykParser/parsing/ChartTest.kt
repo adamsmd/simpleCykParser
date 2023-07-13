@@ -19,7 +19,7 @@ class ChartTest {
           - E: ""
     """.trimIndent().toYamlMap().toParseRules().toParser()
 
-    val chart = Chart(parser, 5)
+    val chart = Chart(parser)
     chart.addSymbol(3, 4, Terminal("("))
     chart.addSymbol(2, 4, Nonterminal("S")) // TODO: should this be "S"?
     val rhs = listOf(null to Nonterminal("S"), null to Terminal("+"), null to Nonterminal("S"))

@@ -6,7 +6,9 @@
 
 package org.michaeldadams.simpleCykParser.grammar
 
+import org.michaeldadams.simpleCykParser.util.QueueMap
 import org.michaeldadams.simpleCykParser.util.QueueSet
+import org.michaeldadams.simpleCykParser.util.queueMap
 
 // TODO: check @throws
 
@@ -172,7 +174,7 @@ fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
  * @receiver TODO
  * @return TODO
  */
-fun ParseRules.epsilons(): Set<Production> =
+fun ParseRules.epsilonProductions(): Set<Production> =
   this.productionMap.values.flatten().filter { it.rhs.isEmpty() }.toSet()
 
 /**
@@ -183,10 +185,10 @@ fun ParseRules.epsilons(): Set<Production> =
  * @receiver TODO
  * @return TODO
  */
-fun ParseRules.nullable(): Set<Production> {
+fun ParseRules.nullableProductions(): Set<Production> {
   val uses: Map<Symbol, Set<Production>> = this.productionsUsing()
   // TODO: Note that productions serves as both a record (Set) and worklist (Queue)
-  var productions: QueueSet<Production> = this.epsilons().toCollection(QueueSet())
+  var productions: QueueSet<Production> = this.epsilonProductions().toCollection(QueueSet())
   var nonterminals: Set<Nonterminal> = productions.map { it.lhs }.toSet()
 
   // For each item in the queue until it is empty
@@ -202,4 +204,26 @@ fun ParseRules.nullable(): Set<Production> {
   }
 
   return productions.toSet()
+}
+
+/**
+ * TODO.
+ */
+fun ParseRules.nullableSymbols(): Set<Symbol> = this.nullableProductions().map { it.lhs }.toSet()
+
+/**
+ * TODO.
+ */
+fun ParseRules.partiallyNullable(): Map<Production, Set<Int>> {
+  val nullable: Set<Symbol?> = this.nullableProductions().map { it.lhs }.toSet()
+
+  val result: QueueMap<Production, QueueSet<Int>> = queueMap { QueueSet() }
+
+  for (production in this.productionMap.values.flatten()) {
+    var consumed = 0
+    do {
+      result[production].add(consumed)
+    } while (production.rhs.getOrNull(consumed++)?.second in nullable)
+  }
+  return result
 }

@@ -20,8 +20,8 @@ class ParseTest {
           - E: ""
     """.trimIndent().toYamlMap().toParseRules().toParser()
 
-    val terminals = listOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")"))
-    val chart = Chart(parser, terminals)
+    val chart = Chart(parser)
+    chart.addSymbols(listOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")")))
     parse(chart)
     chart.printEntries()
   }
@@ -36,9 +36,9 @@ class ParseTest {
           - T: a # Terminal
     """.trimIndent().toYamlMap().toParseRules().toParser()
 
-    val terminals = listOf("a", "a", "a", "a").map { Terminal(it) }
-    val chart = Chart(parser, terminals)
-    chart.printEntries()
+    val chart = Chart(parser)
+    chart.addSymbols(listOf("a", "a", "a", "a").map { Terminal(it) })
     parse(chart)
+    chart.printEntries()
   }
 }
