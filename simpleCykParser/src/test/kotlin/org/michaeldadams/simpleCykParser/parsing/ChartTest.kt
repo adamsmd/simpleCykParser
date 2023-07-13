@@ -1,7 +1,7 @@
 package org.michaeldadams.simpleCykParser.parsing
 
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal
-import org.michaeldadams.simpleCykParser.grammar.Production
+import org.michaeldadams.simpleCykParser.grammar.Rhs
 import org.michaeldadams.simpleCykParser.grammar.Terminal
 import org.michaeldadams.simpleCykParser.grammar.toParseRules
 import org.michaeldadams.simpleCykParser.grammar.toYamlMap
@@ -20,13 +20,14 @@ class ChartTest {
     """.trimIndent().toYamlMap().toParseRules().toParser()
 
     val chart = Chart(parser)
-    chart.addSymbol(3, 4, Terminal("("))
-    chart.addSymbol(2, 4, Nonterminal("S")) // TODO: should this be "S"?
-    val rhs = listOf(null to Nonterminal("S"), null to Terminal("+"), null to Nonterminal("S"))
-    val prod = Production(Nonterminal("S"), "A", rhs)
+    chart.add(3, 4, Terminal("("))
+    chart.add(2, 4, Nonterminal("S")) // TODO: should this be "S"?
+    val lhs = Nonterminal("S")
+    val parts = listOf(null to Nonterminal("S"), null to Terminal("+"), null to Nonterminal("S"))
+    val rhs = Rhs("A", parts)
 
-    chart.addProduction(2, 4, prod, 2, null)
-    chart.addProduction(1, 4, prod, 3, null)
+    chart.add(2, 4, lhs, rhs, 2, null)
+    chart.add(1, 4, lhs, rhs, 3, null)
     chart.printEntries()
   }
 }

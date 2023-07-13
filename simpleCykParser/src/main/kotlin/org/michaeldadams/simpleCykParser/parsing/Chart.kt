@@ -2,11 +2,13 @@
 
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.grammar.Production
+import org.michaeldadams.simpleCykParser.grammar.Nonterminal
+import org.michaeldadams.simpleCykParser.grammar.Rhs
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.toYamlString
 import org.michaeldadams.simpleCykParser.util.QueueMap
 import org.michaeldadams.simpleCykParser.util.QueueSet
+import org.michaeldadams.simpleCykParser.util.fromSetsMap
 import org.michaeldadams.simpleCykParser.util.queueMap
 
 // TODO: when to do "this."
@@ -22,7 +24,7 @@ import org.michaeldadams.simpleCykParser.util.queueMap
  * @param T TODO
  */
 typealias ChartEntryMap<T> =
-  QueueMap<Int, QueueMap<Int, QueueMap<Symbol, QueueMap<Production?, QueueMap<Int, T>>>>>
+  QueueMap<Int, QueueMap<Int, QueueMap<Symbol, QueueMap<Rhs?, QueueMap<Int, T>>>>>
 
 /**
  * TODO.
@@ -37,38 +39,26 @@ typealias SymbolEndsMap<T> = QueueMap<Int, QueueMap<Symbol, T>>
  * @property parser TODO
  */
 class Chart(val parser: Parser) {
-  // TODO: size is inclusive
-  // get left
-  // get right
-  // get children
-  // get parses at
-  // fromTokens
-  // fromSymbols
-  // Used to get division between children
-  // private val defaultEntries: Map<Production?, Set<Int>> = {
-  //   null -> emptySet()
-  //   production in parser.nullable -> production.rhs.size
-  //   initialUses[
-  // }
-
   /** Mutable backing field for [entries]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
   private val _entries: ChartEntryMap<QueueSet<Int?>> =
     queueMap { start ->
-      queueMap<Int, QueueMap<Symbol, QueueMap<Production?, QueueMap<Int, QueueSet<Int?>>>>> {
+      queueMap<Int, QueueMap<Symbol, QueueMap<Rhs?, QueueMap<Int, QueueSet<Int?>>>>> {
         queueMap { queueMap { queueMap { QueueSet() } } }
       }.also { qm ->
-        for ((production, consumedSet) in parser.partiallyNullable) {
-          for (consumed in consumedSet) {
-            qm[start][production.lhs][production][consumed].add(if (consumed == 0) null else start)
+        for ((lhs, rhsMap) in parser.partiallyNullable) {
+          for ((rhs, consumedSet) in rhsMap) {
+            for (consumed in consumedSet) {
+              qm[start][lhs][rhs][consumed].add(if (consumed == 0) null else start)
+            }
           }
         }
       }
     }
 
   /** TODO.
-   * Start
-   * End
+   * Start (inclusive)
+   * End (exclusive)
    * Symbol
    * Production (null means no justification)
    * Consumed
@@ -84,7 +74,7 @@ class Chart(val parser: Parser) {
   private val _symbolEnds: SymbolEndsMap<QueueSet<Int>> =
     queueMap { start ->
       queueMap<Symbol, QueueSet<Int>> { QueueSet() }.also { qm ->
-        parser.nullableSymbols.forEach { qm[it].add(start) }
+        parser.nullable.forEach { qm[it].add(start) }
       }
     }
 
@@ -99,9 +89,14 @@ class Chart(val parser: Parser) {
   // PartialProduction is present but has no splitting position (e.g., due to
   // empty or just being asserted).
 
-  // TODO: fun addSymbols and then remove the constructor
-  fun addSymbols(symbols: List<Symbol>): Unit =
-    symbols.forEachIndexed { start, symbol -> this.addSymbol(start, start + 1, symbol) }
+  /**
+   * TODO.
+   *
+   * @receiver TODO
+   * @param symbols TODO
+   */
+  fun add(symbols: List<Symbol>): Unit =
+    symbols.forEachIndexed { start, symbol -> this.add(start, start + 1, symbol) }
 
   /**
    * TODO.
@@ -111,32 +106,28 @@ class Chart(val parser: Parser) {
    * @param end TODO
    * @param symbol TODO
    */
-  fun addSymbol(start: Int, end: Int, symbol: Symbol): Unit {
+  fun add(start: Int, end: Int, symbol: Symbol): Unit {
     _entries[start][end][symbol][null]
-    addInitializedSymbol(start, end, symbol)
+    addImpl(start, end, symbol)
   }
 
-  // TODO: better name
-
   /**
-   * TODO.
+   * TODO: rename to put?
    *
    * @receiver TODO
    * @param start TODO
    * @param end TODO
    * @param symbol TODO
    */
-  private fun addInitializedSymbol(start: Int, end: Int, symbol: Symbol): Unit {
+  private fun addImpl(start: Int, end: Int, symbol: Symbol): Unit {
     // NOTE: just an assertion and does not show how built
     // TODO: add always adds ProductionEntry (via initialUses)
-    assert(_entries[start][end][symbol].isNotEmpty()) {
-      "Not initialized: ${start}:${end}:${symbol}"
-    }
+    assert(_entries[start][end][symbol].isNotEmpty()) { "Uninitialized: ${start}:${end}:${symbol}" }
     _symbolEnds[start][symbol].add(end)
     // If not in map, then has no initial uses
-    for (newProduction in parser.initialUses.getOrDefault(symbol, emptySet())) {
+    for ((lhs, rhs) in parser.initialUses.getOrDefault(symbol, emptyMap()).fromSetsMap()) {
       // NOTE: Addition goes up not down (we don't have info for down)
-      this.addProduction(start, end, newProduction, 1, start)
+      this.add(start, end, lhs, rhs, 1, start)
     }
   }
 
@@ -148,23 +139,22 @@ class Chart(val parser: Parser) {
    * @receiver TODO
    * @param start TODO
    * @param end TODO
-   * @param production TODO
+   * @param lhs TODO
+   * @param rhs TODO
    * @param consumed TODO
    * @param split TODO
    */
-  fun addProduction(start: Int, end: Int, production: Production, consumed: Int, split: Int?): Unit {
+  fun add(start: Int, end: Int, lhs: Nonterminal, rhs: Rhs, consumed: Int, split: Int?): Unit {
     require(consumed >= 0) { "Consumed must be non-negative but is ${consumed}" }
-    require(consumed <= production.rhs.size) {
-      "Consumed must be less than or equal to the rhs length (${production.rhs.size}) but is ${consumed}"
+    require(consumed <= rhs.parts.size) {
+      "Consumed must be less than or equal to the rhs length (${rhs.parts.size}) but is ${consumed}"
     }
-    // require(production.symbol in parser.parseRules)
-    // require(production in parser.parseRules[production.symbol])
+    // require(lhs in parser.parseRules)
+    // require(rhs in parser.parseRules[lhs])
     // TODO: add always adds Symbol of the partialProd is complete
-    if (_entries[start][end][production.lhs][production][consumed].add(split) &&
-      production.rhs.size == consumed
-    ) {
+    if (_entries[start][end][lhs][rhs][consumed].add(split) && rhs.parts.size == consumed) {
       // NOTE: Addition goes up not down (we don't have info for down)
-      this.addInitializedSymbol(start, end, production.lhs)
+      this.addImpl(start, end, lhs)
     }
   }
 
@@ -177,7 +167,10 @@ class Chart(val parser: Parser) {
    */
   fun printEntries(): Unit {
     for ((start, startValue) in this.entries.entries) {
+      println("################################")
+      println("# start: ${start}")
       for ((end, endValue) in startValue.entries) {
+        println("# start: ${start} end: ${end}")
         for ((symbol, symbolValue) in endValue.entries) {
           for ((production, productionValue) in symbolValue.entries) {
             if (production == null) {
@@ -199,7 +192,6 @@ class Chart(val parser: Parser) {
         }
         println()
       }
-      println()
     }
   }
 }
@@ -212,3 +204,9 @@ class Chart(val parser: Parser) {
 - [5, 6, A, X: [B, C: D], 5, 5]
 
 */
+
+// get left
+// get right
+// get children
+// get parses at
+// Used to get division between children

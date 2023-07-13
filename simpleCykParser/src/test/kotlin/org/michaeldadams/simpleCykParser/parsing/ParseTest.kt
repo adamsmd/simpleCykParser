@@ -21,7 +21,7 @@ class ParseTest {
     """.trimIndent().toYamlMap().toParseRules().toParser()
 
     val chart = Chart(parser)
-    chart.addSymbols(listOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")")))
+    chart.add(listOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")")))
     parse(chart)
     chart.printEntries()
   }
@@ -37,7 +37,7 @@ class ParseTest {
     """.trimIndent().toYamlMap().toParseRules().toParser()
 
     val chart = Chart(parser)
-    chart.addSymbols(listOf("a", "a", "a", "a").map { Terminal(it) })
+    chart.add(listOf("a", "a", "a", "a").map { Terminal(it) })
     parse(chart)
     chart.printEntries()
   }

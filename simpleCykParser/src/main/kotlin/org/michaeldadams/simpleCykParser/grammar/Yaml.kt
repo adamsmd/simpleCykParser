@@ -60,14 +60,15 @@ fun YamlMap.toParseRules(): ParseRules {
   val nonterminals: Set<String> = productionsYaml.keys.map { it.content }.toSet()
 
   val productionsMap = productionsYaml.entries.map { entry ->
-    val nt = Nonterminal(entry.key.content)
-    nt to entry.value.yamlList.items.map { parseProduction(nonterminals, nt, it) }.toSet()
+    Nonterminal(entry.key.content) to
+      entry.value.yamlList.items.map { parseProduction(nonterminals, it) }.toSet()
   }.toMap()
 
   return ParseRules(Nonterminal(start), productionsMap)
 }
 private val WHITESPACE_REGEX = "\\p{IsWhite_Space}+".toRegex()
 
+// TODO: rename to parse parts
 private fun parseRhs(rhs: YamlNode): List<Pair<String?, String>> =
   when (rhs) {
     is YamlScalar ->
@@ -83,13 +84,13 @@ private fun parseRhs(rhs: YamlNode): List<Pair<String?, String>> =
     else -> throw incorrectType("YamlScalar or YamlList", rhs)
   }
 
-private fun parseProduction(nonterminals: Set<String>, nonterminal: Nonterminal, yamlNode: YamlNode): Production {
+private fun parseProduction(nonterminals: Set<String>, yamlNode: YamlNode): Rhs {
   val (name, rawRhs) =
     if (yamlNode is YamlMap) yamlNode.toPair { parseRhs(it) } else null to parseRhs(yamlNode)
-  val rhs = rawRhs.map {
+  val parts = rawRhs.map {
     it.first to if (it.second in nonterminals) Nonterminal(it.second) else Terminal(it.second)
   }
-  return Production(nonterminal, name, rhs)
+  return Rhs(name, parts)
 }
 
 private fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeException =
@@ -141,8 +142,8 @@ fun YamlMap.toGrammar(): Grammar = Grammar(this.toLexRules(), this.toParseRules(
  * @receiver TODO
  * @return TODO
  */
-fun Production.toYamlString(): String =
-  "${name}: [${rhs.map { "${it.first}: ${it.second}" }.joinToString() }]"
+fun Rhs.toYamlString(): String =
+  "${this.label}: [${this.parts.map { "${it.first}: ${it.second}" }.joinToString() }]"
 
 // ================================== //
 // Private Helpers

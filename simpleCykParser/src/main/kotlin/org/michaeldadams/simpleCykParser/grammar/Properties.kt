@@ -8,25 +8,32 @@ package org.michaeldadams.simpleCykParser.grammar
 
 import org.michaeldadams.simpleCykParser.util.QueueMap
 import org.michaeldadams.simpleCykParser.util.QueueSet
+import org.michaeldadams.simpleCykParser.util.fromSetsMap
 import org.michaeldadams.simpleCykParser.util.queueMap
+import org.michaeldadams.simpleCykParser.util.toSetsMap
 
 // TODO: check @throws
 
 /**
- * TODO: Compute the productions using each nonterminal.
+ * TODO: Compute the productions using each symbol.
  *
  * @receiver TODO
  * @return TODO
  */
-fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
-  this.productionMap.values
-    .flatMap { productions ->
-      productions.flatMap { production ->
-        production.rhs.map { it.second to production }
-      }
-    }
-    .groupBy { it.first }
-    .mapValues { entry -> entry.value.map { it.second }.toSet() }
+fun ParseRules.productionsUsing(): Map<Symbol, ProductionMap> =
+  this.productionMap.fromSetsMap()
+    .flatMap { (lhs, rhs) -> rhs.parts.map { it.second to (lhs to rhs) } }
+    .toSetsMap()
+    .mapValues { it.value.toSetsMap() }
+
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
+fun ParseRules.nonterminalsUsing(): Map<Symbol, Set<Nonterminal>> =
+  this.productionsUsing().mapValues { it.value.keys }
 
 /**
  * TODO.
@@ -35,7 +42,7 @@ fun ParseRules.productionsUsing(): Map<Symbol, Set<Production>> =
  * @return TODO
  */
 fun ParseRules.usedSymbols(): Set<Symbol> =
-  this.productionMap.values.flatten().flatMap { it.rhs }.map { it.second }.toSet() + this.start
+  this.productionMap.values.flatten().flatMap { it.parts }.map { it.second }.toSet() + this.start
 
 /**
  * TODO.
@@ -71,14 +78,14 @@ fun Grammar.definedSymbols(): Set<Symbol> =
  * @return pairs of the productions using undefined symbols and the position
  * of the undefined symbol in the [rhs] of that production
  */
-fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> =
-  this.definedSymbols().let { symbols ->
-    this.parseRules.productionMap.values.flatten().flatMap { production ->
-      production.rhs.mapIndexedNotNull { i, component ->
-        if (component.second in symbols) null else Pair(production, i)
-      }
-    }.toSet()
-  }
+fun Grammar.undefinedSymbols(): Set<Triple<Nonterminal, Rhs, Int>> {
+  val symbols = this.definedSymbols()
+  return this.parseRules.productionMap.fromSetsMap().flatMap { (lhs, rhs) ->
+    rhs.parts.mapIndexedNotNull { i, part ->
+      if (part.second in symbols) null else Triple(lhs, rhs, i)
+    }
+  }.toSet()
+}
 
 /**
  * TODO.
@@ -89,6 +96,8 @@ fun Grammar.undefinedSymbols(): Set<Pair<Production, Int>> =
 fun ParseRules.productionlessNonterminals(): Set<Nonterminal> =
   this.productionMap.entries.filter { it.value.isEmpty() }.map { it.key }.toSet()
 
+// TODO: remove all !!
+
 /**
  * TODO.
  *
@@ -98,16 +107,15 @@ fun ParseRules.productionlessNonterminals(): Set<Nonterminal> =
  * @return TODO
  */
 fun ParseRules.emptyNonterminals(): Set<Nonterminal> {
-  val uses: Map<Symbol, Set<Production>> = this.productionsUsing()
-  val empty = this.productionlessNonterminals().toCollection(QueueSet())
+  val uses: Map<Symbol, Set<Nonterminal>> = this.nonterminalsUsing()
+  val empty: QueueSet<Nonterminal> = this.productionlessNonterminals().toCollection(QueueSet())
 
   for (nonterminal in empty) {
-    for (usingProduction in uses.getOrDefault(nonterminal, emptySet())) {
-      // TODO: remove !!
-      val lhsIsEmpty = this.productionMap[usingProduction.lhs]!!.all { production ->
-        production.rhs.any { it.second in empty }
+    for (usingLhs in uses.getOrDefault(nonterminal, emptySet())) {
+      val lhsIsEmpty = this.productionMap[usingLhs]!!.all { production ->
+        production.parts.any { it.second in empty }
       }
-      if (lhsIsEmpty) empty += usingProduction.lhs
+      if (lhsIsEmpty) empty += usingLhs
     }
   }
 
@@ -134,9 +142,9 @@ fun ParseRules.reachableSymbols(): Set<Symbol> {
   reachable += this.start
   for (symbol in reachable) {
     if (symbol is Nonterminal) {
-      for (production in this.productionMap[symbol]!!) {
-        for (component in production.rhs) {
-          reachable += component.second
+      for (production in this.productionMap.getOrDefault(symbol, emptySet())) {
+        for (part in production.parts) {
+          reachable += part.second
         }
       }
     }
@@ -162,11 +170,10 @@ fun Grammar.unreachableSymbols(): Set<Symbol> =
  * @receiver TODO
  * @return TODO
  */
-fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
-  this.productionMap.values.flatten()
-    .filter { it.rhs.isNotEmpty() }
-    .groupBy { it.rhs.first().second }
-    .mapValues { it.value.toSet() }
+fun ParseRules.initialUses(): Map<Symbol?, ProductionMap> =
+  this.productionMap.fromSetsMap()
+    .groupBy { it.second.parts.firstOrNull()?.second }
+    .mapValues { it.value.toSetsMap() }
 
 /**
  * TODO.
@@ -174,8 +181,10 @@ fun ParseRules.initialUses(): Map<Symbol, Set<Production>> =
  * @receiver TODO
  * @return TODO
  */
-fun ParseRules.epsilonProductions(): Set<Production> =
-  this.productionMap.values.flatten().filter { it.rhs.isEmpty() }.toSet()
+fun ParseRules.epsilons(): ProductionMap =
+  this.productionMap
+    .mapValues { entry -> entry.value.filter { it.parts.isEmpty() }.toSet() }
+    .filterValues { it.isNotEmpty() }
 
 /**
  * TODO.
@@ -185,45 +194,48 @@ fun ParseRules.epsilonProductions(): Set<Production> =
  * @receiver TODO
  * @return TODO
  */
-fun ParseRules.nullableProductions(): Set<Production> {
-  val uses: Map<Symbol, Set<Production>> = this.productionsUsing()
+fun ParseRules.nullable(): ProductionMap {
+  val uses: Map<Symbol, ProductionMap> = this.productionsUsing()
   // TODO: Note that productions serves as both a record (Set) and worklist (Queue)
-  var productions: QueueSet<Production> = this.epsilonProductions().toCollection(QueueSet())
-  var nonterminals: Set<Nonterminal> = productions.map { it.lhs }.toSet()
+  var productions: QueueSet<Pair<Nonterminal, Rhs>> = QueueSet()
+  this.epsilons().map { (lhs, productionSet) -> productionSet.map { productions.add(lhs to it) } }
+  var nonterminals: Set<Nonterminal> = productions.map { it.first }.toSet()
 
   // For each item in the queue until it is empty
   for (workitem in productions) {
-    // For each use of workitems's nonterminal
-    for (production in uses.getOrDefault(workitem.lhs, emptySet())) {
-      // If rhs is only nullable nonterminals, then the production is nullable
-      if (production.rhs.all { it.second is Nonterminal && it.second in nonterminals }) {
-        productions += production // Enqueue the nullable production
-        nonterminals += production.lhs // Record the nullable nonterminal
+    // TODO: For each use of workitems's nonterminal
+    for ((lhs, rhsMap) in uses.getOrDefault(workitem.first, emptyMap())) {
+      for (rhs in rhsMap) {
+        // If rhs is only nullable nonterminals, then the production is nullable
+        if (rhs.parts.all { it.second is Nonterminal && it.second in nonterminals }) {
+          productions += lhs to rhs // Enqueue the nullable production
+          nonterminals += lhs // Record the nullable nonterminal
+        }
       }
     }
   }
 
-  return productions.toSet()
+  return productions.toSetsMap()
 }
 
 /**
  * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
  */
-fun ParseRules.nullableSymbols(): Set<Symbol> = this.nullableProductions().map { it.lhs }.toSet()
+fun ParseRules.partiallyNullable(): Map<Nonterminal, Map<Rhs, Set<Int>>> {
+  val nullable: Set<Symbol?> = this.nullable().keys
 
-/**
- * TODO.
- */
-fun ParseRules.partiallyNullable(): Map<Production, Set<Int>> {
-  val nullable: Set<Symbol?> = this.nullableProductions().map { it.lhs }.toSet()
+  val result: QueueMap<Nonterminal, QueueMap<Rhs, QueueSet<Int>>> =
+    queueMap { queueMap { QueueSet() } }
 
-  val result: QueueMap<Production, QueueSet<Int>> = queueMap { QueueSet() }
-
-  for (production in this.productionMap.values.flatten()) {
+  for ((lhs, rhs) in this.productionMap.fromSetsMap()) {
     var consumed = 0
     do {
-      result[production].add(consumed)
-    } while (production.rhs.getOrNull(consumed++)?.second in nullable)
+      result[lhs][rhs].add(consumed)
+    } while (rhs.parts.getOrNull(consumed++)?.second in nullable)
   }
+
   return result
 }

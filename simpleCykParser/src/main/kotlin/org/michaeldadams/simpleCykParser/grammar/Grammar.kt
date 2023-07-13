@@ -43,47 +43,44 @@ data class TerminalRule(val terminal: Terminal, val regex: EqRegex)
 /**
  * The combined lexical rules of a language.
  *
- * Note that multiple lexical rules match, the longest match wins.  If there are
+ * Multiple rules for the same terminal are allowed.
+ *
+ * When multiple lexical rules match, the longest match wins.  If there are
  * multiple longest matches, which ever rule is earliest in [terminals] wins.
  *
- * Also note that multiple rules for the same terminal are allowed.
- *
- * @property whitespace the regular expression defining the synatx of whitespace and comments
+ * @property whitespace the regular expression defining the synatx of whitespace
+ *   and comments
  * @property terminalRules the terminal rules for language
  */
 data class LexRules(val whitespace: EqRegex, val terminalRules: List<TerminalRule>)
-
-// TODO: replace whitespace with a post processing filter
-// TODO: implement indent as a post processing filter
 
 // ================================== //
 // Parsing
 // ================================== //
 
 /**
- * A production rule for a nonterminal.
+ * TODO: A production rule for a nonterminal.
  *
- * @property lhs the nonterminal that this production is for
- * @property name an optional name for this production
- * @property rhs optionally named symbols that this production expands to
+ * @property label an optional label for this production
+ * @property parts optionally named symbols that this production expands to
  */
-data class Production(val lhs: Nonterminal, val name: String?, val rhs: List<Pair<String?, Symbol>>)
+data class Rhs(val label: String?, val parts: List<Pair<String?, Symbol>>)
+
+/**
+ * TODO.
+ */
+typealias ProductionMap = Map<Nonterminal, Set<Rhs>>
+
+// TODO: require ParseRules.start in productionMap?
 
 /**
  * The combined parsing rules of a language.
  *
  * @property start the start symbol of the language
- * @property productionMap a map from a nonterminal to the set of productions for that nonterminal
+ * @property productionMap a map from a nonterminal to the set of productions
+ *   for that nonterminal
  */
-data class ParseRules(val start: Symbol, val productionMap: Map<Nonterminal, Set<Production>>) {
-  init {
-    for ((lhs, productions) in productionMap.entries) {
-      for (production in productions) {
-        require(lhs == production.lhs) { TODO() }
-      }
-    }
-  }
-}
+data class ParseRules(val start: Symbol, val productionMap: ProductionMap)
 
 // ================================== //
 // Lexing and Parsing Together
