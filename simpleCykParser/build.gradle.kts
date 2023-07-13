@@ -6,7 +6,8 @@ description = "Complete But Simple-To-Implement CYK Parsing"
 plugins {
   id("gradle-settings")
   id("git-version")
-  application // Provides "./gradlew installDist" then "./build/install/simpleCykParser/bin/simpleCykParser"
+  // Provides "./gradlew installDist" then "./build/install/simpleCykParser/bin/simpleCykParser"
+  application
 }
 
 // repositories {
