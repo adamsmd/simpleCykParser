@@ -152,7 +152,7 @@ class Chart(val parser: Parser, val size: Int) {
     }
   }
 
-  // TODO: move to Yaml.kt? (Move Yaml.kt to util/ ?)
+  // TODO: move to Yaml.kt? (Move Yaml.kt to util/ ? yaml/ ?)
 
   /**
    * TODO.
@@ -169,14 +169,21 @@ class Chart(val parser: Parser, val size: Int) {
             } else {
               for ((consumed, consumedValue) in productionValue.entries) {
                 for (split in consumedValue) {
-                  @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
-                  println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}, ${split}]")
+                  if (split == null) {
+                    @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
+                    println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}]")
+                  } else {
+                    @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
+                    println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}, ${split}]")
+                  }
                 }
               }
             }
           }
         }
+        println()
       }
+      println()
     }
   }
 }
