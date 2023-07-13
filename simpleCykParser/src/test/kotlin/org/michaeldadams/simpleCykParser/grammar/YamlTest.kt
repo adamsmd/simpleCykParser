@@ -11,17 +11,14 @@ import kotlin.text.toRegex
 @Suppress("LONG_LINE")
 class YamlTest {
   @Test fun testValid(): Unit {
-    // TODO: explain
-    // key or not
-    // rhs is list or string
-    // item is scalar or pair
-    // symbol is token or not
-    // string with spaces at begining or end
-    // TODO:
-    // - ( S )
-    // - X: ""
-    // - F: if ( S ) then { else }
-    // - F: '" S "'
+    /*
+     * Test various combinations of:
+     * - with or without a key
+     * - rhs as a YAML list or string
+     * - if rhs is a YAML string, then whether there are spaces at beginning or end
+     * - rhs components have names or not
+     * - symbols in rhs components are terminals or nonterminals
+     */
     val actual = """
       whitespace: \s+
       terminals:
@@ -35,6 +32,9 @@ class YamlTest {
         B: []
         C: []
         D: []
+        E:
+          - K: ""
+          - ""
         S:
           - K: A t C
           - K: "A u C"
@@ -75,6 +75,10 @@ class YamlTest {
           Nonterminal("B") to setOf(),
           Nonterminal("C") to setOf(),
           Nonterminal("D") to setOf(),
+          Nonterminal("E") to setOf(
+            Production(Nonterminal("E"), "K", listOf()),
+            Production(Nonterminal("E"), null, listOf()),
+          ),
           Nonterminal("S") to setOf(
             Production(Nonterminal("S"), "K", listOf(null to Nonterminal("A"), null to Terminal("t"), null to Nonterminal("C"))),
             Production(Nonterminal("S"), "K", listOf(null to Nonterminal("A"), null to Terminal("u"), null to Nonterminal("C"))),
@@ -98,14 +102,46 @@ class YamlTest {
     assertEquals(expected, actual)
   }
 
-  @Test fun testInvalid(): Unit {
-    // TODO: missing entries
+  @Test fun testMissing(): Unit {
+    // Missing whitespace
     assertFailsWith(MissingRequiredPropertyException::class) {
       """
+        # whitespace: \s+
         terminals: []
         start: S
+        nonterminals: {}
       """.trimIndent().toYamlMap().toGrammar()
     }
+    // Missing terminals
+    assertFailsWith(MissingRequiredPropertyException::class) {
+      """
+        whitespace: \s+
+        # terminals: []
+        start: S
+        nonterminals: {}
+      """.trimIndent().toYamlMap().toGrammar()
+    }
+    // Missing start
+    assertFailsWith(MissingRequiredPropertyException::class) {
+      """
+        whitespace: \s+
+        terminals: []
+        # start: S
+        nonterminals: {}
+      """.trimIndent().toYamlMap().toGrammar()
+    }
+    // Missing nonterminals
+    assertFailsWith(MissingRequiredPropertyException::class) {
+      """
+        whitespace: \s+
+        terminals: []
+        start: S
+        # nonterminals: {}
+      """.trimIndent().toYamlMap().toGrammar()
+    }
+  }
+
+  @Test fun testIncorrectType(): Unit {
     // Map that should represent a pair but has multiple entries
     assertFailsWith(IllegalArgumentException::class) {
       """

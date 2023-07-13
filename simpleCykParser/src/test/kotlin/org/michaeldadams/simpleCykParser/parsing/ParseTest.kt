@@ -9,7 +9,7 @@ import kotlin.test.Test
 
 // TODO: More tests
 class ParseTest {
-  val yaml = Yaml(configuration = YamlConfiguration(breakScalarsAt = 1_000))
+  val yaml = Yaml(configuration = YamlConfiguration(breakScalarsAt = 1000))
 
   @Test fun test1(): Unit {
     val parser = """
