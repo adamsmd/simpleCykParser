@@ -4,9 +4,9 @@ package org.michaeldadams.simpleCykParser.grammar
 
 import org.michaeldadams.simpleCykParser.util.EqRegex
 
-// ================================== //
+// ================================================================== //
 // Terminals and Nonterminals
-// ================================== //
+// ================================================================== //
 
 /**
  * A terminal or nonterminal in the grammar.  Note that terminals and
@@ -28,9 +28,9 @@ data class Terminal(val name: String) : Symbol
  */
 data class Nonterminal(val name: String) : Symbol
 
-// ================================== //
+// ================================================================== //
 // Lexing
-// ================================== //
+// ================================================================== //
 
 /**
  * A lexical rule for a terminal.
@@ -54,9 +54,9 @@ data class TerminalRule(val terminal: Terminal, val regex: EqRegex)
  */
 data class LexRules(val whitespace: EqRegex, val terminalRules: List<TerminalRule>)
 
-// ================================== //
+// ================================================================== //
 // Parsing
-// ================================== //
+// ================================================================== //
 
 /**
  * TODO: A production rule for a nonterminal.
@@ -71,7 +71,7 @@ data class Rhs(val label: String?, val parts: List<Pair<String?, Symbol>>)
  */
 typealias ProductionMap = Map<Nonterminal, Set<Rhs>>
 
-// TODO: require ParseRules.start in productionMap?
+// TODO: require ParseRules.start in productionMap?  If so, add test to GrammarTest
 
 /**
  * The combined parsing rules of a language.
@@ -82,9 +82,9 @@ typealias ProductionMap = Map<Nonterminal, Set<Rhs>>
  */
 data class ParseRules(val start: Symbol, val productionMap: ProductionMap)
 
-// ================================== //
+// ================================================================== //
 // Lexing and Parsing Together
-// ================================== //
+// ================================================================== //
 
 /**
  * The lexing and parsing rules of a language.

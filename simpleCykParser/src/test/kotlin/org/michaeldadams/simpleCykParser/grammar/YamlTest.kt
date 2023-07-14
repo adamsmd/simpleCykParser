@@ -52,7 +52,6 @@ class YamlTest {
           - [AA: A, BB: x, C, y, DD: D]
     """.trimIndent().toYamlMap().toGrammar()
 
-    // TODO: list vs sequence
     @Suppress(
       "MaxLineLength",
       "ktlint:standard:argument-list-wrapping",

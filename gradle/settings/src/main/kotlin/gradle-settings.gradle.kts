@@ -47,6 +47,17 @@ dependencies {
 //   dependsOn(task("clean"))
 //   dependsOn(task("check"))
 // }
+// TODO: make check depend on diktatCheck
+
+// ================================================================== //
+// Coverage
+koverReport {
+  filters {
+    excludes {
+      annotatedBy("org.michaeldadams.simpleCykParser.util.Generated")
+    }
+  }
+}
 
 // ================================================================== //
 // Documentation

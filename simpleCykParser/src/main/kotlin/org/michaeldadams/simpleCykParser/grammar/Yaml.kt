@@ -145,9 +145,9 @@ fun YamlMap.toGrammar(): Grammar = Grammar(this.toLexRules(), this.toParseRules(
 fun Rhs.toYamlString(): String =
   "${this.label}: [${this.parts.map { "${it.first}: ${it.second}" }.joinToString() }]"
 
-// ================================== //
+// ================================================================== //
 // Private Helpers
-// ================================== //
+// ================================================================== //
 
 private operator fun Map<String, YamlNode>.get(key: String, path: YamlPath): YamlNode =
   this[key] ?: throw MissingRequiredPropertyException(key, path)

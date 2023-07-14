@@ -13,8 +13,7 @@ class QueueSet<E> : HashSet<E>() {
   private val elements: ArrayList<E> = ArrayList()
 
   // Adding requires also adding to [elements]
-  override fun add(element: E): Boolean =
-    super.add(element).also { if (it) elements.add(element) }
+  override fun add(element: E): Boolean = super.add(element).also { if (it) elements.add(element) }
 
   // Removal operations are unsupported because they break [elements] and thus iterators.
   override fun clear(): Unit = throw UnsupportedOperationException()

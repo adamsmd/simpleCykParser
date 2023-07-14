@@ -95,7 +95,7 @@ class Chart(val parser: Parser) {
    * @receiver TODO
    * @param symbols TODO
    */
-  fun add(symbols: List<Symbol>): Unit =
+  fun add(symbols: Iterable<Symbol>): Unit =
     symbols.forEachIndexed { start, symbol -> this.add(start, start + 1, symbol) }
 
   /**
@@ -159,39 +159,39 @@ class Chart(val parser: Parser) {
   }
 
   // TODO: move to Yaml.kt? (Move Yaml.kt to util/ ? yaml/ ?)
+}
 
-  /**
-   * TODO.
-   *
-   * @receiver TODO
-   */
-  fun printEntries(): Unit {
-    for ((start, startValue) in this.entries.entries) {
-      println("################################")
-      println("# start: ${start}")
-      for ((end, endValue) in startValue.entries) {
-        println("# start: ${start} end: ${end}")
-        for ((symbol, symbolValue) in endValue.entries) {
-          for ((production, productionValue) in symbolValue.entries) {
-            if (production == null) {
-              println("- [${start}, ${end}, ${symbol}]")
-            } else {
-              for ((consumed, consumedValue) in productionValue.entries) {
-                for (split in consumedValue) {
-                  if (split == null) {
-                    @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
-                    println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}]")
-                  } else {
-                    @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
-                    println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}, ${split}]")
-                  }
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ */
+fun Chart.printEntries(): Unit {
+  for ((start, startValue) in this.entries.entries) {
+    println("################################")
+    println("# start: ${start}")
+    for ((end, endValue) in startValue.entries) {
+      println("# start: ${start} end: ${end}")
+      for ((symbol, symbolValue) in endValue.entries) {
+        for ((production, productionValue) in symbolValue.entries) {
+          if (production == null) {
+            println("- [${start}, ${end}, ${symbol}]")
+          } else {
+            for ((consumed, consumedValue) in productionValue.entries) {
+              for (split in consumedValue) {
+                if (split == null) {
+                  @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
+                  println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}]")
+                } else {
+                  @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
+                  println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}, ${split}]")
                 }
               }
             }
           }
         }
-        println()
       }
+      println()
     }
   }
 }

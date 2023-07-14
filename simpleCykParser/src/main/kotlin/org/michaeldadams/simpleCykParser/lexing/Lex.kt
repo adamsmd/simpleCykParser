@@ -11,8 +11,8 @@ import org.michaeldadams.simpleCykParser.grammar.LexRules
  *
  * @param lexRules the rules to use for lexing
  * @param chars the text to lex
- * @return a pair of where the lexer stopped (exclusive) and the list of tokens lexed up to that
- * point
+ * @return a pair of where the lexer stopped (exclusive) and the list of tokens
+ *   lexed up to that point
  */
 fun lex(lexRules: LexRules, chars: CharSequence): Pair<Int, List<Token>> {
   val tokens: MutableList<Token> = mutableListOf() // result tokens to be returned

@@ -36,7 +36,7 @@ fun parse(chart: Chart): Unit {
           for (leftRhs in chart.entries[leftStart][leftEnd][leftSymbol].keys) {
             if (leftRhs != null) {
               if (leftSymbol !is Nonterminal) {
-                assert(false) { TODO() }
+                throw AssertionError(TODO() as String) // TODO: try as assertion
               } else {
                 for (consumed in chart.entries[leftStart][leftEnd][leftSymbol][leftRhs].keys) {
                   if (consumed < leftRhs.parts.size) {

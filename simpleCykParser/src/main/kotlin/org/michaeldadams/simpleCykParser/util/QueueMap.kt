@@ -33,9 +33,9 @@ interface QueueMap<K, out V> : Map<K, V> {
  */
 fun <K, V> queueMap(defaultValue: (K) -> V): QueueMap<K, V> = QueueMapImpl(defaultValue)
 
-// ================================== //
+// ================================================================== //
 // Private Implementation
-// ================================== //
+// ================================================================== //
 
 /**
  * TODO.
@@ -44,7 +44,8 @@ fun <K, V> queueMap(defaultValue: (K) -> V): QueueMap<K, V> = QueueMapImpl(defau
  * @param V the type of map values
  * @property defaultValue a function generating default values
  */
-private class QueueMapImpl<K, V>(val defaultValue: (K) -> V) : HashMap<K, V>(), QueueMap<K, V> {
+private class QueueMapImpl<K, V>(private val defaultValue: (K) -> V) : HashMap<K, V>(), QueueMap<K, V> {
+  // TODO
   override val keys: MutableSet<K> = QueueSet()
 
   // Putting also adds to the overridden [keys]
@@ -60,6 +61,7 @@ private class QueueMapImpl<K, V>(val defaultValue: (K) -> V) : HashMap<K, V>(), 
     }
 
   // Removal operations are unsupported because they break [elements] and thus iterators.
-  override fun clear(): Unit = throw UnsupportedOperationException()
-  override fun remove(key: K): V? = throw UnsupportedOperationException()
+  // Annotated with [Generated] to exclude them from code coverage.
+  @Generated override fun clear(): Unit = throw AssertionError("Unreachable code reached")
+  @Generated override fun remove(key: K): V? = throw AssertionError("Unreachable code reached")
 }

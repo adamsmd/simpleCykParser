@@ -36,35 +36,35 @@ fun ParseRules.nonterminalsUsing(): Map<Symbol, Set<Nonterminal>> =
   this.productionsUsing().mapValues { it.value.keys }
 
 /**
- * TODO.
+ * Get all the symbols used in the right-hand sides ([Rhs]) of a [ParseRules].
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the parse rules to get the used symbols from
+ * @return all the symbols used in the right-hand sides of the given parse rules
  */
 fun ParseRules.usedSymbols(): Set<Symbol> =
   this.productionMap.values.flatten().flatMap { it.parts }.map { it.second }.toSet() + this.start
 
 /**
- * TODO.
+ * Get the terminals defined by a [LexRules].
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the lexing rules to get the defined terminals from
+ * @return all the terminals defined in the given lexing rules
  */
 fun LexRules.definedTerminals(): Set<Terminal> = this.terminalRules.map { it.terminal }.toSet()
 
 /**
- * TODO.
+ * Get the nonterminals defined by a [ParseRules].
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the parse rules to get the defined nonterminals from
+ * @return all the nonterminals defined in the given parse rules
  */
 fun ParseRules.definedNonterminals(): Set<Nonterminal> = this.productionMap.keys
 
 /**
- * TODO.
+ * Get the symbols (terminals and nonterminals) defined by a [Grammar].
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the grammar to get the defined symbols from
+ * @return all the symbols defined in the given grammar
  */
 fun Grammar.definedSymbols(): Set<Symbol> =
   this.lexRules.definedTerminals() + this.parseRules.definedNonterminals()
@@ -74,9 +74,10 @@ fun Grammar.definedSymbols(): Set<Symbol> =
  *
  * In a well-formed grammar, this function will return the empty set.
  *
- * @receiver TODO
- * @return pairs of the productions using undefined symbols and the position
- * of the undefined symbol in the [rhs] of that production
+ * @receiver the grammar in which to get the undefined symbols
+ * @return triples of the left-hand size ([Nonterminal]), right-hand side
+ *   ([Rhs]) and the position ([Int]) of the undefined symbol in the right-hand
+ *   side
  */
 fun Grammar.undefinedSymbols(): Set<Triple<Nonterminal, Rhs, Int>> {
   val symbols = this.definedSymbols()
@@ -88,10 +89,10 @@ fun Grammar.undefinedSymbols(): Set<Triple<Nonterminal, Rhs, Int>> {
 }
 
 /**
- * TODO.
+ * Get the nonterminals that have no production.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the parse rules from which to get the productionless nonterminals
+ * @return the nonterminals that have no production in the parse rules
  */
 fun ParseRules.productionlessNonterminals(): Set<Nonterminal> =
   this.productionMap.entries.filter { it.value.isEmpty() }.map { it.key }.toSet()
@@ -99,12 +100,14 @@ fun ParseRules.productionlessNonterminals(): Set<Nonterminal> =
 // TODO: remove all !!
 
 /**
- * TODO.
+ * Get the empty nonterminals in a parse rules (i.e., it matches no strings).
  *
- * Recursive version of productionless
+ * A nonterminal will be empty if it has no productions or all its productions
+ * reference other empty nonterminals.  Essentially this is a recursive version
+ * of [productionlessNonterminals].
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the parse rules from which to get the empty nonterminals
+ * @return the nonterminals that are empty in the parse rules
  */
 fun ParseRules.emptyNonterminals(): Set<Nonterminal> {
   val uses: Map<Symbol, Set<Nonterminal>> = this.nonterminalsUsing()
@@ -123,15 +126,15 @@ fun ParseRules.emptyNonterminals(): Set<Nonterminal> {
 }
 
 /**
- * TODO.
+ * Find the symbols that are defined but not used in a [Grammar].
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the grammar from which to compute the unused symbols
+ * @return the symbols that are not used anywhere in a grammar
  */
 fun Grammar.unusedSymbols(): Set<Symbol> = this.definedSymbols() - this.parseRules.usedSymbols()
 
 /**
- * TODO.
+ * Find the symbols that are reachable from the [start] symbol of a [Grammar]. TODO.
  *
  * @receiver TODO
  * @return TODO

@@ -21,7 +21,7 @@ class ChartTest {
 
     val chart = Chart(parser)
     chart.add(3, 4, Terminal("("))
-    chart.add(2, 4, Nonterminal("S")) // TODO: should this be "S"?
+    chart.add(2, 4, Nonterminal("S"))
     val lhs = Nonterminal("S")
     val parts = listOf(null to Nonterminal("S"), null to Terminal("+"), null to Nonterminal("S"))
     val rhs = Rhs("A", parts)
