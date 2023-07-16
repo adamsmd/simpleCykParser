@@ -2,6 +2,8 @@
 
 package org.michaeldadams.simpleCykParser.util
 
+// TODO: AutoMap
+
 /**
  * A [Map] that upon lookup automatically populates missing entries with default
  * values (i.e., autovivification) and implements the [keys] set with a

@@ -14,12 +14,17 @@ import org.michaeldadams.simpleCykParser.util.queueMap
 // TODO: when to do "this."
 
 /**
- * TODO.
- * - start
- * - end
- * - symbol
- * - production
- * - consumed
+ * A map for chart entries.
+ *
+ * In order, indexed by:
+ * - start position (inclusive),
+ * - end position (exclusive),
+ * - symbol at that start an end position,
+ * - right-hand side (if any) that produced that symbol,
+ * - consumed ho (map non-empty only if the right-hand side is non-null)
+ *
+ * symbol (no production)
+ * production (with consumed)
  *
  * @param T TODO
  */
@@ -46,9 +51,9 @@ class Chart(val parser: Parser) {
       queueMap<Int, QueueMap<Symbol, QueueMap<Rhs?, QueueMap<Int, QueueSet<Int?>>>>> {
         queueMap { queueMap { queueMap { QueueSet() } } }
       }.also { qm ->
-        for ((lhs, rhsMap) in parser.partiallyNullable) {
-          for ((rhs, consumedSet) in rhsMap) {
-            for (consumed in consumedSet) {
+        for ((lhs, rhsMap) in parser.nullablePrefixes) {
+          for ((rhs, nullablePrefix) in rhsMap) {
+            for (consumed in 0..nullablePrefix) {
               qm[start][lhs][rhs][consumed].add(if (consumed == 0) null else start)
             }
           }

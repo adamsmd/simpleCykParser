@@ -1,24 +1,25 @@
 /**
- * TODO.
+ * Properties that can be computed about lex rules, parse rules and grammars.
  *
- * TODO: Not everything here is actually used for parsing.
+ * Note that not everything here is actually used for parsing.  For example,
+ * some things like [undefinedSymbols] are used for checking if a grammar is
+ * valid.
  */
 
 package org.michaeldadams.simpleCykParser.grammar
 
-import org.michaeldadams.simpleCykParser.util.QueueMap
 import org.michaeldadams.simpleCykParser.util.QueueSet
 import org.michaeldadams.simpleCykParser.util.fromSetsMap
-import org.michaeldadams.simpleCykParser.util.queueMap
 import org.michaeldadams.simpleCykParser.util.toSetsMap
 
 // TODO: check @throws
 
 /**
- * TODO: Compute the productions using each symbol.
+ * Get the productions using each symbol.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the parse rules to get what productions use each symbol for
+ * @return a map from symbols to a map from nonterminals to the set of
+ *   right-hand sides in the nonterminal using the symbol
  */
 fun ParseRules.productionsUsing(): Map<Symbol, ProductionMap> =
   this.productionMap.fromSetsMap()
@@ -27,10 +28,10 @@ fun ParseRules.productionsUsing(): Map<Symbol, ProductionMap> =
     .mapValues { it.value.toSetsMap() }
 
 /**
- * TODO.
+ * Get the nonterminals using each symbol.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the parse rules to get what nonterminals use each symbol for
+ * @return a map from symbols to the set of nonterminals that use those symbols
  */
 fun ParseRules.nonterminalsUsing(): Map<Symbol, Set<Nonterminal>> =
   this.productionsUsing().mapValues { it.value.keys }
@@ -38,7 +39,7 @@ fun ParseRules.nonterminalsUsing(): Map<Symbol, Set<Nonterminal>> =
 /**
  * Get all the symbols used in the right-hand sides ([Rhs]) of a [ParseRules].
  *
- * @receiver the parse rules to get the used symbols from
+ * @receiver the parse rules to get the used symbols for
  * @return all the symbols used in the right-hand sides of the given parse rules
  */
 fun ParseRules.usedSymbols(): Set<Symbol> =
@@ -47,7 +48,7 @@ fun ParseRules.usedSymbols(): Set<Symbol> =
 /**
  * Get the terminals defined by a [LexRules].
  *
- * @receiver the lexing rules to get the defined terminals from
+ * @receiver the lexing rules to get the defined terminals for
  * @return all the terminals defined in the given lexing rules
  */
 fun LexRules.definedTerminals(): Set<Terminal> = this.terminalRules.map { it.terminal }.toSet()
@@ -55,7 +56,7 @@ fun LexRules.definedTerminals(): Set<Terminal> = this.terminalRules.map { it.ter
 /**
  * Get the nonterminals defined by a [ParseRules].
  *
- * @receiver the parse rules to get the defined nonterminals from
+ * @receiver the parse rules to get the defined nonterminals for
  * @return all the nonterminals defined in the given parse rules
  */
 fun ParseRules.definedNonterminals(): Set<Nonterminal> = this.productionMap.keys
@@ -63,7 +64,7 @@ fun ParseRules.definedNonterminals(): Set<Nonterminal> = this.productionMap.keys
 /**
  * Get the symbols (terminals and nonterminals) defined by a [Grammar].
  *
- * @receiver the grammar to get the defined symbols from
+ * @receiver the grammar to get the defined symbols for
  * @return all the symbols defined in the given grammar
  */
 fun Grammar.definedSymbols(): Set<Symbol> =
@@ -74,7 +75,7 @@ fun Grammar.definedSymbols(): Set<Symbol> =
  *
  * In a well-formed grammar, this function will return the empty set.
  *
- * @receiver the grammar in which to get the undefined symbols
+ * @receiver the grammar to get the undefined symbols for
  * @return triples of the left-hand size ([Nonterminal]), right-hand side
  *   ([Rhs]) and the position ([Int]) of the undefined symbol in the right-hand
  *   side
@@ -91,7 +92,7 @@ fun Grammar.undefinedSymbols(): Set<Triple<Nonterminal, Rhs, Int>> {
 /**
  * Get the nonterminals that have no production.
  *
- * @receiver the parse rules from which to get the productionless nonterminals
+ * @receiver the parse rules to get the productionless nonterminals for
  * @return the nonterminals that have no production in the parse rules
  */
 fun ParseRules.productionlessNonterminals(): Set<Nonterminal> =
@@ -100,13 +101,13 @@ fun ParseRules.productionlessNonterminals(): Set<Nonterminal> =
 // TODO: remove all !!
 
 /**
- * Get the empty nonterminals in a parse rules (i.e., it matches no strings).
+ * Get the empty nonterminals in a parse rules (i.e., they match no strings).
  *
  * A nonterminal will be empty if it has no productions or all its productions
  * reference other empty nonterminals.  Essentially this is a recursive version
  * of [productionlessNonterminals].
  *
- * @receiver the parse rules from which to get the empty nonterminals
+ * @receiver the parse rules to get the empty nonterminals for
  * @return the nonterminals that are empty in the parse rules
  */
 fun ParseRules.emptyNonterminals(): Set<Nonterminal> {
@@ -128,16 +129,21 @@ fun ParseRules.emptyNonterminals(): Set<Nonterminal> {
 /**
  * Find the symbols that are defined but not used in a [Grammar].
  *
- * @receiver the grammar from which to compute the unused symbols
+ * @receiver the grammar to compute the unused symbols for
  * @return the symbols that are not used anywhere in a grammar
  */
 fun Grammar.unusedSymbols(): Set<Symbol> = this.definedSymbols() - this.parseRules.usedSymbols()
 
 /**
- * Find the symbols that are reachable from the [start] symbol of a [Grammar]. TODO.
+ * Find the symbols that are reachable from the [start] symbol of a
+ * [ParseRules].
  *
- * @receiver TODO
- * @return TODO
+ * A symbol is reachable if it is the [start] symbol or it is referenced in a
+ * right-hand side of a reachable symbol.
+ *
+ * @receiver the parse rules to compute the reachable symbols for
+ * @return the symbols that are reachable from the start symbol of the parse
+ *   rules
  */
 fun ParseRules.reachableSymbols(): Set<Symbol> {
   val reachable: QueueSet<Symbol> = QueueSet()
@@ -157,21 +163,28 @@ fun ParseRules.reachableSymbols(): Set<Symbol> {
 }
 
 /**
- * TODO.
+ * Find the symbols defined in a grammar that are not reachable from the [start]
+ * symbol of the [parseRules] of a [Grammar].
  *
- * Recursive version of unused
+ * Conceptually this is the negation of [reachableSymbols] or a trasitively
+ * closed version of [unusedSymbols].
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the grammar to compute the unreachable symbols for
+ * @return the symbols that are defined in the grammar but are not reachable
+ *   from the start symbol of the parse rules in the grammar
  */
 fun Grammar.unreachableSymbols(): Set<Symbol> =
   this.definedSymbols() - this.parseRules.reachableSymbols()
 
 /**
- * TODO.
+ * Find the right-hand sides that use a symbol as their first TODO.
+ *
+ * TODO: explain null = rhs with no parts
  *
  * @receiver TODO
- * @return TODO
+ * @return a map from a symbol to a map from a nonterminal to a set of the
+ *   right-hand sides in that nonterminal that use that symbol as the first
+ *   element in their part
  */
 fun ParseRules.initialUses(): Map<Symbol?, ProductionMap> =
   this.productionMap.fromSetsMap()
@@ -179,10 +192,12 @@ fun ParseRules.initialUses(): Map<Symbol?, ProductionMap> =
     .mapValues { it.value.toSetsMap() }
 
 /**
- * TODO.
+ * Find all right-hand sides with an empty list for their parts (i.e., epsilon
+ * productions).
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the parse rules in which to find epsilon productions
+ * @return a map from nonterminals to the set of right-hand sides for that
+ *   nonterminal with an empty list for their parts
  */
 fun ParseRules.epsilons(): ProductionMap =
   this.productionMap
@@ -190,18 +205,28 @@ fun ParseRules.epsilons(): ProductionMap =
     .filterValues { it.isNotEmpty() }
 
 /**
- * TODO.
+ * Find right-hand sides that are nullable (i.e., they match the empty string).
  *
- * TODO: Note that there are much more efficient algorithms for this.
+ * A right-hand side will be nullable if its parts are the empty list or
+ * all of the symbols in its parts are nullable.
  *
- * @receiver TODO
- * @return TODO
+ * A symbol if nullable if it is a nonterminal and at least one of its
+ * right-hand sides is nullable.
+ *
+ * Note that there are more efficient algorithms for this, but this one is
+ * simple to implement and easy to get correct.
+ *
+ * @receiver the parse rules to find nullable productions for
+ * @return a map from nonterminals to the set of right-hand sides for that
+ *   nonterminal that are nullable
  */
 fun ParseRules.nullable(): ProductionMap {
   val uses: Map<Symbol, ProductionMap> = this.productionsUsing()
-  // TODO: Note that productions serves as both a record (Set) and worklist (Queue)
+
+  // NOTE: productions serves as both a record (Set) and worklist (Queue)
   var productions: QueueSet<Pair<Nonterminal, Rhs>> = QueueSet()
   this.epsilons().map { (lhs, productionSet) -> productionSet.map { productions.add(lhs to it) } }
+
   var nonterminals: Set<Nonterminal> = productions.map { it.first }.toSet()
 
   // For each item in the queue until it is empty
@@ -222,22 +247,22 @@ fun ParseRules.nullable(): ProductionMap {
 }
 
 /**
- * TODO.
+ * Find the prefixes of right-hand sides that are nullable (i.e. the prefix
+ * matches the empty string).
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the parse rules to find nullable prefixes for
+ * @return a map from nonterminals to a map from right-hand sides of that
+ *   nonterminal to the number of symbols at the start of that right-hand side
+ *   that are nullable
  */
-fun ParseRules.partiallyNullable(): Map<Nonterminal, Map<Rhs, Set<Int>>> {
+fun ParseRules.nullablePrefixes(): Map<Nonterminal, Map<Rhs, Int>> {
   val nullable: Set<Symbol?> = this.nullable().keys
 
-  val result: QueueMap<Nonterminal, QueueMap<Rhs, QueueSet<Int>>> =
-    queueMap { queueMap { QueueSet() } }
+  val result: MutableMap<Nonterminal, MutableMap<Rhs, Int>> = mutableMapOf()
 
   for ((lhs, rhs) in this.productionMap.fromSetsMap()) {
-    var consumed = 0
-    do {
-      result[lhs][rhs].add(consumed)
-    } while (rhs.parts.getOrNull(consumed++)?.second in nullable)
+    val index = rhs.parts.indexOfFirst { it.second !in nullable }
+    result.getOrPut(lhs, { mutableMapOf() }) += rhs to (if (index == -1) rhs.parts.size else index)
   }
 
   return result

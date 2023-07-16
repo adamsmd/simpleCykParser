@@ -9,7 +9,7 @@ import org.michaeldadams.simpleCykParser.grammar.Rhs
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.initialUses
 import org.michaeldadams.simpleCykParser.grammar.nullable
-import org.michaeldadams.simpleCykParser.grammar.partiallyNullable
+import org.michaeldadams.simpleCykParser.grammar.nullablePrefixes
 
 /**
  * TODO.
@@ -18,7 +18,7 @@ import org.michaeldadams.simpleCykParser.grammar.partiallyNullable
  */
 data class Parser(val parseRules: ParseRules) {
   /** TODO: Populates chart.entries. */
-  val partiallyNullable: Map<Nonterminal, Map<Rhs, Set<Int>>> = parseRules.partiallyNullable()
+  val nullablePrefixes: Map<Nonterminal, Map<Rhs, Int>> = parseRules.nullablePrefixes()
 
   /** TODO: Populates Chart._symbolEnds. */
   val nullable: Set<Symbol> = parseRules.nullable().keys
