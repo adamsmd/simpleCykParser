@@ -18,6 +18,8 @@ class YamlTest {
      * - if rhs is a YAML string, then whether there are spaces at beginning or end
      * - rhs components have names or not
      * - symbols in rhs components are terminals or nonterminals
+     *
+     * TODO: explicit N and T annotations
      */
     val actual = """
       whitespace: \s+
@@ -42,14 +44,14 @@ class YamlTest {
           - K: " A w C "
           - K: []
           - K: [A, x, C]
-          - K: [AA: A, BB: x, C, y, DD: D]
+          - K: [AA: N:A, BB: x, N:C, y, DD: D]
           - A t C
           - "A u C"
           - "A v C "
           - " A w C "
           - []
           - [A, x, C]
-          - [AA: A, BB: x, C, y, DD: D]
+          - [AA: N:A, BB: x, N:C, y, DD: D]
     """.trimIndent().toYamlMap().toGrammar()
 
     @Suppress(
@@ -79,20 +81,21 @@ class YamlTest {
             Rhs(null, listOf()),
           ),
           Nonterminal("S") to setOf(
-            Rhs("K", listOf(null to Nonterminal("A"), null to Terminal("t"), null to Nonterminal("C"))),
-            Rhs("K", listOf(null to Nonterminal("A"), null to Terminal("u"), null to Nonterminal("C"))),
-            Rhs("K", listOf(null to Nonterminal("A"), null to Terminal("v"), null to Nonterminal("C"))),
-            Rhs("K", listOf(null to Nonterminal("A"), null to Terminal("w"), null to Nonterminal("C"))),
+            // TODO: shorten
+            Rhs("K", listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("t")), RhsElement(null, Nonterminal("C")))),
+            Rhs("K", listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("u")), RhsElement(null, Nonterminal("C")))),
+            Rhs("K", listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("v")), RhsElement(null, Nonterminal("C")))),
+            Rhs("K", listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("w")), RhsElement(null, Nonterminal("C")))),
             Rhs("K", listOf()),
-            Rhs("K", listOf(null to Nonterminal("A"), null to Terminal("x"), null to Nonterminal("C"))),
-            Rhs("K", listOf("AA" to Nonterminal("A"), "BB" to Terminal("x"), null to Nonterminal("C"), null to Terminal("y"), "DD" to Nonterminal("D"))),
-            Rhs(null, listOf(null to Nonterminal("A"), null to Terminal("t"), null to Nonterminal("C"))),
-            Rhs(null, listOf(null to Nonterminal("A"), null to Terminal("u"), null to Nonterminal("C"))),
-            Rhs(null, listOf(null to Nonterminal("A"), null to Terminal("v"), null to Nonterminal("C"))),
-            Rhs(null, listOf(null to Nonterminal("A"), null to Terminal("w"), null to Nonterminal("C"))),
+            Rhs("K", listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("x")), RhsElement(null, Nonterminal("C")))),
+            Rhs("K", listOf(RhsElement("AA", Nonterminal("A")), RhsElement("BB", Terminal("x")), RhsElement(null, Nonterminal("C")), RhsElement(null, Terminal("y")), RhsElement("DD", Nonterminal("D")))),
+            Rhs(null, listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("t")), RhsElement(null, Nonterminal("C")))),
+            Rhs(null, listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("u")), RhsElement(null, Nonterminal("C")))),
+            Rhs(null, listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("v")), RhsElement(null, Nonterminal("C")))),
+            Rhs(null, listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("w")), RhsElement(null, Nonterminal("C")))),
             Rhs(null, listOf()),
-            Rhs(null, listOf(null to Nonterminal("A"), null to Terminal("x"), null to Nonterminal("C"))),
-            Rhs(null, listOf("AA" to Nonterminal("A"), "BB" to Terminal("x"), null to Nonterminal("C"), null to Terminal("y"), "DD" to Nonterminal("D"))),
+            Rhs(null, listOf(RhsElement(null, Nonterminal("A")), RhsElement(null, Terminal("x")), RhsElement(null, Nonterminal("C")))),
+            Rhs(null, listOf(RhsElement("AA", Nonterminal("A")), RhsElement("BB", Terminal("x")), RhsElement(null, Nonterminal("C")), RhsElement(null, Terminal("y")), RhsElement("DD", Nonterminal("D")))),
           ),
         ),
       ),

@@ -14,6 +14,8 @@ import org.michaeldadams.simpleCykParser.util.toSetsMap
 
 // TODO: check @throws
 
+// TODO: check for unique terminal and nonterminal names
+
 /**
  * Get the productions using each symbol.
  *
@@ -23,7 +25,7 @@ import org.michaeldadams.simpleCykParser.util.toSetsMap
  */
 fun ParseRules.productionsUsing(): Map<Symbol, ProductionMap> =
   this.productionMap.fromSetsMap()
-    .flatMap { (lhs, rhs) -> rhs.parts.map { it.second to (lhs to rhs) } }
+    .flatMap { (lhs, rhs) -> rhs.elements.map { it.symbol to (lhs to rhs) } }
     .toSetsMap()
     .mapValues { it.value.toSetsMap() }
 
@@ -43,7 +45,8 @@ fun ParseRules.nonterminalsUsing(): Map<Symbol, Set<Nonterminal>> =
  * @return all the symbols used in the right-hand sides of the given parse rules
  */
 fun ParseRules.usedSymbols(): Set<Symbol> =
-  this.productionMap.values.flatten().flatMap { it.parts }.map { it.second }.toSet() + this.start
+  this.productionMap.values.flatten().flatMap { rhs -> rhs.elements.map { it.symbol } }.toSet() +
+    this.start
 
 /**
  * Get the terminals defined by a [LexRules].
@@ -83,8 +86,8 @@ fun Grammar.definedSymbols(): Set<Symbol> =
 fun Grammar.undefinedSymbols(): Set<Triple<Nonterminal, Rhs, Int>> {
   val symbols = this.definedSymbols()
   return this.parseRules.productionMap.fromSetsMap().flatMap { (lhs, rhs) ->
-    rhs.parts.mapIndexedNotNull { i, part ->
-      if (part.second in symbols) null else Triple(lhs, rhs, i)
+    rhs.elements.mapIndexedNotNull { i, element ->
+      if (element.symbol in symbols) null else Triple(lhs, rhs, i)
     }
   }.toSet()
 }
@@ -116,8 +119,8 @@ fun ParseRules.emptyNonterminals(): Set<Nonterminal> {
 
   for (nonterminal in empty) {
     for (usingLhs in uses.getOrDefault(nonterminal, emptySet())) {
-      val lhsIsEmpty = this.productionMap[usingLhs]!!.all { production ->
-        production.parts.any { it.second in empty }
+      val lhsIsEmpty = this.productionMap[usingLhs]!!.all { rhs ->
+        rhs.elements.any { it.symbol in empty } // TODO: simplify
       }
       if (lhsIsEmpty) empty += usingLhs
     }
@@ -151,9 +154,9 @@ fun ParseRules.reachableSymbols(): Set<Symbol> {
   reachable += this.start
   for (symbol in reachable) {
     if (symbol is Nonterminal) {
-      for (production in this.productionMap.getOrDefault(symbol, emptySet())) {
-        for (part in production.parts) {
-          reachable += part.second
+      for (rhs in this.productionMap.getOrDefault(symbol, emptySet())) {
+        for (element in rhs.elements) {
+          reachable += element.symbol
         }
       }
     }
@@ -188,7 +191,7 @@ fun Grammar.unreachableSymbols(): Set<Symbol> =
  */
 fun ParseRules.initialUses(): Map<Symbol?, ProductionMap> =
   this.productionMap.fromSetsMap()
-    .groupBy { it.second.parts.firstOrNull()?.second }
+    .groupBy { it.second.elements.firstOrNull()?.symbol }
     .mapValues { it.value.toSetsMap() }
 
 /**
@@ -201,8 +204,8 @@ fun ParseRules.initialUses(): Map<Symbol?, ProductionMap> =
  */
 fun ParseRules.epsilons(): ProductionMap =
   this.productionMap
-    .mapValues { entry -> entry.value.filter { it.parts.isEmpty() }.toSet() }
-    .filterValues { it.isNotEmpty() }
+    .mapValues { entry -> entry.value.filter { it.elements.isEmpty() }.toSet() }
+    .filterValues { it.isNotEmpty() } // TODO: do others need this?
 
 /**
  * Find right-hand sides that are nullable (i.e., they match the empty string).
@@ -227,7 +230,7 @@ fun ParseRules.nullable(): ProductionMap {
   var productions: QueueSet<Pair<Nonterminal, Rhs>> = QueueSet()
   this.epsilons().map { (lhs, productionSet) -> productionSet.map { productions.add(lhs to it) } }
 
-  var nonterminals: Set<Nonterminal> = productions.map { it.first }.toSet()
+  var nullable: Set<Nonterminal> = productions.map { it.first }.toSet()
 
   // For each item in the queue until it is empty
   for (workitem in productions) {
@@ -235,9 +238,9 @@ fun ParseRules.nullable(): ProductionMap {
     for ((lhs, rhsMap) in uses.getOrDefault(workitem.first, emptyMap())) {
       for (rhs in rhsMap) {
         // If rhs is only nullable nonterminals, then the production is nullable
-        if (rhs.parts.all { it.second is Nonterminal && it.second in nonterminals }) {
+        if (rhs.elements.all { it.symbol in nullable }) {
           productions += lhs to rhs // Enqueue the nullable production
-          nonterminals += lhs // Record the nullable nonterminal
+          nullable += lhs // Record the nullable nonterminal
         }
       }
     }
@@ -261,8 +264,8 @@ fun ParseRules.nullablePrefixes(): Map<Nonterminal, Map<Rhs, Int>> {
   val result: MutableMap<Nonterminal, MutableMap<Rhs, Int>> = mutableMapOf()
 
   for ((lhs, rhs) in this.productionMap.fromSetsMap()) {
-    val index = rhs.parts.indexOfFirst { it.second !in nullable }
-    result.getOrPut(lhs, { mutableMapOf() }) += rhs to (if (index == -1) rhs.parts.size else index)
+    val index = rhs.elements.indexOfFirst { it.symbol !in nullable }
+    result.getOrPut(lhs, { mutableMapOf() }) += rhs to (if (index == -1) rhs.elements.size else index)
   }
 
   return result

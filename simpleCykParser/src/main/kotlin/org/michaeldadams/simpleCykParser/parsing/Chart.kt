@@ -28,14 +28,17 @@ import org.michaeldadams.simpleCykParser.util.queueMap
  *
  * @param T TODO
  */
-typealias ChartEntryMap<T> =
-  QueueMap<Int, QueueMap<Int, QueueMap<Symbol, QueueMap<Rhs?, QueueMap<Int, T>>>>>
+// TODO: rename to position map
+typealias SymbolMap<T> = QueueMap<Int, QueueMap<Int, T>>
+// TODO: rename to partial map
+typealias ItemMap<T> = QueueMap<Int, QueueMap<Int, QueueMap<Item, T>>>
 
 /**
  * TODO.
  *
  * @param T TODO
  */
+// TODO: rename
 typealias SymbolEndsMap<T> = QueueMap<Int, QueueMap<Symbol, T>>
 
 /**
@@ -44,20 +47,32 @@ typealias SymbolEndsMap<T> = QueueMap<Int, QueueMap<Symbol, T>>
  * @property parser TODO
  */
 class Chart(val parser: Parser) {
-  /** Mutable backing field for [entries]. */
+  /** Mutable backing field for [symbols]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _entries: ChartEntryMap<QueueSet<Int?>> =
+  private val _symbols: SymbolMap<QueueSet<Symbol>> =
     queueMap { start ->
-      queueMap<Int, QueueMap<Symbol, QueueMap<Rhs?, QueueMap<Int, QueueSet<Int?>>>>> {
-        queueMap { queueMap { queueMap { QueueSet() } } }
+      queueMap<Int, QueueSet<Symbol>> { QueueSet() }.also { it[start].addAll(parser.nullable) }
+    }
+
+  val symbols: SymbolMap<Set<Symbol>> = _symbols
+
+  /** Mutable backing field for [productions]. */
+  @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
+  private val _items: ItemMap<QueueSet<Int?>> =
+    queueMap { start ->
+      queueMap<Int, QueueMap<Item, QueueSet<Int?>>> {
+        queueMap { QueueSet() }
       }.also { qm ->
-        for ((lhs, rhsMap) in parser.nullablePrefixes) {
-          for ((rhs, nullablePrefix) in rhsMap) {
-            for (consumed in 0..nullablePrefix) {
-              qm[start][lhs][rhs][consumed].add(if (consumed == 0) null else start)
-            }
+        // println("init $start")
+        for (item in parser.nullablePartials) {
+          // println("  $item")
+          for (consumed in 0..item.consumed) {
+            // println("    $consumed")
+            // TODO: start instead of null?
+            qm[start][item].add(if (consumed == 0) null else start)
           }
         }
+        // println()
       }
     }
 
@@ -69,7 +84,7 @@ class Chart(val parser: Parser) {
    * Consumed
    * Split (null if consumed == 0 or no justification(TODO: remove))
    */
-  val entries: ChartEntryMap<Set<Int?>> = _entries
+  val items: ItemMap<Set<Int?>> = _items
 
   // TODO: End for a start and symbol.
   // TODO: Used to get 'rightEnd'
@@ -112,27 +127,19 @@ class Chart(val parser: Parser) {
    * @param symbol TODO
    */
   fun add(start: Int, end: Int, symbol: Symbol): Unit {
-    _entries[start][end][symbol][null]
-    addImpl(start, end, symbol)
-  }
-
-  /**
-   * TODO: rename to put?
-   *
-   * @receiver TODO
-   * @param start TODO
-   * @param end TODO
-   * @param symbol TODO
-   */
-  private fun addImpl(start: Int, end: Int, symbol: Symbol): Unit {
     // NOTE: just an assertion and does not show how built
     // TODO: add always adds ProductionEntry (via initialUses)
-    assert(_entries[start][end][symbol].isNotEmpty()) { "Uninitialized: ${start}:${end}:${symbol}" }
-    _symbolEnds[start][symbol].add(end)
+    _symbols[start][end] += symbol
+    _symbolEnds[start][symbol] += end
+    // println("+ $start $end $symbol")
+    // for (item in _items[start][end].keys) {
+    //   println("  + $item")
+    // }
     // If not in map, then has no initial uses
-    for ((lhs, rhs) in parser.initialUses.getOrDefault(symbol, emptyMap()).fromSetsMap()) {
+    for (item in parser.initialItems.getOrDefault(symbol, emptySet())) {
+      // println("  - $item")
       // NOTE: Addition goes up not down (we don't have info for down)
-      this.add(start, end, lhs, rhs, 1, start)
+      this.add(start, end, item, start)
     }
   }
 
@@ -149,17 +156,13 @@ class Chart(val parser: Parser) {
    * @param consumed TODO
    * @param split TODO
    */
-  fun add(start: Int, end: Int, lhs: Nonterminal, rhs: Rhs, consumed: Int, split: Int?): Unit {
-    require(consumed >= 0) { "Consumed must be non-negative but is ${consumed}" }
-    require(consumed <= rhs.parts.size) {
-      "Consumed must be less than or equal to the rhs length (${rhs.parts.size}) but is ${consumed}"
-    }
+  fun add(start: Int, end: Int, item: Item, split: Int?): Unit {
     // require(lhs in parser.parseRules)
     // require(rhs in parser.parseRules[lhs])
     // TODO: add always adds Symbol of the partialProd is complete
-    if (_entries[start][end][lhs][rhs][consumed].add(split) && rhs.parts.size == consumed) {
+    if (_items[start][end][item].add(split) && item.isComplete()) {
       // NOTE: Addition goes up not down (we don't have info for down)
-      this.addImpl(start, end, lhs)
+      this.add(start, end, item.lhs)
     }
   }
 
@@ -172,27 +175,33 @@ class Chart(val parser: Parser) {
  * @receiver TODO
  */
 fun Chart.printEntries(): Unit {
-  for ((start, startValue) in this.entries.entries) {
-    println("################################")
-    println("# start: ${start}")
+  println("symbols:")
+  for ((start, startValue) in this.symbols.entries) {
+    println("  ################################")
+    println("  # start: ${start}")
     for ((end, endValue) in startValue.entries) {
-      println("# start: ${start} end: ${end}")
-      for ((symbol, symbolValue) in endValue.entries) {
-        for ((production, productionValue) in symbolValue.entries) {
-          if (production == null) {
-            println("- [${start}, ${end}, ${symbol}]")
+      println("  # start: ${start} end: ${end}")
+      for (symbol in endValue) {
+        println("  - [${start}, ${end}, ${symbol.toYamlString()}]")
+      }
+      println()
+    }
+  }
+
+  println("productions:")
+  for ((start, startValue) in this.items.entries) {
+    println("  ################################")
+    println("  # start: ${start}")
+    for ((end, endValue) in startValue.entries) {
+      println("  # start: ${start} end: ${end}")
+      for ((item, itemValue) in endValue.entries) {
+        for (split in itemValue) {
+          if (split == null) {
+            @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
+            println("  - [${start}, ${end}, ${item.lhs.name}, ${item.rhs.toYamlString()}, ${item.consumed}]")
           } else {
-            for ((consumed, consumedValue) in productionValue.entries) {
-              for (split in consumedValue) {
-                if (split == null) {
-                  @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
-                  println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}]")
-                } else {
-                  @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
-                  println("- [${start}, ${end}, ${symbol}, ${production.toYamlString()}, ${consumed}, ${split}]")
-                }
-              }
-            }
+            @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
+            println("  - [${start}, ${end}, ${item.lhs.name}, ${item.rhs.toYamlString()}, ${item.consumed}, ${split}]")
           }
         }
       }

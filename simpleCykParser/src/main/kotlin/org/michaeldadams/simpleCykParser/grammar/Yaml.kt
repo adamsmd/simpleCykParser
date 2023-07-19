@@ -13,6 +13,7 @@ import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
+import kotlinx.serialization.builtins.serializer
 import org.michaeldadams.simpleCykParser.util.toEqRegex
 import kotlin.text.toRegex
 
@@ -37,8 +38,9 @@ fun YamlMap.toLexRules(): LexRules {
   val whitespace = map["whitespace", this.path].yamlScalar.content.toRegex().toEqRegex()
 
   val terminals = map["terminals", this.path].yamlList.items.map { item ->
-    item.yamlMap.toPair { it.yamlScalar.content }
-  }.map { TerminalRule(Terminal(it.first), it.second.toRegex().toEqRegex()) }
+    val (terminal, regex) = item.yamlMap.toMapPair()
+    TerminalRule(Terminal(terminal), regex.yamlScalar.content.toRegex().toEqRegex())
+  }
 
   // TODO: regex RegexOption.COMMENTS
 
@@ -61,36 +63,48 @@ fun YamlMap.toParseRules(): ParseRules {
 
   val productionsMap = productionsYaml.entries.map { entry ->
     Nonterminal(entry.key.content) to
-      entry.value.yamlList.items.map { parseProduction(nonterminals, it) }.toSet()
+      entry.value.yamlList.items.map { it.toRhs(nonterminals) }.toSet()
   }.toMap()
 
   return ParseRules(Nonterminal(start), productionsMap)
 }
 private val WHITESPACE_REGEX = "\\p{IsWhite_Space}+".toRegex()
+private const val NONTERMINAL_PREFIX = "N:"
+private const val TERMINAL_PREFIX = "T:"
 
-// TODO: rename to parse parts
-private fun parseRhs(rhs: YamlNode): List<Pair<String?, String>> =
-  when (rhs) {
-    is YamlScalar ->
-      rhs.content.split(WHITESPACE_REGEX).filter { it.isNotEmpty() }.map { null to it }
-    // TODO: rename item?
-    is YamlList -> rhs.items.map { rhsItem ->
-      when (rhsItem) {
-        is YamlScalar -> null to rhsItem.content
-        is YamlMap -> rhsItem.toPair { it.yamlScalar.content }
-        else -> throw incorrectType("YamlScalar or YamlMap", rhsItem)
-      }
-    }
-    else -> throw incorrectType("YamlScalar or YamlList", rhs)
+fun String.toSymbol(nonterminals: Set<String>): Symbol =
+  when {
+    this.startsWith(NONTERMINAL_PREFIX) -> Nonterminal(this.substring(NONTERMINAL_PREFIX.length))
+    this.startsWith(TERMINAL_PREFIX) -> Terminal(this.substring(TERMINAL_PREFIX.length))
+    this in nonterminals -> Nonterminal(this)
+    else -> Terminal(this)
   }
 
-private fun parseProduction(nonterminals: Set<String>, yamlNode: YamlNode): Rhs {
-  val (name, rawRhs) =
-    if (yamlNode is YamlMap) yamlNode.toPair { parseRhs(it) } else null to parseRhs(yamlNode)
-  val parts = rawRhs.map {
-    it.first to if (it.second in nonterminals) Nonterminal(it.second) else Terminal(it.second)
+fun YamlNode.toSymbol(nonterminals: Set<String>): Symbol =
+  this.yamlScalar.content.toSymbol(nonterminals)
+
+fun YamlNode.toRhsElement(nonterminals: Set<String>): RhsElement {
+  val (label, symbol) = this.toOptionalMapPair()
+  return RhsElement(label, symbol.toSymbol(nonterminals))
+}
+  // when (this) {
+  //   is YamlMap -> this.toMapPair().let { RhsElement(it.first, it.second.toSymbol(nonterminals)) }
+  //   else -> RhsElement(null, this.toSymbol(nonterminals))
+  // }
+  // this.toOptionalListPair().let { RhsElement(it.first, it.second.toSymbol(nonterminals)) }
+
+fun YamlNode.toRhsElements(nonterminals: Set<String>): List<RhsElement> =
+  when (this) {
+    is YamlList -> this.items.map { it.toRhsElement(nonterminals) }
+    is YamlScalar -> this.content.split(WHITESPACE_REGEX)
+      .filter { it.isNotEmpty() }
+      .map { RhsElement(null, it.toSymbol(nonterminals)) }
+    else -> throw incorrectType("YamlScalar or YamlList", this)
   }
-  return Rhs(name, parts)
+
+fun YamlNode.toRhs(nonterminals: Set<String>): Rhs {
+  val (label, elements) = this.toOptionalMapPair()
+  return Rhs(label, elements.toRhsElements(nonterminals))
 }
 
 private fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeException =
@@ -136,14 +150,32 @@ productions:
  */
 fun YamlMap.toGrammar(): Grammar = Grammar(this.toLexRules(), this.toParseRules())
 
+fun RhsElement.toYamlString(): String {
+  val symbol = this.symbol.toYamlString()
+  return if (this.label == null) symbol else "[${label.toYamlString()}, ${symbol}]"
+}
+
 /**
  * TODO.
  *
  * @receiver TODO
  * @return TODO
  */
-fun Rhs.toYamlString(): String =
-  "${this.label}: [${this.parts.map { "${it.first}: ${it.second}" }.joinToString() }]"
+fun Rhs.toYamlString(): String {
+  val elements = "[${this.elements.map { "${it.toYamlString()}" }.joinToString() }]"
+  return if (this.label == null) elements else "${this.label}: ${elements}"
+}
+
+// fun Pair<String?, Symbol>.toYamlString(): String =
+//   if (this.first === null) this.second.toYamlString() else "${this.first}: ${this.second.toYamlString()}"
+
+fun Symbol.toYamlString(): String =
+  when (this) {
+    is Terminal -> (TERMINAL_PREFIX + name).toYamlString()
+    is Nonterminal -> (NONTERMINAL_PREFIX + name).toYamlString()
+  }
+// ["S"]
+// "S"
 
 // ================================================================== //
 // Private Helpers
@@ -154,8 +186,29 @@ private operator fun Map<String, YamlNode>.get(key: String, path: YamlPath): Yam
 
 private fun YamlMap.toMap(): Map<String, YamlNode> = this.entries.mapKeys { it.key.content }
 
-private fun <T> YamlMap.toPair(mapSecond: (YamlNode) -> T): Pair<String, T> {
+private fun YamlMap.toMapPair(): Pair<String, YamlNode> {
+  // TODO: not require
   require(this.entries.size == 1) { "Expected one map element but found ${this.entries.size}" }
   val pair = this.entries.toList().single()
-  return pair.first.content to mapSecond(pair.second)
+  return pair.first.content to pair.second
 }
+
+private fun YamlNode.toOptionalMapPair(): Pair<String?, YamlNode> =
+  when (this) {
+    is YamlMap -> this.toMapPair()
+    else -> null to this
+  }
+
+// private fun YamlList.toListPair(): Pair<String, YamlNode> {
+//   require(this.items.size == 2) { "Expected two list elements but found ${this.items.size}" }
+//   return this[0].yamlScalar.content to this[1]
+// }
+
+// private fun YamlNode.toOptionalListPair(): Pair<String?, YamlNode> =
+//   when (this) {
+//     is YamlList -> this.toListPair()
+//     else -> null to this
+//   }
+
+private fun String.toYamlString(): String =
+  Yaml.default.encodeToString(String.serializer(), this)
