@@ -27,7 +27,8 @@ class ChartTest {
     val elements = listOf(
       RhsElement(null, Nonterminal("S")),
       RhsElement(null, Terminal("+")),
-      RhsElement(null, Nonterminal("S")))
+      RhsElement(null, Nonterminal("S")),
+    )
     val item = Item(Nonterminal("S"), Rhs("A", elements), 2)
 
     chart.add(2, 4, item, null)

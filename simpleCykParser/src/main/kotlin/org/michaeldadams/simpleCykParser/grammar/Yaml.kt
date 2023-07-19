@@ -87,11 +87,6 @@ fun YamlNode.toRhsElement(nonterminals: Set<String>): RhsElement {
   val (label, symbol) = this.toOptionalMapPair()
   return RhsElement(label, symbol.toSymbol(nonterminals))
 }
-  // when (this) {
-  //   is YamlMap -> this.toMapPair().let { RhsElement(it.first, it.second.toSymbol(nonterminals)) }
-  //   else -> RhsElement(null, this.toSymbol(nonterminals))
-  // }
-  // this.toOptionalListPair().let { RhsElement(it.first, it.second.toSymbol(nonterminals)) }
 
 fun YamlNode.toRhsElements(nonterminals: Set<String>): List<RhsElement> =
   when (this) {

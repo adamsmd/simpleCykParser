@@ -2,10 +2,8 @@
 
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.grammar.Nonterminal
-import org.michaeldadams.simpleCykParser.grammar.Rhs
-import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.ParseRules
+import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.toYamlString
 import org.michaeldadams.simpleCykParser.util.AutoMap
 import org.michaeldadams.simpleCykParser.util.TotalMap
@@ -27,9 +25,7 @@ import org.michaeldadams.simpleCykParser.util.TotalMap
  *
  * @param T TODO
  */
-// TODO: rename to position map
 typealias SymbolMap<T> = TotalMap<Int, TotalMap<Int, T>>
-// TODO: rename to partial map
 typealias ItemMap<T> = TotalMap<Int, TotalMap<Int, TotalMap<Item, T>>>
 
 /**
@@ -37,7 +33,6 @@ typealias ItemMap<T> = TotalMap<Int, TotalMap<Int, TotalMap<Item, T>>>
  *
  * @param T TODO
  */
-// TODO: rename
 typealias SymbolEndsMap<T> = TotalMap<Int, TotalMap<Symbol, T>>
 
 /**
@@ -66,17 +61,6 @@ class Chart(val parseRules: ParseRules) {
    */
   val items: ItemMap<Set<Int?>> = _items
 
-  fun addEpsilonItems(): Unit {
-    // TODO: symbolEnds.keys and itemStarts.keys?
-    for (start in items.keys + symbols.keys) {
-      for ((lhs, rhsSet) in parseRules.productionMap) {
-        for (rhs in rhsSet) {
-          add(start, start, Item(lhs, rhs, 0), null)
-        }
-      }
-    }
-  }
-
   // TODO: End for a start and symbol.
   // TODO: Used to get 'rightEnd'
 
@@ -92,7 +76,8 @@ class Chart(val parseRules: ParseRules) {
   val symbolEnds: SymbolEndsMap<Set<Int>> = _symbolEnds
 
   // end -> nextSymbol -> start -> nextItem
-  val _itemStarts: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, MutableSet<Item>>>> =
+  @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
+  private val _itemStarts: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, MutableSet<Item>>>> =
     AutoMap { AutoMap { AutoMap { mutableSetOf() } } }
 
   val itemStarts: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, Set<Item>>>> = _itemStarts
@@ -100,15 +85,6 @@ class Chart(val parseRules: ParseRules) {
   // TODO: Splitting position for a start, end and PartialProduction. Null if
   // PartialProduction is present but has no splitting position (e.g., due to
   // empty or just being asserted).
-
-  /**
-   * TODO.
-   *
-   * @receiver TODO
-   * @param symbols TODO
-   */
-  fun add(symbols: Iterable<Symbol>): Unit =
-    symbols.forEachIndexed { start, symbol -> this.add(start, start + 1, symbol) }
 
   /**
    * TODO.
@@ -165,9 +141,30 @@ class Chart(val parseRules: ParseRules) {
       }
     }
   }
+
+  /**
+   * TODO.
+   *
+   * @receiver TODO
+   * @param symbols TODO
+   */
+  fun add(symbols: Iterable<Symbol>): Unit =
+    symbols.forEachIndexed { start, symbol -> this.add(start, start + 1, symbol) }
+
+  fun addEpsilonItems(): Unit {
+    // TODO: symbolEnds.keys and itemStarts.keys?
+    for (start in items.keys + symbols.keys) {
+      for ((lhs, rhsSet) in parseRules.productionMap) {
+        for (rhs in rhsSet) {
+          add(start, start, Item(lhs, rhs, 0), null)
+        }
+      }
+    }
+  }
 }
 
 // TODO: move to Yaml.kt? (Move Yaml.kt to util/ ? yaml/ ?)
+
 /**
  * TODO.
  *
