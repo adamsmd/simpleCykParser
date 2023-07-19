@@ -4,8 +4,9 @@ import org.michaeldadams.simpleCykParser.grammar.Nonterminal
 import org.michaeldadams.simpleCykParser.grammar.Rhs
 import org.michaeldadams.simpleCykParser.grammar.RhsElement
 import org.michaeldadams.simpleCykParser.grammar.Terminal
-import org.michaeldadams.simpleCykParser.grammar.toParseRules
-import org.michaeldadams.simpleCykParser.grammar.toYamlMap
+import org.michaeldadams.simpleCykParser.yaml.printEntries
+import org.michaeldadams.simpleCykParser.yaml.toParseRules
+import org.michaeldadams.simpleCykParser.yaml.toYamlMap
 import kotlin.test.Test
 
 // TODO: mote tests

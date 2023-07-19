@@ -4,7 +4,6 @@ package org.michaeldadams.simpleCykParser.parsing
 
 import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Symbol
-import org.michaeldadams.simpleCykParser.grammar.toYamlString
 import org.michaeldadams.simpleCykParser.util.AutoMap
 import org.michaeldadams.simpleCykParser.util.TotalMap
 
@@ -162,58 +161,6 @@ class Chart(val parseRules: ParseRules) {
     }
   }
 }
-
-// TODO: move to Yaml.kt? (Move Yaml.kt to util/ ? yaml/ ?)
-
-/**
- * TODO.
- *
- * @receiver TODO
- */
-fun Chart.printEntries(): Unit {
-  println("symbols:")
-  for ((start, startValue) in this.symbols.entries) {
-    println("  ################################")
-    println("  # start: ${start}")
-    for ((end, endValue) in startValue.entries) {
-      println("  # start: ${start} end: ${end}")
-      for (symbol in endValue) {
-        println("  - [${start}, ${end}, ${symbol.toYamlString()}]")
-      }
-      println()
-    }
-  }
-
-  println("items:")
-  for ((start, startValue) in this.items.entries) {
-    println("  ################################")
-    println("  # start: ${start}")
-    for ((end, endValue) in startValue.entries) {
-      println("  # start: ${start} end: ${end}")
-      for ((item, itemValue) in endValue.entries) {
-        for (split in itemValue) {
-          if (split == null) {
-            @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
-            println("  - [${start}, ${end}, ${item.lhs.name}, ${item.rhs.toYamlString()}, ${item.consumed}]")
-          } else {
-            @Suppress("MaxLineLength", "ktlint:argument-list-wrapping", "ktlint:max-line-length")
-            println("  - [${start}, ${end}, ${item.lhs.name}, ${item.rhs.toYamlString()}, ${item.consumed}, ${split}]")
-          }
-        }
-      }
-      println()
-    }
-  }
-}
-
-/*
-
-- [5, 6, A]
-- [5, 6, A, X: [B, C: D]]
-- [5, 6, A, X: [B, C: D], 1]
-- [5, 6, A, X: [B, C: D], 5, 5]
-
-*/
 
 // get left
 // get right

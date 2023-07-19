@@ -1,7 +1,15 @@
-package org.michaeldadams.simpleCykParser.grammar
+package org.michaeldadams.simpleCykParser.yaml
 
 import com.charleskorn.kaml.IncorrectTypeException
 import com.charleskorn.kaml.MissingRequiredPropertyException
+import org.michaeldadams.simpleCykParser.grammar.Grammar
+import org.michaeldadams.simpleCykParser.grammar.LexRules
+import org.michaeldadams.simpleCykParser.grammar.Nonterminal
+import org.michaeldadams.simpleCykParser.grammar.ParseRules
+import org.michaeldadams.simpleCykParser.grammar.Rhs
+import org.michaeldadams.simpleCykParser.grammar.RhsElement
+import org.michaeldadams.simpleCykParser.grammar.Terminal
+import org.michaeldadams.simpleCykParser.grammar.TerminalRule
 import org.michaeldadams.simpleCykParser.util.toEqRegex
 import kotlin.test.Test
 import kotlin.test.assertEquals
