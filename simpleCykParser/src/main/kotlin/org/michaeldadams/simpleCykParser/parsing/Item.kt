@@ -22,20 +22,4 @@ data class Item(val lhs: Nonterminal, val rhs: Rhs, val consumed: Int) {
   // TODO: swap order of pair
   fun consume(): Pair<Symbol, Item>? =
     rhs.elements.getOrNull(consumed)?.let { Pair(it.symbol, Item(lhs, rhs, consumed + 1)) }
-
-  fun isComplete(): Boolean = consumed == rhs.elements.size
 }
-
-fun ParseRules.nullablePartials(): Set<Item> =
-  this.nullablePrefixes().flatMap { (lhs, lhsMap) ->
-    lhsMap.flatMap { (rhs, prefix) ->
-      (0..prefix).map { consumed -> Item(lhs, rhs, consumed) }
-    }
-  }.toSet()
-
-fun ParseRules.initialItems(): Map<Symbol?, Set<Item>> =
-  this.initialUses().mapValues { entry ->
-    entry.value.flatMap { (lhs, rhsSet: Set<Rhs>) ->
-      rhsSet.map { rhs -> Item(lhs, rhs, if (entry.key == null) 0 else 1) }
-    }.toSet()
-  }

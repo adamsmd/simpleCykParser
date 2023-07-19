@@ -18,14 +18,14 @@ import org.michaeldadams.simpleCykParser.grammar.nullablePrefixes
  */
 data class Parser(val parseRules: ParseRules) {
   /** TODO: Populates chart.entries. */
-  val nullablePartials: Set<Item> = parseRules.nullablePartials()
+  // val nullablePartials: Set<Item> = parseRules.nullablePartials()
 
   /** TODO: Populates Chart._symbolEnds. */
-  val nullable: Set<Symbol> = parseRules.nullable().keys
+  // val nullable: Set<Symbol> = parseRules.nullable().keys
 
   /** TODO: Used by Chart.add(). */
   // TODO: rename to itemInitials?
-  val initialItems: Map<Symbol?, Set<Item>> = parseRules.initialItems()
+  // val initialItems: Map<Symbol?, Set<Item>> = parseRules.initialItems()
 }
 
 /**

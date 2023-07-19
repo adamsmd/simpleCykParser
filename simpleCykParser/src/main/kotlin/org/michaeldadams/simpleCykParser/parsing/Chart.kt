@@ -49,32 +49,13 @@ typealias SymbolEndsMap<T> = QueueMap<Int, QueueMap<Symbol, T>>
 class Chart(val parser: Parser) {
   /** Mutable backing field for [symbols]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _symbols: SymbolMap<QueueSet<Symbol>> =
-    queueMap { start ->
-      queueMap<Int, QueueSet<Symbol>> { QueueSet() }.also { it[start].addAll(parser.nullable) }
-    }
+  private val _symbols: SymbolMap<QueueSet<Symbol>> = queueMap { queueMap { QueueSet() } }
 
   val symbols: SymbolMap<Set<Symbol>> = _symbols
 
   /** Mutable backing field for [productions]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _items: ItemMap<QueueSet<Int?>> =
-    queueMap { start ->
-      queueMap<Int, QueueMap<Item, QueueSet<Int?>>> {
-        queueMap { QueueSet() }
-      }.also { qm ->
-        // println("init $start")
-        for (item in parser.nullablePartials) {
-          // println("  $item")
-          for (consumed in 0..item.consumed) {
-            // println("    $consumed")
-            // TODO: start instead of null?
-            qm[start][item].add(if (consumed == 0) null else start)
-          }
-        }
-        // println()
-      }
-    }
+  private val _items: ItemMap<QueueSet<Int?>> = queueMap { queueMap { queueMap { QueueSet() } } }
 
   /** TODO.
    * Start (inclusive)
@@ -86,17 +67,22 @@ class Chart(val parser: Parser) {
    */
   val items: ItemMap<Set<Int?>> = _items
 
+  fun addEpsilonItems(): Unit {
+    for (start in items.keys + symbols.keys) {
+      for ((lhs, rhsSet) in parser.parseRules.productionMap) {
+        for (rhs in rhsSet) {
+          add(start, start, Item(lhs, rhs, 0), null)
+        }
+      }
+    }
+  }
+
   // TODO: End for a start and symbol.
   // TODO: Used to get 'rightEnd'
 
   /** Mutable backing field for [symbolEnds]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _symbolEnds: SymbolEndsMap<QueueSet<Int>> =
-    queueMap { start ->
-      queueMap<Symbol, QueueSet<Int>> { QueueSet() }.also { qm ->
-        parser.nullable.forEach { qm[it].add(start) }
-      }
-    }
+  private val _symbolEnds: SymbolEndsMap<QueueSet<Int>> = queueMap { queueMap { QueueSet() } }
 
   /** TODO.
    * Start
@@ -104,6 +90,12 @@ class Chart(val parser: Parser) {
    * End
    */
   val symbolEnds: SymbolEndsMap<Set<Int>> = _symbolEnds
+
+  // end -> nextSymbol -> start -> nextItem
+  val _itemStarts: QueueMap<Int, QueueMap<Symbol, QueueMap<Int, QueueSet<Item>>>> =
+    queueMap { queueMap { queueMap { QueueSet() } } }
+
+  val itemStarts: QueueMap<Int, QueueMap<Symbol, QueueMap<Int, Set<Item>>>> = _itemStarts
 
   // TODO: Splitting position for a start, end and PartialProduction. Null if
   // PartialProduction is present but has no splitting position (e.g., due to
@@ -129,21 +121,19 @@ class Chart(val parser: Parser) {
   fun add(start: Int, end: Int, symbol: Symbol): Unit {
     // NOTE: just an assertion and does not show how built
     // TODO: add always adds ProductionEntry (via initialUses)
-    _symbols[start][end] += symbol
-    _symbolEnds[start][symbol] += end
-    // println("+ $start $end $symbol")
-    // for (item in _items[start][end].keys) {
-    //   println("  + $item")
-    // }
-    // If not in map, then has no initial uses
-    for (item in parser.initialItems.getOrDefault(symbol, emptySet())) {
-      // println("  - $item")
-      // NOTE: Addition goes up not down (we don't have info for down)
-      this.add(start, end, item, start)
+    if (_symbols[start][end].add(symbol)) {
+      _symbolEnds[start][symbol] += end
+      for ((itemStart, itemSet) in itemStarts[start][symbol]) {
+        for (nextItem in itemSet) {
+          add(itemStart, end, nextItem, start)
+        }
+      }
     }
   }
 
   // TODO: find all "middle" and call them "split"
+  // val nextItem[start][nextEnd/start][nextItem][end/end]
+  // val nextItem[end][ConsumedSymbol] = Set<start>
 
   /**
    * TODO.
@@ -157,18 +147,27 @@ class Chart(val parser: Parser) {
    * @param split TODO
    */
   fun add(start: Int, end: Int, item: Item, split: Int?): Unit {
+    // require(split between start and end)
+    // require(start <= end)
     // require(lhs in parser.parseRules)
     // require(rhs in parser.parseRules[lhs])
-    // TODO: add always adds Symbol of the partialProd is complete
-    if (_items[start][end][item].add(split) && item.isComplete()) {
-      // NOTE: Addition goes up not down (we don't have info for down)
-      this.add(start, end, item.lhs)
+    if (_items[start][end][item].add(split)) {
+      val consumed = item.consume()
+      if (consumed == null) {
+        // NOTE: Addition goes up not down (we don't have info for down)
+        this.add(start, end, item.lhs)
+      } else {
+        val (consumedSymbol, nextItem) = consumed
+        _itemStarts[end][consumedSymbol][start] += nextItem
+        for (nextEnd in symbolEnds[end][consumedSymbol]) {
+          add(start, nextEnd, nextItem, end)
+        }
+      }
     }
   }
-
-  // TODO: move to Yaml.kt? (Move Yaml.kt to util/ ? yaml/ ?)
 }
 
+// TODO: move to Yaml.kt? (Move Yaml.kt to util/ ? yaml/ ?)
 /**
  * TODO.
  *
@@ -188,7 +187,7 @@ fun Chart.printEntries(): Unit {
     }
   }
 
-  println("productions:")
+  println("items:")
   for ((start, startValue) in this.items.entries) {
     println("  ################################")
     println("  # start: ${start}")

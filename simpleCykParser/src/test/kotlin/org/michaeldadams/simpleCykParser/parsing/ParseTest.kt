@@ -22,7 +22,8 @@ class ParseTest {
 
     val chart = Chart(parser)
     chart.add(listOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")")))
-    parse(chart)
+    // parse(chart)
+    chart.addEpsilonItems()
     chart.printEntries()
   }
 
@@ -38,7 +39,8 @@ class ParseTest {
 
     val chart = Chart(parser)
     chart.add(listOf("a", "a", "a", "a").map { Terminal(it) })
-    parse(chart)
+    // parse(chart)
+    chart.addEpsilonItems()
     chart.printEntries()
   }
 }
