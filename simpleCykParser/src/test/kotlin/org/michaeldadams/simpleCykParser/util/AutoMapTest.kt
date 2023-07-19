@@ -5,10 +5,10 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class QueueMapTest {
-  @Test fun testQueueMap(): Unit {
+class AutoMapTest {
+  @Test fun testAutoMap(): Unit {
     var count = 0
-    val map: QueueMap<String, String> = queueMap { it + count++ }
+    val map: AutoMap<String, String> = AutoMap { it + count++ }
     assertEquals("A0", map["A"])
     assertEquals("B1", map["B"])
     assertEquals("B1", map["B"]) // Once set, it stays
@@ -18,7 +18,7 @@ class QueueMapTest {
   @Test fun testKeysNonConcurrent(): Unit {
     var result: List<String> = emptyList()
 
-    val map: QueueMap<String, Int> = queueMap { 0 }
+    val map: AutoMap<String, Int> = AutoMap { 0 }
     map["A"]
     map["B"]
     map["B"]

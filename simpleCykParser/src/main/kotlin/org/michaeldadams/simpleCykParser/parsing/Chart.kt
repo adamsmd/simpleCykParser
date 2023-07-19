@@ -7,8 +7,8 @@ import org.michaeldadams.simpleCykParser.grammar.Rhs
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.toYamlString
-import org.michaeldadams.simpleCykParser.util.QueueMap
-import org.michaeldadams.simpleCykParser.util.queueMap
+import org.michaeldadams.simpleCykParser.util.AutoMap
+import org.michaeldadams.simpleCykParser.util.TotalMap
 
 // TODO: when to do "this."
 
@@ -28,9 +28,9 @@ import org.michaeldadams.simpleCykParser.util.queueMap
  * @param T TODO
  */
 // TODO: rename to position map
-typealias SymbolMap<T> = QueueMap<Int, QueueMap<Int, T>>
+typealias SymbolMap<T> = TotalMap<Int, TotalMap<Int, T>>
 // TODO: rename to partial map
-typealias ItemMap<T> = QueueMap<Int, QueueMap<Int, QueueMap<Item, T>>>
+typealias ItemMap<T> = TotalMap<Int, TotalMap<Int, TotalMap<Item, T>>>
 
 /**
  * TODO.
@@ -38,7 +38,7 @@ typealias ItemMap<T> = QueueMap<Int, QueueMap<Int, QueueMap<Item, T>>>
  * @param T TODO
  */
 // TODO: rename
-typealias SymbolEndsMap<T> = QueueMap<Int, QueueMap<Symbol, T>>
+typealias SymbolEndsMap<T> = TotalMap<Int, TotalMap<Symbol, T>>
 
 /**
  * TODO.
@@ -48,13 +48,13 @@ typealias SymbolEndsMap<T> = QueueMap<Int, QueueMap<Symbol, T>>
 class Chart(val parseRules: ParseRules) {
   /** Mutable backing field for [symbols]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _symbols: SymbolMap<MutableSet<Symbol>> = queueMap { queueMap { mutableSetOf() } }
+  private val _symbols: SymbolMap<MutableSet<Symbol>> = AutoMap { AutoMap { mutableSetOf() } }
 
   val symbols: SymbolMap<Set<Symbol>> = _symbols
 
   /** Mutable backing field for [productions]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _items: ItemMap<MutableSet<Int?>> = queueMap { queueMap { queueMap { mutableSetOf() } } }
+  private val _items: ItemMap<MutableSet<Int?>> = AutoMap { AutoMap { AutoMap { mutableSetOf() } } }
 
   /** TODO.
    * Start (inclusive)
@@ -82,7 +82,7 @@ class Chart(val parseRules: ParseRules) {
 
   /** Mutable backing field for [symbolEnds]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _symbolEnds: SymbolEndsMap<MutableSet<Int>> = queueMap { queueMap { mutableSetOf() } }
+  private val _symbolEnds: SymbolEndsMap<MutableSet<Int>> = AutoMap { AutoMap { mutableSetOf() } }
 
   /** TODO.
    * Start
@@ -92,10 +92,10 @@ class Chart(val parseRules: ParseRules) {
   val symbolEnds: SymbolEndsMap<Set<Int>> = _symbolEnds
 
   // end -> nextSymbol -> start -> nextItem
-  val _itemStarts: QueueMap<Int, QueueMap<Symbol, QueueMap<Int, MutableSet<Item>>>> =
-    queueMap { queueMap { queueMap { mutableSetOf() } } }
+  val _itemStarts: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, MutableSet<Item>>>> =
+    AutoMap { AutoMap { AutoMap { mutableSetOf() } } }
 
-  val itemStarts: QueueMap<Int, QueueMap<Symbol, QueueMap<Int, Set<Item>>>> = _itemStarts
+  val itemStarts: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, Set<Item>>>> = _itemStarts
 
   // TODO: Splitting position for a start, end and PartialProduction. Null if
   // PartialProduction is present but has no splitting position (e.g., due to
