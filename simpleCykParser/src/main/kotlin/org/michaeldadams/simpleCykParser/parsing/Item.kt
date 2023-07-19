@@ -4,12 +4,8 @@ package org.michaeldadams.simpleCykParser.parsing
 
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal
 import org.michaeldadams.simpleCykParser.grammar.ParseRules
-import org.michaeldadams.simpleCykParser.grammar.ProductionMap
 import org.michaeldadams.simpleCykParser.grammar.Rhs
 import org.michaeldadams.simpleCykParser.grammar.Symbol
-import org.michaeldadams.simpleCykParser.grammar.initialUses
-import org.michaeldadams.simpleCykParser.grammar.nullable
-import org.michaeldadams.simpleCykParser.grammar.nullablePrefixes
 
 data class Item(val lhs: Nonterminal, val rhs: Rhs, val consumed: Int) {
   init {
@@ -19,7 +15,6 @@ data class Item(val lhs: Nonterminal, val rhs: Rhs, val consumed: Int) {
     }
   }
 
-  // TODO: swap order of pair
   fun consume(): Pair<Symbol, Item>? =
     rhs.elements.getOrNull(consumed)?.let { Pair(it.symbol, Item(lhs, rhs, consumed + 1)) }
 }

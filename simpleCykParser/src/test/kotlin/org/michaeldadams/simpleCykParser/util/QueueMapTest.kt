@@ -27,6 +27,12 @@ class QueueMapTest {
       result += x
     }
 
+    // TODO: test key removal
+    // assertFailsWith(UnsupportedOperationException::class) { queue.iterator().remove() }
+    // assertFailsWith(UnsupportedOperationException::class) { queue.remove("A") }
+    // assertFailsWith(UnsupportedOperationException::class) { queue.removeAll(listOf("A")) }
+    // assertFailsWith(UnsupportedOperationException::class) { queue.clear() }
+
     assertContentEquals(listOf("A", "B", "C"), result)
     assertFailsWith(NoSuchElementException::class) {
       val i = map.keys.iterator()
@@ -35,26 +41,5 @@ class QueueMapTest {
       i.next()
       i.next()
     }
-  }
-
-  @Test fun testKeysConcurrent(): Unit {
-    var result: List<String> = emptyList()
-
-    val map: QueueMap<String, Int> = queueMap() { 0 }
-    map["A"]
-    map["B"]
-    for (x in map.keys) {
-      result += x
-      if (x.length < 3) {
-        map[x + "A"]
-        map[x + "B"]
-      }
-    }
-
-    val expected = listOf(
-      "A", "B", "AA", "AB", "BA", "BB", "AAA", "AAB", "ABA", "ABB", "BAA", "BAB", "BBA", "BBB",
-    )
-
-    assertContentEquals(expected, result)
   }
 }

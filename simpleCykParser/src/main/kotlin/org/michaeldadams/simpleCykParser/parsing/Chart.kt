@@ -5,10 +5,9 @@ package org.michaeldadams.simpleCykParser.parsing
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal
 import org.michaeldadams.simpleCykParser.grammar.Rhs
 import org.michaeldadams.simpleCykParser.grammar.Symbol
+import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.toYamlString
 import org.michaeldadams.simpleCykParser.util.QueueMap
-import org.michaeldadams.simpleCykParser.util.QueueSet
-import org.michaeldadams.simpleCykParser.util.fromSetsMap
 import org.michaeldadams.simpleCykParser.util.queueMap
 
 // TODO: when to do "this."
@@ -46,16 +45,16 @@ typealias SymbolEndsMap<T> = QueueMap<Int, QueueMap<Symbol, T>>
  *
  * @property parser TODO
  */
-class Chart(val parser: Parser) {
+class Chart(val parseRules: ParseRules) {
   /** Mutable backing field for [symbols]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _symbols: SymbolMap<QueueSet<Symbol>> = queueMap { queueMap { QueueSet() } }
+  private val _symbols: SymbolMap<MutableSet<Symbol>> = queueMap { queueMap { mutableSetOf() } }
 
   val symbols: SymbolMap<Set<Symbol>> = _symbols
 
   /** Mutable backing field for [productions]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _items: ItemMap<QueueSet<Int?>> = queueMap { queueMap { queueMap { QueueSet() } } }
+  private val _items: ItemMap<MutableSet<Int?>> = queueMap { queueMap { queueMap { mutableSetOf() } } }
 
   /** TODO.
    * Start (inclusive)
@@ -68,8 +67,9 @@ class Chart(val parser: Parser) {
   val items: ItemMap<Set<Int?>> = _items
 
   fun addEpsilonItems(): Unit {
+    // TODO: symbolEnds.keys and itemStarts.keys?
     for (start in items.keys + symbols.keys) {
-      for ((lhs, rhsSet) in parser.parseRules.productionMap) {
+      for ((lhs, rhsSet) in parseRules.productionMap) {
         for (rhs in rhsSet) {
           add(start, start, Item(lhs, rhs, 0), null)
         }
@@ -82,7 +82,7 @@ class Chart(val parser: Parser) {
 
   /** Mutable backing field for [symbolEnds]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _symbolEnds: SymbolEndsMap<QueueSet<Int>> = queueMap { queueMap { QueueSet() } }
+  private val _symbolEnds: SymbolEndsMap<MutableSet<Int>> = queueMap { queueMap { mutableSetOf() } }
 
   /** TODO.
    * Start
@@ -92,8 +92,8 @@ class Chart(val parser: Parser) {
   val symbolEnds: SymbolEndsMap<Set<Int>> = _symbolEnds
 
   // end -> nextSymbol -> start -> nextItem
-  val _itemStarts: QueueMap<Int, QueueMap<Symbol, QueueMap<Int, QueueSet<Item>>>> =
-    queueMap { queueMap { queueMap { QueueSet() } } }
+  val _itemStarts: QueueMap<Int, QueueMap<Symbol, QueueMap<Int, MutableSet<Item>>>> =
+    queueMap { queueMap { queueMap { mutableSetOf() } } }
 
   val itemStarts: QueueMap<Int, QueueMap<Symbol, QueueMap<Int, Set<Item>>>> = _itemStarts
 
@@ -123,8 +123,8 @@ class Chart(val parser: Parser) {
     // TODO: add always adds ProductionEntry (via initialUses)
     if (_symbols[start][end].add(symbol)) {
       _symbolEnds[start][symbol] += end
-      for ((itemStart, itemSet) in itemStarts[start][symbol]) {
-        for (nextItem in itemSet) {
+      for ((itemStart, itemSet) in itemStarts[start][symbol].toMap()) {
+        for (nextItem in itemSet.toSet()) {
           add(itemStart, end, nextItem, start)
         }
       }
@@ -159,7 +159,7 @@ class Chart(val parser: Parser) {
       } else {
         val (consumedSymbol, nextItem) = consumed
         _itemStarts[end][consumedSymbol][start] += nextItem
-        for (nextEnd in symbolEnds[end][consumedSymbol]) {
+        for (nextEnd in symbolEnds[end][consumedSymbol].toSet()) {
           add(start, nextEnd, nextItem, end)
         }
       }

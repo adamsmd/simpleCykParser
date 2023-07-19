@@ -61,12 +61,12 @@ fun YamlMap.toParseRules(): ParseRules {
   val productionsYaml: Map<YamlScalar, YamlNode> = map["productions", this.path].yamlMap.entries
   val nonterminals: Set<String> = productionsYaml.keys.map { it.content }.toSet()
 
-  val productionsMap = productionsYaml.entries.map { entry ->
+  val productionMap = productionsYaml.entries.map { entry ->
     Nonterminal(entry.key.content) to
       entry.value.yamlList.items.map { it.toRhs(nonterminals) }.toSet()
   }.toMap()
 
-  return ParseRules(Nonterminal(start), productionsMap)
+  return ParseRules(Nonterminal(start), productionMap)
 }
 private val WHITESPACE_REGEX = "\\p{IsWhite_Space}+".toRegex()
 private const val NONTERMINAL_PREFIX = "N:"
@@ -186,6 +186,7 @@ private operator fun Map<String, YamlNode>.get(key: String, path: YamlPath): Yam
 
 private fun YamlMap.toMap(): Map<String, YamlNode> = this.entries.mapKeys { it.key.content }
 
+// TODO: rename to toPair
 private fun YamlMap.toMapPair(): Pair<String, YamlNode> {
   // TODO: not require
   require(this.entries.size == 1) { "Expected one map element but found ${this.entries.size}" }
@@ -198,17 +199,6 @@ private fun YamlNode.toOptionalMapPair(): Pair<String?, YamlNode> =
     is YamlMap -> this.toMapPair()
     else -> null to this
   }
-
-// private fun YamlList.toListPair(): Pair<String, YamlNode> {
-//   require(this.items.size == 2) { "Expected two list elements but found ${this.items.size}" }
-//   return this[0].yamlScalar.content to this[1]
-// }
-
-// private fun YamlNode.toOptionalListPair(): Pair<String?, YamlNode> =
-//   when (this) {
-//     is YamlList -> this.toListPair()
-//     else -> null to this
-//   }
 
 private fun String.toYamlString(): String =
   Yaml.default.encodeToString(String.serializer(), this)

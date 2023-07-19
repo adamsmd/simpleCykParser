@@ -2,12 +2,11 @@
 
 package org.michaeldadams.simpleCykParser.util
 
-// TODO: AutoMap
+// TODO: Rename to AutoMap and MutableAutoMap
 
 /**
  * A [Map] that upon lookup automatically populates missing entries with default
- * values (i.e., autovivification) and implements the [keys] set with a
- * [QueueSet] it they can be iterated through while entries are being added.
+ * values (i.e., autovivification).
  *
  * This interface is a read-only wrapper around the mutable implementation, so
  * the only way to add new entries is with autovivification via [get].
@@ -47,12 +46,6 @@ fun <K, V> queueMap(defaultValue: (K) -> V): QueueMap<K, V> = QueueMapImpl(defau
  * @property defaultValue a function generating default values
  */
 private class QueueMapImpl<K, V>(private val defaultValue: (K) -> V) : HashMap<K, V>(), QueueMap<K, V> {
-  // TODO
-  override val keys: MutableSet<K> = QueueSet()
-
-  // Putting also adds to the overridden [keys]
-  override fun put(key: K, value: V): V? = super.put(key, value).also { keys += key }
-
   // Getting adds if not already present
   override operator fun get(key: K): V =
     if (this.contains(key)) {
@@ -61,9 +54,4 @@ private class QueueMapImpl<K, V>(private val defaultValue: (K) -> V) : HashMap<K
     } else {
       defaultValue(key).also { this.put(key, it) }
     }
-
-  // Removal operations are unsupported because they break [elements] and thus iterators.
-  // Annotated with [Generated] to exclude them from code coverage.
-  @Generated override fun clear(): Unit = throw AssertionError("Unreachable code reached")
-  @Generated override fun remove(key: K): V? = throw AssertionError("Unreachable code reached")
 }

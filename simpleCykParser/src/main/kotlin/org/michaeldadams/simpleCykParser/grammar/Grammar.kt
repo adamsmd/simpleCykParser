@@ -68,11 +68,6 @@ data class RhsElement(val label: String?, val symbol: Symbol)
  */
 data class Rhs(val label: String?, val elements: List<RhsElement>)
 
-/**
- * TODO.
- */
-typealias ProductionMap = Map<Nonterminal, Set<Rhs>>
-
 // TODO: require ParseRules.start in productionMap?  If so, add test to GrammarTest
 
 /**
@@ -82,7 +77,7 @@ typealias ProductionMap = Map<Nonterminal, Set<Rhs>>
  * @property productionMap a map from a nonterminal to the set of productions
  *   for that nonterminal
  */
-data class ParseRules(val start: Symbol, val productionMap: ProductionMap)
+data class ParseRules(val start: Symbol, val productionMap: Map<Nonterminal, Set<Rhs>>)
 
 // ================================================================== //
 // Lexing and Parsing Together
