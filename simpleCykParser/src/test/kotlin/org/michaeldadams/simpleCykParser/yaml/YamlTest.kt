@@ -28,7 +28,33 @@ class YamlTest {
      * - symbols in rhs components are terminals or nonterminals
      *
      * TODO: explicit N and T annotations
+     *
+     * TODO:
+     *
+     * whitespace: \s+
+     * terminals:
+     *   - STRING: '"[^"]"'
+     *   - NUM: \d+
+     *   - IF: if
+     *   - (: \(
+     *   - STR: (?idmsuxU-idmsuxU) ... TODO (note some flags have no inline)
+     * terminalOptions: COMMENTS, UNICODE
+     * start: S
+     * productions:
+     *   S:
+     *     - F: if ( S ) then { else }
+     *     - F: '" S "'
+     *     - S S
+     *     - ""
+     *     - []
+     *     - [X: S, Y: S]
+     *     - F: [X: S, S]
+     *     - F:
+     *        - X: S
+     *        - S
+     *   T: []
      */
+
     val actual = """
       whitespace: \s+
       terminals:

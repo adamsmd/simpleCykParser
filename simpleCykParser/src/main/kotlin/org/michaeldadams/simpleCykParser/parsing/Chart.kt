@@ -10,75 +10,81 @@ import org.michaeldadams.simpleCykParser.util.TotalMap
 // TODO: when to do "this."
 
 /**
- * A map for chart entries.
- *
- * In order, indexed by:
- * - start position (inclusive),
- * - end position (exclusive),
- * - symbol at that start an end position,
- * - right-hand side (if any) that produced that symbol,
- * - consumed ho (map non-empty only if the right-hand side is non-null)
- *
- * symbol (no production)
- * production (with consumed)
- *
- * @param T TODO
- */
-typealias SymbolMap<T> = TotalMap<Int, TotalMap<Int, T>>
-typealias ItemMap<T> = TotalMap<Int, TotalMap<Int, TotalMap<Item, T>>>
-
-/**
  * TODO.
  *
- * @param T TODO
+ * @property parseRules TODO
  */
-typealias SymbolEndsMap<T> = TotalMap<Int, TotalMap<Symbol, T>>
-
-/**
- * TODO.
- *
- * @property parser TODO
- */
+@Suppress("TYPE_ALIAS")
 class Chart(val parseRules: ParseRules) {
   /** Mutable backing field for [symbols]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _symbols: SymbolMap<MutableSet<Symbol>> = AutoMap { AutoMap { mutableSetOf() } }
+  private val _symbols: TotalMap<Int, TotalMap<Int, MutableSet<Symbol>>> =
+    AutoMap { AutoMap { mutableSetOf() } }
 
-  val symbols: SymbolMap<Set<Symbol>> = _symbols
-
-  /** Mutable backing field for [productions]. */
-  @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _items: ItemMap<MutableSet<Int?>> = AutoMap { AutoMap { AutoMap { mutableSetOf() } } }
-
-  /** TODO.
-   * Start (inclusive)
-   * End (exclusive)
-   * Symbol
-   * Production (null means no justification)
-   * Consumed
-   * Split (null if consumed == 0 or no justification(TODO: remove))
+  /**
+   * The symbols in the chart.
+   *
+   * Can be added to using the [add] functions.
+   *
+   * Indexed (in order) by:
+   * - start position (inclusive) and
+   * - end position (exclusive).
+   *
+   * The final value is the set of symbols at that start and end position.
    */
-  val items: ItemMap<Set<Int?>> = _items
+  val symbols: TotalMap<Int, TotalMap<Int, Set<Symbol>>> = _symbols
 
-  // TODO: End for a start and symbol.
-  // TODO: Used to get 'rightEnd'
+  /** Mutable backing field for [items]. */
+  @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
+  private val _items: TotalMap<Int, TotalMap<Int, TotalMap<Item, MutableSet<Int?>>>> =
+    AutoMap { AutoMap { AutoMap { mutableSetOf() } } }
+
+  // TODO: rename to splits?
+
+  /**
+   * The items in the chart.
+   *
+   * Can be added to using the [add] functions.
+   *
+   * Indexed (in order) by:
+   * - start position (inclusive),
+   * - end position (exclusive) and
+   * - item.
+   *
+   * The final value is the set of positions where the TODO.
+   */
+  val items: TotalMap<Int, TotalMap<Int, TotalMap<Item, Set<Int?>>>> = _items
 
   /** Mutable backing field for [symbolEnds]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _symbolEnds: SymbolEndsMap<MutableSet<Int>> = AutoMap { AutoMap { mutableSetOf() } }
+  private val _symbolEnds: TotalMap<Int, TotalMap<Symbol, MutableSet<Int>>> =
+    AutoMap { AutoMap { mutableSetOf() } }
 
-  /** TODO.
-   * Start
-   * Symbol
-   * End
+  /**
+   * Positions where a symbol ends given a start.
+   *
+   * Index (in order) by:
+   * - start position (inclusive) and
+   * - symbol.
+   *
+   * The final value is the set of positions where the given symbol TODO.
+   *
+   * TODO: looks along a row for a given right child
+   * TODO: essentially symbols but indexed in a different order
    */
-  val symbolEnds: SymbolEndsMap<Set<Int>> = _symbolEnds
+  val symbolEnds: TotalMap<Int, TotalMap<Symbol, Set<Int>>> = _symbolEnds
 
-  // end -> nextSymbol -> start -> nextItem
+  /** Mutable backing field for [itemStarts]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
   private val _itemStarts: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, MutableSet<Item>>>> =
     AutoMap { AutoMap { AutoMap { mutableSetOf() } } }
 
+  /**
+   * TODO.
+   *
+   * end -> nextSymbol -> start -> nextItem
+   * TODO: looks up a column for a left child
+   */
   val itemStarts: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, Set<Item>>>> = _itemStarts
 
   // TODO: Splitting position for a start, end and PartialProduction. Null if
@@ -116,9 +122,7 @@ class Chart(val parseRules: ParseRules) {
    * @receiver TODO
    * @param start TODO
    * @param end TODO
-   * @param lhs TODO
-   * @param rhs TODO
-   * @param consumed TODO
+   * @param item TODO
    * @param split TODO
    */
   fun add(start: Int, end: Int, item: Item, split: Int?): Unit {
@@ -150,6 +154,11 @@ class Chart(val parseRules: ParseRules) {
   fun add(symbols: Iterable<Symbol>): Unit =
     symbols.forEachIndexed { start, symbol -> this.add(start, start + 1, symbol) }
 
+  /**
+   * TODO.
+   *
+   * @receiver TODO
+   */
   fun addEpsilonItems(): Unit {
     // TODO: symbolEnds.keys and itemStarts.keys?
     for (start in items.keys + symbols.keys) {
@@ -162,8 +171,15 @@ class Chart(val parseRules: ParseRules) {
   }
 }
 
+// (implicit start and end)
+// symbol -> items
+// item -> splits
+// split -> left or right child
+
+// get parents as left child (symbol)
+// get parents as right child (item)
+
 // get left
 // get right
 // get children
 // get parses at
-// Used to get division between children

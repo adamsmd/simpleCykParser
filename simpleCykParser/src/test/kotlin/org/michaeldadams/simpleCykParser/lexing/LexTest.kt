@@ -28,6 +28,6 @@ class LexTest {
       ),
     )
 
-    assertEquals(Pair(23, expectedTokens), lex(lexRules, " A B B  AA123  123.45  --"))
+    assertEquals(Pair(23, expectedTokens), lexRules.lex(" A B B  AA123  123.45  --"))
   }
 }

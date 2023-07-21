@@ -33,8 +33,6 @@ data class Token(val terminal: Terminal, val groups: List<MatchGroup?>) {
   }
 }
 
-// TODO: List vs Collection or Sequence?
-
 /**
  * Construct a [Token] from a [MatchResult] and a [Token].
  *

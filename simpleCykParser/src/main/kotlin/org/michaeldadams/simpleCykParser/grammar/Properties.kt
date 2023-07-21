@@ -43,20 +43,21 @@ fun Grammar.definedSymbols(): Set<Symbol> =
  * In a well-formed grammar, this function will return the empty set.
  *
  * @receiver the grammar to get the undefined symbols for
+ * @param symbols the symbols to assume as defined
  * @return triples of the left-hand size ([Nonterminal]), right-hand side
  *   ([Rhs]) and the position ([Int]) of the undefined symbol in the right-hand
  *   side
  */
-fun Grammar.undefinedSymbols(): Set<Triple<Nonterminal, Rhs, Int>> {
-  val symbols = this.definedSymbols()
-  return this.parseRules.productionMap.flatMap { (lhs, rhsSet) ->
+fun ParseRules.undefinedSymbols(symbols: Set<Symbol>): Set<Triple<Nonterminal, Rhs, Int>> =
+  this.productionMap.flatMap { (lhs, rhsSet) ->
     rhsSet.flatMap { rhs ->
       rhs.elements.mapIndexedNotNull { i, element ->
         if (element.symbol in symbols) null else Triple(lhs, rhs, i)
       }
     }
   }.toSet()
-}
+
+// TODO: check ParseRules.start is undefined
 
 /**
  * Get the nonterminals that have no production.
@@ -65,9 +66,7 @@ fun Grammar.undefinedSymbols(): Set<Triple<Nonterminal, Rhs, Int>> {
  * @return the nonterminals that have no production in the parse rules
  */
 fun ParseRules.productionlessNonterminals(): Set<Nonterminal> =
-  this.productionMap.entries.filter { it.value.isEmpty() }.map { it.key }.toSet()
-
-// TODO: remove all !!
+  this.productionMap.filter { it.value.isEmpty() }.map { it.key }.toSet()
 
 /**
  * Get all the symbols used in the right-hand sides ([Rhs]) of a [ParseRules].

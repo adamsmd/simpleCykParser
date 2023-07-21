@@ -8,6 +8,7 @@ plugins {
   id("git-version")
   // Provides "./gradlew installDist" then "./build/install/simpleCykParser/bin/simpleCykParser"
   application
+  id("com.dorongold.task-tree") version "2.1.1"
 }
 
 // repositories {
@@ -27,6 +28,7 @@ dependencies {
 
   // YAML Parsing
   implementation("com.charleskorn.kaml:kaml:0.54.0")
+  implementation("org.snakeyaml:snakeyaml-engine:2.6")
 }
 
 // ================================================================== //

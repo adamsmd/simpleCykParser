@@ -10,7 +10,7 @@ class TokenTest {
     val terminal = Terminal("x")
 
     val match = "x(y*)".toRegex().matchEntire("xyy")!!
-    val groups = match.groups.toList()
+    val groups = match.groups.toList() // TODO: direct construction of MatchGroup
 
     fun test(token: Token): Unit {
       assertEquals(terminal, token.terminal)

@@ -58,17 +58,27 @@ data class LexRules(val whitespace: EqRegex, val terminalRules: List<TerminalRul
 // Parsing
 // ================================================================== //
 
+/**
+ * TODO: optionally named symbols.
+ *
+ * Note that [label] is not used by the parsing algorithm but may be useful to
+ * help users understand the role of different parts of a production.
+ *
+ * @property label an optional label for this element
+ * @property symbol optionally named symbols that this production expands to
+ */
 data class RhsElement(val label: String?, val symbol: Symbol)
 
 /**
  * TODO: A production rule for a nonterminal.
  *
+ * Note that [label] is not used by the parsing algorithm but is useful for
+ * debugging and telling one production from another.
+ *
  * @property label an optional label for this production
- * @property parts optionally named symbols that this production expands to
+ * @property elements optionally named symbols that this production expands to
  */
 data class Rhs(val label: String?, val elements: List<RhsElement>)
-
-// TODO: require ParseRules.start in productionMap?  If so, add test to GrammarTest
 
 /**
  * The combined parsing rules of a language.
