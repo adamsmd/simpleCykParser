@@ -233,13 +233,14 @@ private operator fun Map<String, YamlNode>.get(key: String, path: YamlPath): Yam
 
 private fun YamlMap.toMap(): Map<String, YamlNode> = this.entries.mapKeys { it.key.content }
 
-private fun YamlMap.toPair(): Pair<String, YamlNode> {
+// TODO: rename to toStringPair?
+fun YamlMap.toPair(): Pair<String, YamlNode> {
   val pair = this.entries.toList().singleOrNull()
     ?: throw YamlException("Expected one map element but found ${this.entries.size}", this.path)
   return pair.first.content to pair.second
 }
 
-private fun YamlNode.toOptionalPair(): Pair<String?, YamlNode> =
+fun YamlNode.toOptionalPair(): Pair<String?, YamlNode> =
   if (this is YamlMap) this.toPair() else null to this
 
 // TODO: broken on "". produces `--- ""`
@@ -271,6 +272,16 @@ class StreamToStringWriter : StringWriter(), StreamDataWriter {
  */
 fun Item.toYamlString(): String =
   "[${this.lhs.name.toYamlString()}, ${this.rhs.toYamlString()}, ${this.consumed}]"
+
+fun YamlNode.toItem(nonterminals: Set<String>): Item {
+  val elements = this.yamlList.items
+  if (elements.size != 3) { TODO() }
+  return Item(
+    Nonterminal(elements[0].yamlScalar.content),
+    elements[1].toRhs(nonterminals),
+    elements[2].yamlScalar.toInt(),
+  )
+}
 
 /**
  * TODO.

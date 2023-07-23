@@ -5,6 +5,7 @@ package org.michaeldadams.simpleCykParser.main
 import com.charleskorn.kaml.YamlException
 import com.charleskorn.kaml.YamlMap
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.parameters.arguments.ProcessedArgument
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.convert
@@ -27,20 +28,33 @@ import java.io.InputStream
 fun CliktCommand.inputArgument(): ProcessedArgument<String, String> =
   argument(help = "File containing the grammar").inputStream().convert { it.reader().readText() }
 
+fun <S, T> S.tryYaml(action: S.() -> T): T =
+  try {
+    this.action()
+  } catch (e: YamlException) {
+    // TODO: InvalidFileFormat(filename, message, lineno)
+    // Error: incorrect format in file filename line 10: message
+    throw UsageError(
+      "Invalid YAML at ${e.path.toHumanReadableString()} " +
+        "on line ${e.line}, column ${e.column}: ${e.message}",
+    )
+  }
+
 /**
  * TODO.
  *
  * @receiver TODO
  * @param T TODO
  * @param help TODO
- * @param conversion TODO
+ * @param converter TODO
  * @return TODO
  */
-fun <T : Any> CliktCommand.rulesArgument(help: String, conversion: (YamlMap) -> T):
+fun <T : Any> CliktCommand.rulesArgument(help: String, converter: (YamlMap) -> T):
   ProcessedArgument<T, T> =
   this.argument(help = help).inputStream().convert<InputStream, T> {
+    // TODO: use tryYaml and check that error message is same
     try {
-      conversion(it.reader().readText().toYamlMap())
+      converter(it.reader().readText().toYamlMap())
     } catch (e: YamlException) {
       // TODO: InvalidFileFormat(filename, message, lineno)
       fail(

@@ -9,12 +9,18 @@
 
 package org.michaeldadams.simpleCykParser.main
 
+import com.charleskorn.kaml.YamlList
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
+import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlList
+import com.charleskorn.kaml.yamlScalar
 import com.github.ajalt.clikt.completion.completionOption
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.output.MordantHelpFormatter
+import com.github.ajalt.clikt.parameters.arguments.convert
 import com.github.ajalt.clikt.parameters.options.versionOption
 import org.michaeldadams.simpleCykParser.BuildInformation
 import org.michaeldadams.simpleCykParser.grammar.Grammar
@@ -31,6 +37,10 @@ import org.michaeldadams.simpleCykParser.lexing.lex
 import org.michaeldadams.simpleCykParser.parsing.Chart
 import org.michaeldadams.simpleCykParser.yaml.toYaml
 import org.michaeldadams.simpleCykParser.yaml.toYamlString
+import org.michaeldadams.simpleCykParser.yaml.toPair
+import org.michaeldadams.simpleCykParser.yaml.toSymbol
+import org.michaeldadams.simpleCykParser.yaml.toItem
+import com.github.ajalt.clikt.core.InvalidFileFormat
 
 /** Runs the main entry point of the application. */
 fun main(args: Array<String>): Unit = Main().subcommands(
@@ -146,6 +156,7 @@ class Lex : CliktCommand(help = "Tokenize/lex a file") {
   val input: String by inputArgument()
   override fun run(): Unit {
     val (position, tokens) = lexRules.lex(input)
+    // throw ProgramResult(1)
     echo("inputLength: ${input.length}")
     echo("tokenizedLength: ${position}")
     echo("tokens:")
@@ -162,34 +173,84 @@ class Lex : CliktCommand(help = "Tokenize/lex a file") {
 // Parsing
 // ================================================================== //
 
+fun YamlList.addListTo(chart: Chart): Unit {
+  var pos = 0
+  val nonterminals = chart.parseRules.productionMap.keys.map { it.name }.toSet()
+  for (node in this.items) {
+    // TODO: tryYaml
+    when (node) {
+      is YamlScalar -> {
+        chart.add(pos, pos + 1, node.content.toSymbol(nonterminals))
+        pos++
+      }
+      is YamlMap -> {
+        chart.add(pos, pos + 1, node.toPair().first.toSymbol(nonterminals))
+        pos++
+      }
+      is YamlList -> {
+        when (node.items.size) {
+          3 -> chart.add(
+            node.items[0].yamlScalar.toInt(),
+            node.items[1].yamlScalar.toInt().also { pos = it },
+            node.items[2].yamlScalar.content.toSymbol(nonterminals),
+          )
+          4 -> chart.add(
+            node.items[0].yamlScalar.toInt(),
+            node.items[1].yamlScalar.toInt().also { pos = it },
+            node.items[2].toItem(nonterminals),
+            node.items[3].yamlScalar.toInt(),
+          )
+          else -> TODO()
+        }
+      }
+      else -> TODO()
+    }
+    // throw InvalidFileFormat("filename", "message", 10)
+  }
+}
+
 class Parse : CliktCommand(
   help = """
     Parse a sequence of symbols.
 
+    If input is a map, then "tokens", "items" and "symbols" are consulted for lists.
+    If input is a list, then the list is consulted.
+
+    In the list:
+    - A string is a symbol (starting where the last symbol ended)
+    - A pair is a symbol (starting where the last symbol ended)
+    - A triple is an item
+    - [start, end, symbol]
+    - [start, end, item, split]
     TODO: Tokens are expected either as "A" or "A: " and may be property of "tokens" or "terminals"
     field of map.  Or Chart-style map.  Supports both terminals and nonterminals.
+    // map -> try tokens and terminals (start where previous ended) and items/symbols
+    // list -> "A" or "A: "
   """.trimIndent(),
 ) {
+  // TODO: val showAux by option() // print chart extras
   val parseRules: ParseRules by parseRulesArgument()
-  val input: String by inputArgument()
+  val input: List<YamlList> by inputArgument().convert { string ->
+    tryYaml {
+      val yaml = string.toYaml()
+      if (yaml is YamlMap) {
+        // TODO: constant for "symbols"
+        listOf("symbols").mapNotNull<String, YamlList> { yaml.get<YamlNode>(it)?.yamlList }
+        // TODO: check that list is not empty
+      } else {
+        listOf(yaml.yamlList)
+      }
+    }
+  }
   override fun run(): Unit {
-    // TODO: automatically try map or list
-    val terminals = input.toYaml().yamlList.items.map { TODO() }
     val chart = Chart(parseRules)
-    chart.add(terminals)
+    input.forEach { it.addListTo(chart) }
     chart.addEpsilonItems()
     echo(chart.toYamlString())
   }
 }
 
-class LexAndParse : CliktCommand(
-  help = """
-    Lex a file then parse the resulting tokens.
-
-    TODO: Tokens are expected either as "A" or "A: " and may be property of "tokens" or "terminals"
-    field of map.  Or Chart-style map.
-  """.trimIndent(),
-) {
+class LexAndParse : CliktCommand(help = "Lex a file then parse the resulting tokens.") {
   val grammar: Grammar by grammarArgument()
   val input: String by inputArgument()
   override fun run(): Unit {
