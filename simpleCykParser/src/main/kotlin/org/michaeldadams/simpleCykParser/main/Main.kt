@@ -9,6 +9,7 @@
 
 package org.michaeldadams.simpleCykParser.main
 
+import com.charleskorn.kaml.YamlException
 import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
@@ -35,6 +36,7 @@ import org.michaeldadams.simpleCykParser.grammar.undefinedSymbols
 import org.michaeldadams.simpleCykParser.grammar.usedSymbols
 import org.michaeldadams.simpleCykParser.lexing.lex
 import org.michaeldadams.simpleCykParser.parsing.Chart
+import org.michaeldadams.simpleCykParser.yaml.incorrectType
 import org.michaeldadams.simpleCykParser.yaml.toYaml
 import org.michaeldadams.simpleCykParser.yaml.toYamlString
 import org.michaeldadams.simpleCykParser.yaml.toPair
@@ -128,9 +130,13 @@ fun CliktCommand.checkImpl(
   // Undefined nonterminals
   for ((lhs, rhs, index) in parseRules.undefinedSymbols(definedSymbols)) {
     if (filter(rhs.elements[index].symbol)) {
-      echo("Undefined symbol ${index} of ${lhs} -> ${rhs}")
+      echo("Undefined symbol ${index} of ${lhs} -> ${rhs}") // TODO
     }
   }
+
+  // TODO: check ParseRules.start is undefined
+
+
 }
 
 class CheckParseRules : CliktCommand(help = "Perform sanity checks on a parse rules") {
@@ -143,6 +149,7 @@ class CheckParseRules : CliktCommand(help = "Perform sanity checks on a parse ru
 class CheckGrammar : CliktCommand(help = "Perform sanity checks on a grammar") {
   val grammar by grammarArgument()
   override fun run(): Unit {
+    // TODO: check overlapping terminals and nonterminals
     checkImpl(grammar.parseRules, grammar.definedSymbols(), { true })
   }
 }
@@ -180,30 +187,37 @@ fun YamlList.addListTo(chart: Chart): Unit {
     // TODO: tryYaml
     when (node) {
       is YamlScalar -> {
-        chart.add(pos, pos + 1, node.content.toSymbol(nonterminals))
+        // Add Symbol at next position
+        chart.add(pos, pos + 1, node.toSymbol(nonterminals))
         pos++
       }
       is YamlMap -> {
+        // Add Symbol at next position
         chart.add(pos, pos + 1, node.toPair().first.toSymbol(nonterminals))
         pos++
       }
       is YamlList -> {
         when (node.items.size) {
+          // Add Symbol at specified position
           3 -> chart.add(
             node.items[0].yamlScalar.toInt(),
             node.items[1].yamlScalar.toInt().also { pos = it },
-            node.items[2].yamlScalar.content.toSymbol(nonterminals),
+            node.items[2].toSymbol(nonterminals),
           )
+          // Add Item
           4 -> chart.add(
             node.items[0].yamlScalar.toInt(),
             node.items[1].yamlScalar.toInt().also { pos = it },
             node.items[2].toItem(nonterminals),
             node.items[3].yamlScalar.toInt(),
           )
-          else -> TODO()
+          else -> throw YamlException(
+            "Expected 3 (for symbols) or 4 (for items) elements in list but found ${node.items.size}",
+            node.path,
+          )
         }
       }
-      else -> TODO()
+      else -> throw incorrectType("YamlScalar or YamlMap or YamlList", node)
     }
     // throw InvalidFileFormat("filename", "message", 10)
   }

@@ -57,8 +57,6 @@ fun ParseRules.undefinedSymbols(symbols: Set<Symbol>): Set<Triple<Nonterminal, R
     }
   }.toSet()
 
-// TODO: check ParseRules.start is undefined
-
 /**
  * Get the nonterminals that have no production.
  *

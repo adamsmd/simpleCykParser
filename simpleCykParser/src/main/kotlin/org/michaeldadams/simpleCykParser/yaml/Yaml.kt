@@ -40,16 +40,12 @@ import kotlin.text.toRegex
 
 // TODO: check that all KDoc have @receiver
 
-// TODO: remove toYamlMap
-
 /**
- * Parses a string as Yaml containing a map.
+ * Parses a string as Yaml document.
  *
- * @receiver TODO
- * @return the map resulting from parsing the string
+ * @receiver the string containing the Yaml to parse
+ * @return the [YamlNode] resulting from parsing the string
  */
-fun String.toYamlMap(): YamlMap = Yaml.default.parseToYamlNode(this).yamlMap
-
 fun String.toYaml(): YamlNode = Yaml.default.parseToYamlNode(this)
 
 /**
@@ -106,15 +102,20 @@ fun YamlMap.toGrammar(): Grammar = Grammar(this.toLexRules(), this.toParseRules(
 // Symbols
 // ================================================================== //
 
-private const val NONTERMINAL_PREFIX = "N:"
 private const val TERMINAL_PREFIX = "T:"
+private const val NONTERMINAL_PREFIX = "N:"
 
 /**
- * TODO.
+ * Convert a string into the terminal or nonterminal it represents.
  *
- * @receiver TODO
- * @param nonterminals TODO
- * @return TODO
+ * If the string starts with "T:", it is a terminal with its name after this prefix.
+ * If the string starts with "N:", it is a nonterminal with its name after this prefix.
+ * If neither is the case, the string is a nonterminal if it is in [nonterminals].
+ * Otherwise, it is a terminal.
+ *
+ * @receiver the string to be converted to a symbol
+ * @param nonterminals the set of strings to treat as nonterminals
+ * @return the symbol that the string was converted into
  */
 fun String.toSymbol(nonterminals: Set<String>): Symbol =
   when {
@@ -125,11 +126,15 @@ fun String.toSymbol(nonterminals: Set<String>): Symbol =
   }
 
 /**
- * TODO.
+ * Convert a [YamlNode] into the terminal or nonterminal it represents.
  *
- * @receiver TODO
- * @param nonterminals TODO
- * @return TODO
+ * If the [YamlNode] is a [YamlScalar], [toSymbol] is called on the [content] of
+ * that [YamlScalar].  If the [YamlNode is not a [YamlScalar], an exception is
+ * thrown.
+ *
+ * @receiver the [YamlNode] to be converted to a symbol
+ * @param nonterminals the set of string to treat as nonterminals
+ * @return the symbol that the [YamlNode] was converted into
  */
 fun YamlNode.toSymbol(nonterminals: Set<String>): Symbol =
   this.yamlScalar.content.toSymbol(nonterminals)
@@ -222,7 +227,7 @@ fun Rhs.toYamlString(): String {
 // Private Helpers
 // ================================================================== //
 
-private fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeException =
+fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeException =
   IncorrectTypeException(
     "Expected element to be ${expectedType} but is ${yamlNode::class.simpleName}",
     yamlNode.path,
@@ -256,7 +261,7 @@ fun String.toYamlString(): String {
   return writer.toString()
 }
 
-class StreamToStringWriter : StringWriter(), StreamDataWriter {
+private class StreamToStringWriter : StringWriter(), StreamDataWriter {
   override fun flush(): Unit = super<StringWriter>.flush()
 }
 
@@ -275,7 +280,12 @@ fun Item.toYamlString(): String =
 
 fun YamlNode.toItem(nonterminals: Set<String>): Item {
   val elements = this.yamlList.items
-  if (elements.size != 3) { TODO() }
+  if (elements.size != 3) {
+    throw YamlException(
+      "Items are represented by 3 element lists but found ${elements.size} elements",
+      path,
+    )
+  }
   return Item(
     Nonterminal(elements[0].yamlScalar.content),
     elements[1].toRhs(nonterminals),
@@ -287,33 +297,71 @@ fun YamlNode.toItem(nonterminals: Set<String>): Item {
  * TODO.
  *
  * @receiver TODO
+ * @return TODO
  */
 fun Chart.toYamlString(): String = buildString {
+  appendLine("################################################################")
   appendLine("symbols:")
+  appendLine()
   for ((start, startValue) in symbols) {
-    appendLine("  ################################")
-    appendLine("  # start: ${start}")
+    appendLine("################################")
+    appendLine("# start: ${start}")
     for ((end, endValue) in startValue) {
-      appendLine("  # start: ${start} end: ${end}")
+      appendLine("# start: ${start} end: ${end}")
       for (symbol in endValue) {
-        appendLine("  - [${start}, ${end}, ${symbol.toYamlString()}]")
+        appendLine("- [${start}, ${end}, ${symbol.toYamlString()}]")
       }
       appendLine()
     }
   }
 
+  appendLine("################################################################")
   appendLine("items:")
+  appendLine()
   for ((start, startValue) in items) {
-    appendLine("  ################################")
-    appendLine("  # start: ${start}")
+    appendLine("################################")
+    appendLine("# start: ${start}")
     for ((end, endValue) in startValue) {
-      appendLine("  # start: ${start} end: ${end}")
+      appendLine("# start: ${start} end: ${end}")
       for ((item, itemValue) in endValue) {
         for (split in itemValue) {
-          appendLine("  - [${start}, ${end}, ${item.toYamlString()}, ${split}]")
+          appendLine("- [${start}, ${end}, ${item.toYamlString()}, ${split}]")
         }
       }
       appendLine()
+    }
+  }
+
+  appendLine("################################################################")
+  appendLine("symbolEnds:")
+  appendLine()
+  for ((start, startValue) in symbolEnds) {
+    appendLine("################################")
+    appendLine("# start: ${start}")
+    for ((symbol, symbolValue) in startValue) {
+      appendLine("# start: ${start} symbol: ${symbol.toYamlString()}")
+      for (end in symbolValue) {
+        appendLine("- [${start}, ${symbol.toYamlString()}, ${end}]")
+      }
+      appendLine()
+    }
+  }
+
+  appendLine("################################################################")
+  appendLine("itemStarts:")
+  appendLine()
+  for ((end, endValue) in itemStarts) {
+    appendLine("################################")
+    appendLine("# end: ${end}")
+    for ((symbol, symbolValue) in endValue) {
+      appendLine("# end: ${end} symbol: ${symbol.toYamlString()}")
+      for ((start, startValue) in symbolValue) {
+        appendLine("# end: ${end} symbol: ${symbol.toYamlString()} start: ${start}")
+        for (item in startValue) {
+          appendLine("- [${end}, ${symbol.toYamlString()}, ${start}, ${item.toYamlString()}]")
+        }
+        appendLine()
+      }
     }
   }
 }
@@ -322,11 +370,29 @@ fun Chart.toYamlString(): String = buildString {
 // Token
 // ================================================================== //
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun IntRange.toYamlString(): String = "[${start}, ${endInclusive}]"
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun MatchGroup?.toYamlString(): String =
   if (this == null) "null" else "${value.toYamlString()}: ${range.toYamlString()}"
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun Token.toYamlString(): String =
   "${terminal.name.toYamlString()}: [${groups.map { it.toYamlString() }.joinToString()}]"
 

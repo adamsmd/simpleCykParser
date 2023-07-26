@@ -1,11 +1,12 @@
 package org.michaeldadams.simpleCykParser.parsing
 
+import com.charleskorn.kaml.yamlMap
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal
 import org.michaeldadams.simpleCykParser.grammar.Rhs
 import org.michaeldadams.simpleCykParser.grammar.RhsElement
 import org.michaeldadams.simpleCykParser.grammar.Terminal
 import org.michaeldadams.simpleCykParser.yaml.toParseRules
-import org.michaeldadams.simpleCykParser.yaml.toYamlMap
+import org.michaeldadams.simpleCykParser.yaml.toYaml
 import org.michaeldadams.simpleCykParser.yaml.toYamlString
 import kotlin.test.Test
 
@@ -19,7 +20,7 @@ class ChartTest {
           - P: ( S )
           - A: S + S
           - E: ""
-    """.trimIndent().toYamlMap().toParseRules()
+    """.trimIndent().toYaml().yamlMap.toParseRules()
 
     val chart = Chart(parseRules)
     chart.add(3, 4, Terminal("("))
@@ -45,7 +46,7 @@ class ChartTest {
         S:
           - P: ( S )
           - E: ""
-    """.trimIndent().toYamlMap().toParseRules()
+    """.trimIndent().toYaml().yamlMap.toParseRules()
 
     val chart = Chart(parseRules)
     chart.add(listOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")")))
@@ -61,7 +62,7 @@ class ChartTest {
           - R: S S S # Recursive
           - E: "" # Empty
           - T: a # Terminal
-    """.trimIndent().toYamlMap().toParseRules()
+    """.trimIndent().toYaml().yamlMap.toParseRules()
 
     val chart = Chart(parseRules)
     chart.add(listOf("a", "a", "a", "a").map { Terminal(it) })

@@ -2,6 +2,7 @@ package org.michaeldadams.simpleCykParser.yaml
 
 import com.charleskorn.kaml.IncorrectTypeException
 import com.charleskorn.kaml.MissingRequiredPropertyException
+import com.charleskorn.kaml.yamlMap
 import org.michaeldadams.simpleCykParser.grammar.Grammar
 import org.michaeldadams.simpleCykParser.grammar.LexRules
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal
@@ -86,7 +87,7 @@ class YamlTest {
           - []
           - [A, x, C]
           - [AA: N:A, BB: x, N:C, y, DD: D]
-    """.trimIndent().toYamlMap().toGrammar()
+    """.trimIndent().toYaml().yamlMap.toGrammar()
 
     @Suppress(
       "MaxLineLength",
@@ -146,7 +147,7 @@ class YamlTest {
         terminals: []
         start: S
         nonterminals: {}
-      """.trimIndent().toYamlMap().toGrammar()
+      """.trimIndent().toYaml().yamlMap.toGrammar()
     }
     // Missing terminals
     assertFailsWith(MissingRequiredPropertyException::class) {
@@ -155,7 +156,7 @@ class YamlTest {
         # terminals: []
         start: S
         nonterminals: {}
-      """.trimIndent().toYamlMap().toGrammar()
+      """.trimIndent().toYaml().yamlMap.toGrammar()
     }
     // Missing start
     assertFailsWith(MissingRequiredPropertyException::class) {
@@ -164,7 +165,7 @@ class YamlTest {
         terminals: []
         # start: S
         nonterminals: {}
-      """.trimIndent().toYamlMap().toGrammar()
+      """.trimIndent().toYaml().yamlMap.toGrammar()
     }
     // Missing nonterminals
     assertFailsWith(MissingRequiredPropertyException::class) {
@@ -173,7 +174,7 @@ class YamlTest {
         terminals: []
         start: S
         # nonterminals: {}
-      """.trimIndent().toYamlMap().toGrammar()
+      """.trimIndent().toYaml().yamlMap.toGrammar()
     }
   }
 
@@ -187,7 +188,7 @@ class YamlTest {
             B: B
         start: S
         productions: []
-      """.trimIndent().toYamlMap().toGrammar()
+      """.trimIndent().toYaml().yamlMap.toGrammar()
     }
     // Map that should represent a pair but has no entries
     assertFailsWith(IllegalArgumentException::class) {
@@ -197,7 +198,7 @@ class YamlTest {
           - {}
         start: S
         productions: []
-      """.trimIndent().toYamlMap().toGrammar()
+      """.trimIndent().toYaml().yamlMap.toGrammar()
     }
     assertFailsWith(IncorrectTypeException::class) {
       """
@@ -207,7 +208,7 @@ class YamlTest {
         productions:
           S:
             - # Null entry
-      """.trimIndent().toYamlMap().toGrammar()
+      """.trimIndent().toYaml().yamlMap.toGrammar()
     }
     assertFailsWith(IncorrectTypeException::class) {
       """
@@ -217,7 +218,7 @@ class YamlTest {
         productions:
           S:
             - F: {A: x}
-      """.trimIndent().toYamlMap().toGrammar()
+      """.trimIndent().toYaml().yamlMap.toGrammar()
     }
     assertFailsWith(IncorrectTypeException::class) {
       """
@@ -227,7 +228,7 @@ class YamlTest {
         productions:
           S:
             - [A, [B]]
-      """.trimIndent().toYamlMap().toGrammar()
+      """.trimIndent().toYaml().yamlMap.toGrammar()
     }
   }
 }

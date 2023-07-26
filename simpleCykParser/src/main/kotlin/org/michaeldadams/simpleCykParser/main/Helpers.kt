@@ -4,6 +4,7 @@ package org.michaeldadams.simpleCykParser.main
 
 import com.charleskorn.kaml.YamlException
 import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.yamlMap
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.parameters.arguments.ProcessedArgument
@@ -16,7 +17,7 @@ import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.yaml.toGrammar
 import org.michaeldadams.simpleCykParser.yaml.toLexRules
 import org.michaeldadams.simpleCykParser.yaml.toParseRules
-import org.michaeldadams.simpleCykParser.yaml.toYamlMap
+import org.michaeldadams.simpleCykParser.yaml.toYaml
 import java.io.InputStream
 
 /**
@@ -54,7 +55,7 @@ fun <T : Any> CliktCommand.rulesArgument(help: String, converter: (YamlMap) -> T
   this.argument(help = help).inputStream().convert<InputStream, T> {
     // TODO: use tryYaml and check that error message is same
     try {
-      converter(it.reader().readText().toYamlMap())
+      converter(it.reader().readText().toYaml().yamlMap)
     } catch (e: YamlException) {
       // TODO: InvalidFileFormat(filename, message, lineno)
       fail(
