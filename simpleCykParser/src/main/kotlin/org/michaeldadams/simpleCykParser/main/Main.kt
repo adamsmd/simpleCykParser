@@ -18,6 +18,7 @@ import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlScalar
 import com.github.ajalt.clikt.completion.completionOption
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.InvalidFileFormat
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.output.MordantHelpFormatter
@@ -37,12 +38,11 @@ import org.michaeldadams.simpleCykParser.grammar.usedSymbols
 import org.michaeldadams.simpleCykParser.lexing.lex
 import org.michaeldadams.simpleCykParser.parsing.Chart
 import org.michaeldadams.simpleCykParser.yaml.incorrectType
-import org.michaeldadams.simpleCykParser.yaml.toYaml
-import org.michaeldadams.simpleCykParser.yaml.toYamlString
+import org.michaeldadams.simpleCykParser.yaml.toItem
 import org.michaeldadams.simpleCykParser.yaml.toPair
 import org.michaeldadams.simpleCykParser.yaml.toSymbol
-import org.michaeldadams.simpleCykParser.yaml.toItem
-import com.github.ajalt.clikt.core.InvalidFileFormat
+import org.michaeldadams.simpleCykParser.yaml.toYaml
+import org.michaeldadams.simpleCykParser.yaml.toYamlString
 
 /** Runs the main entry point of the application. */
 fun main(args: Array<String>): Unit = Main().subcommands(
@@ -135,8 +135,6 @@ fun CliktCommand.checkImpl(
   }
 
   // TODO: check ParseRules.start is undefined
-
-
 }
 
 class CheckParseRules : CliktCommand(help = "Perform sanity checks on a parse rules") {
