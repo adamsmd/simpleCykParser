@@ -33,21 +33,23 @@ fun String.toYaml(): YamlNode = Yaml.default.parseToYamlNode(this)
 // Strings
 // ================================================================== //
 
-// TODO: broken on "". produces `--- ""`
-// val yaml = Yaml(configuration=YamlConfiguration(singleLineStringStyle=SingleLineStringStyle.Plain))
-// fun String.toYamlString(): String = "\"" + yaml.encodeToString(String.serializer(), this) + "\""
-// fun String.toYamlString(): String = Yaml.default.encodeToString(String.serializer(), this)
-
+/**
+ * Convert a [String] object to its YAML representation.
+ *
+ * We do not use `Yaml.default.encodeToString(String.serializer(), s)` because
+ * that produced `--- ""` when applied to the empty string.
+ *
+ * @receiver the object to convert to YAML
+ * @return the YAML resulting from converting the object
+ */
 fun String.toYamlString(): String {
+  val writer = object : StringWriter(), StreamDataWriter {
+    override fun flush(): Unit = super<StringWriter>.flush()
+  }
   // Other potentially useful settings are setWidth() and setSplitLines()
-  val writer = StreamToStringWriter()
-  Dump(DumpSettings.builder().setUseUnicodeEncoding(false).setBestLineBreak("").build())
-    .dumpNode(ScalarNode(Tag.STR, this, ScalarStyle.DOUBLE_QUOTED), writer)
+  val builder = DumpSettings.builder().setUseUnicodeEncoding(false).setBestLineBreak("").build()
+  Dump(builder).dumpNode(ScalarNode(Tag.STR, this, ScalarStyle.DOUBLE_QUOTED), writer)
   return writer.toString()
-}
-
-private class StreamToStringWriter : StringWriter(), StreamDataWriter {
-  override fun flush(): Unit = super<StringWriter>.flush()
 }
 
 // ================================================================== //
@@ -55,7 +57,7 @@ private class StreamToStringWriter : StringWriter(), StreamDataWriter {
 // ================================================================== //
 
 // TODO: prevent need to use in Main.kt
-
+// TODO: document
 fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeException =
   IncorrectTypeException(
     "Expected element to be ${expectedType} but is ${yamlNode::class.simpleName}",
@@ -67,11 +69,13 @@ fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeExcept
 // ================================================================== //
 
 // TODO: rename to toStringPair?
+// TODO: document
 fun YamlMap.toPair(): Pair<String, YamlNode> {
   val pair = this.entries.toList().singleOrNull()
     ?: throw YamlException("Expected one map element but found ${this.entries.size}", this.path)
   return pair.first.content to pair.second
 }
 
+// TODO: document
 fun YamlNode.toOptionalPair(): Pair<String?, YamlNode> =
   if (this is YamlMap) this.toPair() else null to this

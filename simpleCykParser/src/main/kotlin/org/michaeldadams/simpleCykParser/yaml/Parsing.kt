@@ -15,14 +15,22 @@ import org.michaeldadams.simpleCykParser.parsing.Item
 // ================================================================== //
 
 /**
- * TODO.
+ * Convert a [Item] object to its YAML representation.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the object to convert to YAML
+ * @return the YAML resulting from converting the object
  */
 fun Item.toYamlString(): String =
   "[${this.lhs.name.toYamlString()}, ${this.rhs.toYamlString()}, ${this.consumed}]"
 
+/**
+ * Convert a YAML node to an [Item] object.
+ *
+ * @receiver the YAML node to convert to an object
+ * @param nonterminals the strings to be treated as names of nonterminals
+ * @return the object represented by the YAML node
+ * @throws YamlException if the YAML node has an unexpected structure
+ */
 fun YamlNode.toItem(nonterminals: Set<String>): Item {
   val elements = this.yamlList.items
   if (elements.size != 3) {
@@ -43,10 +51,10 @@ fun YamlNode.toItem(nonterminals: Set<String>): Item {
 // ================================================================== //
 
 /**
- * TODO.
+ * Convert a [Chart] object to its YAML representation.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the object to convert to YAML
+ * @return the YAML resulting from converting the object
  */
 fun Chart.toYamlString(): String = buildString {
   appendLine("################################################################")

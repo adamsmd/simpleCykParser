@@ -11,31 +11,27 @@ import kotlin.text.MatchGroup
 // ================================================================== //
 
 /**
- * TODO.
+ * Convert an [IntRange] object to its YAML representation.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the object to convert to YAML
+ * @return the YAML resulting from converting the object
  */
 fun IntRange.toYamlString(): String = "[${start}, ${endInclusive}]"
 
 /**
- * TODO.
+ * Convert a [MatchGroup] object to its YAML representation.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the object to convert to YAML
+ * @return the YAML resulting from converting the object
  */
 fun MatchGroup?.toYamlString(): String =
   if (this == null) "null" else "${value.toYamlString()}: ${range.toYamlString()}"
 
 /**
- * TODO.
+ * Convert a [Token] object to its YAML representation.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the object to convert to YAML
+ * @return the YAML resulting from converting the object
  */
 fun Token.toYamlString(): String =
   "${terminal.name.toYamlString()}: [${groups.map { it.toYamlString() }.joinToString()}]"
-
-//  "A": ["xxx": [12,15], "xx": [13,14]]
-//  "A": ["xxx": [12,15], [], "xx": [13,14]]
-//  "A": [["xxx", 12,15], "xx": [13,14]]

@@ -41,9 +41,9 @@ private const val NONTERMINAL_PREFIX = "N:"
  * If neither is the case, the string is a nonterminal if it is in [nonterminals].
  * Otherwise, it is a terminal.
  *
- * @receiver the string to be converted to a symbol
- * @param nonterminals the set of strings to treat as nonterminals
- * @return the symbol that the string was converted into
+ * @receiver the string to convert to a symbol
+ * @param nonterminals the strings to be treated as names of nonterminals
+ * @return the symbol represented by the string
  */
 fun String.toSymbol(nonterminals: Set<String>): Symbol =
   when {
@@ -54,24 +54,20 @@ fun String.toSymbol(nonterminals: Set<String>): Symbol =
   }
 
 /**
- * Convert a [YamlNode] into the terminal or nonterminal it represents.
+ * Convert a YAML node to a [Symbol] object.
  *
- * If the [YamlNode] is a [YamlScalar], [toSymbol] is called on the [content] of
- * that [YamlScalar].  If the [YamlNode is not a [YamlScalar], an exception is
- * thrown.
- *
- * @receiver the [YamlNode] to be converted to a symbol
- * @param nonterminals the set of string to treat as nonterminals
- * @return the symbol that the [YamlNode] was converted into
+ * @receiver the YAML node to convert to an object
+ * @param nonterminals the strings to be treated as names of nonterminals
+ * @return the object represented by the YAML node
  */
 fun YamlNode.toSymbol(nonterminals: Set<String>): Symbol =
   this.yamlScalar.content.toSymbol(nonterminals)
 
 /**
- * TODO.
+ * Convert a [Symbol] object to its YAML representation.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the object to convert to YAML
+ * @return the YAML resulting from converting the object
  */
 fun Symbol.toYamlString(): String =
   when (this) {
@@ -84,11 +80,11 @@ fun Symbol.toYamlString(): String =
 // ================================================================== //
 
 /**
- * TODO.
+ * Convert a YAML node to an [RhsElement] object.
  *
- * @receiver TODO
- * @param nonterminals TODO
- * @return TODO
+ * @receiver the YAML node to convert to an object
+ * @param nonterminals the strings to be treated as names of nonterminals
+ * @return the object represented by the YAML node
  */
 fun YamlNode.toRhsElement(nonterminals: Set<String>): RhsElement {
   val (label, symbol) = this.toOptionalPair()
@@ -96,10 +92,10 @@ fun YamlNode.toRhsElement(nonterminals: Set<String>): RhsElement {
 }
 
 /**
- * TODO.
+ * Convert an [RhsElement] object to its YAML representation.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the object to convert to YAML
+ * @return the YAML resulting from converting the object
  */
 fun RhsElement.toYamlString(): String {
   val symbol = this.symbol.toYamlString()
@@ -109,11 +105,11 @@ fun RhsElement.toYamlString(): String {
 private val WHITESPACE_REGEX = "\\p{IsWhite_Space}+".toRegex()
 
 /**
- * TODO.
+ * Convert a YAML node to a list of [RhsElement] objects.
  *
- * @receiver TODO
- * @param nonterminals TODO
- * @return TODO
+ * @receiver the YAML node to convert to the objects
+ * @param nonterminals the strings to be treated as names of nonterminals
+ * @return the list of objects represented by the YAML node
  */
 fun YamlNode.toRhsElements(nonterminals: Set<String>): List<RhsElement> =
   when (this) {
@@ -129,11 +125,11 @@ fun YamlNode.toRhsElements(nonterminals: Set<String>): List<RhsElement> =
 // ================================================================== //
 
 /**
- * TODO.
+ * Convert a YAML node to an [Rhs] object.
  *
- * @receiver TODO
- * @param nonterminals TODO
- * @return TODO
+ * @receiver the YAML node to convert to an object
+ * @param nonterminals the strings to be treated as names of nonterminals
+ * @return the object represented by the YAML node
  */
 fun YamlNode.toRhs(nonterminals: Set<String>): Rhs {
   val (label, elements) = this.toOptionalPair()
@@ -141,10 +137,10 @@ fun YamlNode.toRhs(nonterminals: Set<String>): Rhs {
 }
 
 /**
- * TODO.
+ * Convert an [Rhs] object to its YAML representation.
  *
- * @receiver TODO
- * @return TODO
+ * @receiver the object to convert to YAML
+ * @return the YAML resulting from converting the object
  */
 fun Rhs.toYamlString(): String {
   val elements = "[${this.elements.map { "${it.toYamlString()}" }.joinToString() }]"
@@ -156,10 +152,10 @@ fun Rhs.toYamlString(): String {
 // ================================================================== //
 
 /**
- * Extracts lexing rules from a [YamlMap].
+ * Convert a YAML node to a [LexRules] object.
  *
- * @receiver TODO
- * @return the lexing rules extracted from the [YamlMap]
+ * @receiver the YAML node to convert to an object
+ * @return the object represented by the YAML node
  */
 fun YamlMap.toLexRules(): LexRules {
   val map = this.toMap()
@@ -180,12 +176,10 @@ fun YamlMap.toLexRules(): LexRules {
 // ================================================================== //
 
 /**
- * Extracts parsing rules from a [YamlMap].
+ * Convert a YAML node to a [ParseRules] object.
  *
- * @receiver TODO
- * @return the parsing rules extracted from the [YamlMap]
- * @throws IncorrectTypeException TODO
- * @throws MissingRequiredPropertyException TODO
+ * @receiver the YAML node to convert to an object
+ * @return the object represented by the YAML node
  */
 fun YamlMap.toParseRules(): ParseRules {
   val map = this.toMap()
@@ -206,10 +200,10 @@ fun YamlMap.toParseRules(): ParseRules {
 // ================================================================== //
 
 /**
- * Extracts a grammar from a [YamlMap].
+ * Convert a YAML node to a [Grammar] object.
  *
- * @receiver TODO
- * @return the grammar extracted from the [YamlMap]
+ * @receiver the YAML node to convert to an object
+ * @return the object represented by the YAML node
  */
 fun YamlMap.toGrammar(): Grammar = Grammar(this.toLexRules(), this.toParseRules())
 
@@ -217,13 +211,9 @@ fun YamlMap.toGrammar(): Grammar = Grammar(this.toLexRules(), this.toParseRules(
 // Private Helpers
 // ================================================================== //
 
-// fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeException =
-//   IncorrectTypeException(
-//     "Expected element to be ${expectedType} but is ${yamlNode::class.simpleName}",
-//     yamlNode.path,
-//   )
-
+// TODO: document
 private operator fun Map<String, YamlNode>.get(key: String, path: YamlPath): YamlNode =
   this[key] ?: throw MissingRequiredPropertyException(key, path)
 
+// TODO: document
 private fun YamlMap.toMap(): Map<String, YamlNode> = this.entries.mapKeys { it.key.content }
