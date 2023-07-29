@@ -29,10 +29,20 @@ import java.io.InputStream
 fun CliktCommand.inputArgument(): ProcessedArgument<String, String> =
   argument(help = "File containing the grammar").inputStream().convert { it.reader().readText() }
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @param S
+ * @param T
+ * @param action TODO
+ * @return TODO
+ * @throw UsageError TODO
+ */
 fun <S, T> S.tryYaml(action: S.() -> T): T =
   try {
     this.action()
-  } catch (e: YamlException) {
+  } catch (@Suppress("SwallowedException") e: YamlException) {
     // TODO: InvalidFileFormat(filename, message, lineno)
     // Error: incorrect format in file filename line 10: message
     throw UsageError(

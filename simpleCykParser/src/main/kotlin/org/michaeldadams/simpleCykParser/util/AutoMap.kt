@@ -1,4 +1,4 @@
-/** Code and helpers for [AutoMap] and [MutableAutoMap]. */
+/** The [TotalMap] and [AutoMap] classes. */
 
 package org.michaeldadams.simpleCykParser.util
 

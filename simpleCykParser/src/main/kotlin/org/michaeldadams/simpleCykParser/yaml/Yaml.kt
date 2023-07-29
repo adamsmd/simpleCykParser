@@ -15,8 +15,6 @@ import org.snakeyaml.engine.v2.nodes.ScalarNode
 import org.snakeyaml.engine.v2.nodes.Tag
 import java.io.StringWriter
 
-// TODO: check that all KDoc have @receiver
-
 // ================================================================== //
 // Parse YAML
 // ================================================================== //
@@ -57,7 +55,14 @@ fun String.toYamlString(): String {
 // ================================================================== //
 
 // TODO: prevent need to use in Main.kt
-// TODO: document
+
+/**
+ * Return an [IncorrectTypeException] for when a [YamlNode] is the wrong type.
+ *
+ * @param expectedType the type that the [YamlNode] should have been
+ * @param yamlNode the [YamlNode] that had the wrong type
+ * @return the constructed exception
+ */
 fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeException =
   IncorrectTypeException(
     "Expected element to be ${expectedType} but is ${yamlNode::class.simpleName}",
@@ -68,14 +73,26 @@ fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeExcept
 // Pairs
 // ================================================================== //
 
-// TODO: rename to toStringPair?
-// TODO: document
+// TODO: rename to toStringPair? toLabeled? toNamed(!)?
+
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ * @throw YamlException TODO
+ */
 fun YamlMap.toPair(): Pair<String, YamlNode> {
   val pair = this.entries.toList().singleOrNull()
     ?: throw YamlException("Expected one map element but found ${this.entries.size}", this.path)
   return pair.first.content to pair.second
 }
 
-// TODO: document
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @return TODO
+ */
 fun YamlNode.toOptionalPair(): Pair<String?, YamlNode> =
   if (this is YamlMap) this.toPair() else null to this

@@ -44,7 +44,15 @@ import org.michaeldadams.simpleCykParser.yaml.toSymbol
 import org.michaeldadams.simpleCykParser.yaml.toYaml
 import org.michaeldadams.simpleCykParser.yaml.toYamlString
 
-/** Runs the main entry point of the application. */
+// TODO: move TODO
+// TODO: Chart Entry Type
+// TODO: when to do "this."
+// TODO: check that all KDoc have @receiver
+
+/** The main entry point of the application.
+ *
+ * @param args TODO
+ */
 fun main(args: Array<String>): Unit = Main().subcommands(
   PrintLexRules(),
   PrintParseRules(),
@@ -56,7 +64,6 @@ fun main(args: Array<String>): Unit = Main().subcommands(
   LexAndParse(),
 ).main(args)
 
-/** The main application. */
 class Main : CliktCommand(
   name = "simpleCykParser",
   printHelpOnEmptyArgs = true,
@@ -178,6 +185,12 @@ class Lex : CliktCommand(help = "Tokenize/lex a file") {
 // Parsing
 // ================================================================== //
 
+/**
+ * TODO.
+ *
+ * @receiver TODO
+ * @param chart TODO
+ */
 fun YamlList.addListTo(chart: Chart): Unit {
   var pos = 0
   val nonterminals = chart.parseRules.productionMap.keys.map { it.name }.toSet()
@@ -210,12 +223,15 @@ fun YamlList.addListTo(chart: Chart): Unit {
             node.items[3].yamlScalar.toInt(),
           )
           else -> throw YamlException(
-            "Expected 3 (for symbols) or 4 (for items) elements in list but found ${node.items.size}",
+            "Expected 3 (for symbols) or 4 (for items) elements in list but found ${
+              node.items.size}",
             node.path,
           )
         }
       }
-      else -> throw incorrectType("YamlScalar or YamlMap or YamlList", node)
+      else -> {
+        throw incorrectType("YamlScalar or YamlMap or YamlList", node)
+      }
     }
     // throw InvalidFileFormat("filename", "message", 10)
   }
@@ -240,7 +256,11 @@ class Parse : CliktCommand(
     // list -> "A" or "A: "
   """.trimIndent(),
 ) {
-  // TODO: val showAux by option() // print chart extras
+  // TODO: val symbols by option(default = true)
+  // TODO: val items by option by option()
+  // TODO: val symbolStarts by option()
+  // TODO: val itemEnds by option()
+  // TODO: include these in LexAndParse
   val parseRules: ParseRules by parseRulesArgument()
   val input: List<YamlList> by inputArgument().convert { string ->
     tryYaml {

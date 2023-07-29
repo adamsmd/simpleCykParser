@@ -10,6 +10,9 @@ The basic usage is:
 
 TODO
 
+TODO: non-probabalistic
+TODO: chart parser
+
 For more details on usage and command-line flags run:
 
     simpleCykParser --help
@@ -28,8 +31,22 @@ TODO: Examples found in test files
 TODO:
 
 - git checkout
-- gradlew build
-- ./build/...
+- ./gradlew assemble # Build without tests
+- ./gradlew test # Run just tests
+- ./gradlew check # Run tests and linters
+- ./gradlew build # Build and run tests
+
+### Running In Place
+
+TODO:
+
+- ./gradlew installDist
+- ./simpleCykParser/build/install/simpleCykParser/bin/simpleCykParser
+
+### Installing
+
+TODO:
+
 - install
 
 ## Testing

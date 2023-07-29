@@ -1,4 +1,4 @@
-/** TODO. */
+/** The [Chart] class. */
 
 package org.michaeldadams.simpleCykParser.parsing
 
@@ -6,8 +6,6 @@ import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.util.AutoMap
 import org.michaeldadams.simpleCykParser.util.TotalMap
-
-// TODO: when to do "this."
 
 /**
  * TODO.
@@ -95,9 +93,9 @@ class Chart(val parseRules: ParseRules) {
    * TODO.
    *
    * @receiver TODO
-   * @param start TODO
-   * @param end TODO
-   * @param symbol TODO
+   * @param start the start position (inclusive) of the symbol to be added
+   * @param end the end position (exclusive) of the symbol to be added
+   * @param symbol the symbol to be added
    */
   fun add(start: Int, end: Int, symbol: Symbol): Unit {
     // NOTE: just an assertion and does not show how built
@@ -120,9 +118,9 @@ class Chart(val parseRules: ParseRules) {
    * TODO.
    *
    * @receiver TODO
-   * @param start TODO
-   * @param end TODO
-   * @param item TODO
+   * @param start the start position (inclusive) of the item to be added
+   * @param end the end position (exclusive) of the item to be added
+   * @param item the item to be added
    * @param split TODO
    */
   fun add(start: Int, end: Int, item: Item, split: Int?): Unit {
@@ -160,8 +158,9 @@ class Chart(val parseRules: ParseRules) {
    * @receiver TODO
    */
   fun addEpsilonItems(): Unit {
-    // TODO: symbolEnds.keys and itemStarts.keys?
-    for (start in items.keys + symbols.keys) {
+    val itemEndPositions = itemStarts.keys
+    val symbolStartPositions = symbolEnds.keys
+    for (start in itemEndPositions + symbolStartPositions) {
       for ((lhs, rhsSet) in parseRules.productionMap) {
         for (rhs in rhsSet) {
           add(start, start, Item(lhs, rhs, 0), null)
@@ -173,8 +172,11 @@ class Chart(val parseRules: ParseRules) {
 
 // (implicit start and end)
 // symbol -> items
-// item -> splits
+// fun Chart.getItems(start: Int, end: Int, symbol: Symbol): Set<Item> = TODO()
+// item -> splits: chart.
 // split -> left or right child
+// fun Chart.getLeft(start: Int, end: Int, item: Item): Item = TODO()
+// fun Chart.getRight(start: Int, end: Int, item: Item): Symbol = TODO()
 
 // get parents as left child (symbol)
 // get parents as right child (item)

@@ -4,6 +4,6 @@ import kotlin.test.Test
 
 class GrammarTest {
   @Test fun test(): Unit {
-    // Grammar.kt is just data classes with no code, so nothing to test
+    // Grammar.kt has no code, so nothing to test
   }
 }

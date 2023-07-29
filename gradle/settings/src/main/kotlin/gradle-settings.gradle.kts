@@ -50,6 +50,16 @@ dependencies {
 // TODO: make check depend on diktatCheck
 
 // ================================================================== //
+// Coverage
+koverReport {
+  filters {
+    excludes {
+      annotatedBy("org.michaeldadams.simpleCykParser.util.Generated")
+    }
+  }
+}
+
+// ================================================================== //
 // Documentation
 tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
   dokkaSourceSets {

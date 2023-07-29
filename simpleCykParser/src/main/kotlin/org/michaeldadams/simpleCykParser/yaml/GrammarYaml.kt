@@ -2,7 +2,6 @@
 
 package org.michaeldadams.simpleCykParser.yaml
 
-import com.charleskorn.kaml.IncorrectTypeException
 import com.charleskorn.kaml.MissingRequiredPropertyException
 import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
@@ -23,8 +22,6 @@ import org.michaeldadams.simpleCykParser.grammar.Terminal
 import org.michaeldadams.simpleCykParser.grammar.TerminalRule
 import org.michaeldadams.simpleCykParser.util.toEqRegex
 import kotlin.text.toRegex
-
-// TODO: check that all KDoc have @receiver
 
 // ================================================================== //
 // Symbols
@@ -102,6 +99,7 @@ fun RhsElement.toYamlString(): String {
   return if (this.label == null) symbol else "[${label.toYamlString()}, ${symbol}]"
 }
 
+@Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
 private val WHITESPACE_REGEX = "\\p{IsWhite_Space}+".toRegex()
 
 /**
@@ -211,9 +209,27 @@ fun YamlMap.toGrammar(): Grammar = Grammar(this.toLexRules(), this.toParseRules(
 // Private Helpers
 // ================================================================== //
 
-// TODO: document
+/**
+ * Version of [get] that throws [MissingRequiredPropertyException] if the key is
+ * not present.
+ *
+ * @receiver the [Map] in which to lookup the key
+ * @param key the key to lookup in the [Map]
+ * @param path the path to pass to [MissingRequiredPropertyException] if the key
+ *   is not found
+ * @return the value for the given key
+ * @throw MissingRequiredPropertyException if the key is not present
+ */
 private operator fun Map<String, YamlNode>.get(key: String, path: YamlPath): YamlNode =
   this[key] ?: throw MissingRequiredPropertyException(key, path)
 
-// TODO: document
+/**
+ * Convert a [YamlMap] to a [Map] keyed by strings.
+ *
+ * Use this instead of the [entries] of [YamlMap] because that is keyed by
+ * [YamlNode].
+ *
+ * @receiver the [YamlMap] to convert
+ * @return the [Map] resulting from the conversion
+ */
 private fun YamlMap.toMap(): Map<String, YamlNode> = this.entries.mapKeys { it.key.content }

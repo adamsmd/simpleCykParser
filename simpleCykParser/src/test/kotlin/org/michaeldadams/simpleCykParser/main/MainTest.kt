@@ -1,9 +1,16 @@
 package org.michaeldadams.simpleCykParser.main
 
-class MainTest {
-  // TODO
-  // val result = Main().test("--version")
-  // assertEqual("Version 2.1", result.stdout)
+import com.github.ajalt.clikt.testing.test
+import org.michaeldadams.simpleCykParser.BuildInformation
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-  // val result = CheckGrammar().test("--foo", stdin = "...")
+class MainTest {
+  @Test fun test(): Unit {
+    // TODO
+    val result = Main().test("--version")
+    assertEquals("simpleCykParser version ${BuildInformation.VERSION}\n", result.stdout)
+
+    // TODO: val result = CheckGrammar().test("--foo", stdin = "...")
+  }
 }

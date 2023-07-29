@@ -3,6 +3,7 @@
 package org.michaeldadams.simpleCykParser.lexing
 
 import org.michaeldadams.simpleCykParser.grammar.Terminal
+import org.michaeldadams.simpleCykParser.util.Generated as Gen
 
 /**
  * A token produced by lexing.
@@ -22,7 +23,7 @@ import org.michaeldadams.simpleCykParser.grammar.Terminal
  * @property terminal the terminal for this token
  * @property groups the capture groups from the token's regular expression
  */
-data class Token(val terminal: Terminal, val groups: List<MatchGroup?>) {
+data class Token(@get:Gen val terminal: Terminal, @get:Gen val groups: List<MatchGroup?>) {
   /** The [MatchGroup] for the entire region matched by the token. */
   @Suppress("CUSTOM_GETTERS_SETTERS")
   val region: MatchGroup get() = groups.first()!!
@@ -34,9 +35,9 @@ data class Token(val terminal: Terminal, val groups: List<MatchGroup?>) {
 }
 
 /**
- * Construct a [Token] from a [MatchResult] and a [Token].
+ * Construct a token from a [MatchResult] and a terminal.
  *
- * @receiver TODO
+ * @receiver the [MatchResult] to convert the token from.
  * @param terminal the terminal that the token is for
  * @return the token constructed for the [terminal] and the [MatchResult]
  */
