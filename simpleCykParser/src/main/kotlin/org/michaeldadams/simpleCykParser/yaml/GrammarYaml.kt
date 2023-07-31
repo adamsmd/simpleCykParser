@@ -84,7 +84,7 @@ fun Symbol.toYamlString(): String =
  * @return the object represented by the YAML node
  */
 fun YamlNode.toRhsElement(nonterminals: Set<String>): RhsElement {
-  val (label, symbol) = this.toOptionalPair()
+  val (label, symbol) = this.toOptionallyLabeled()
   return RhsElement(label, symbol.toSymbol(nonterminals))
 }
 
@@ -130,7 +130,7 @@ fun YamlNode.toRhsElements(nonterminals: Set<String>): List<RhsElement> =
  * @return the object represented by the YAML node
  */
 fun YamlNode.toRhs(nonterminals: Set<String>): Rhs {
-  val (label, elements) = this.toOptionalPair()
+  val (label, elements) = this.toOptionallyLabeled()
   return Rhs(label, elements.toRhsElements(nonterminals))
 }
 
@@ -160,7 +160,7 @@ fun YamlMap.toLexRules(): LexRules {
   val whitespace = map["whitespace", this.path].yamlScalar.content.toRegex().toEqRegex()
 
   val terminals = map["terminals", this.path].yamlList.items.map { item ->
-    val (terminal, regex) = item.yamlMap.toPair()
+    val (terminal, regex) = item.yamlMap.toLabeled()
     TerminalRule(Terminal(terminal), regex.yamlScalar.content.toRegex().toEqRegex())
   }
 

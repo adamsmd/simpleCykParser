@@ -39,7 +39,7 @@ import org.michaeldadams.simpleCykParser.lexing.lex
 import org.michaeldadams.simpleCykParser.parsing.Chart
 import org.michaeldadams.simpleCykParser.yaml.incorrectType
 import org.michaeldadams.simpleCykParser.yaml.toItem
-import org.michaeldadams.simpleCykParser.yaml.toPair
+import org.michaeldadams.simpleCykParser.yaml.toLabeled
 import org.michaeldadams.simpleCykParser.yaml.toSymbol
 import org.michaeldadams.simpleCykParser.yaml.toYaml
 import org.michaeldadams.simpleCykParser.yaml.toYamlString
@@ -204,7 +204,7 @@ fun YamlList.addListTo(chart: Chart): Unit {
       }
       is YamlMap -> {
         // Add Symbol at next position
-        chart.add(pos, pos + 1, node.toPair().first.toSymbol(nonterminals))
+        chart.add(pos, pos + 1, node.toLabeled().first.toSymbol(nonterminals))
         pos++
       }
       is YamlList -> {

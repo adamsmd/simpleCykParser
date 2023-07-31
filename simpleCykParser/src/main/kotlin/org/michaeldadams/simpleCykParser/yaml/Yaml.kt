@@ -73,8 +73,6 @@ fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeExcept
 // Pairs
 // ================================================================== //
 
-// TODO: rename to toStringPair? toLabeled? toNamed(!)?
-
 /**
  * TODO.
  *
@@ -82,7 +80,7 @@ fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeExcept
  * @return TODO
  * @throw YamlException TODO
  */
-fun YamlMap.toPair(): Pair<String, YamlNode> {
+fun YamlMap.toLabeled(): Pair<String, YamlNode> {
   val pair = this.entries.toList().singleOrNull()
     ?: throw YamlException("Expected one map element but found ${this.entries.size}", this.path)
   return pair.first.content to pair.second
@@ -94,5 +92,5 @@ fun YamlMap.toPair(): Pair<String, YamlNode> {
  * @receiver TODO
  * @return TODO
  */
-fun YamlNode.toOptionalPair(): Pair<String?, YamlNode> =
-  if (this is YamlMap) this.toPair() else null to this
+fun YamlNode.toOptionallyLabeled(): Pair<String?, YamlNode> =
+  if (this is YamlMap) this.toLabeled() else null to this
