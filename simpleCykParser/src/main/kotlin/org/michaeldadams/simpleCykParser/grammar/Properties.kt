@@ -8,10 +8,6 @@
 
 package org.michaeldadams.simpleCykParser.grammar
 
-// TODO: check @throws
-
-// TODO: check for unique terminal and nonterminal names
-
 /**
  * Get the terminals defined by a [LexRules].
  *

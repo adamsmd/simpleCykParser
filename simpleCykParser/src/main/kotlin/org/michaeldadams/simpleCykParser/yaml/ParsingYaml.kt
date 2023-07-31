@@ -105,9 +105,9 @@ fun Chart.toYamlString(): String = buildString {
   }
 
   appendLine("################################################################")
-  appendLine("itemStarts:")
+  appendLine("nextItems:")
   appendLine()
-  for ((end, endValue) in itemStarts) {
+  for ((end, endValue) in nextItems) {
     appendLine("################################")
     appendLine("# end: ${end}")
     for ((symbol, symbolValue) in endValue) {

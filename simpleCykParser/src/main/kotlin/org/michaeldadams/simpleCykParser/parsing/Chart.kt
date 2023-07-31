@@ -9,6 +9,8 @@ import org.michaeldadams.simpleCykParser.util.TotalMap
 
 /**
  * TODO.
+ * 
+ * All start positions are inclusvie and all end positions are exclusive.
  *
  * @property parseRules TODO
  */
@@ -25,8 +27,8 @@ class Chart(val parseRules: ParseRules) {
    * Can be added to using the [add] functions.
    *
    * Indexed (in order) by:
-   * - start position (inclusive) and
-   * - end position (exclusive).
+   * - start position and
+   * - end position.
    *
    * The final value is the set of symbols at that start and end position.
    */
@@ -45,11 +47,13 @@ class Chart(val parseRules: ParseRules) {
    * Can be added to using the [add] functions.
    *
    * Indexed (in order) by:
-   * - start position (inclusive),
-   * - end position (exclusive) and
+   * - start position,
+   * - end position and
    * - item.
    *
-   * The final value is the set of positions where the TODO.
+   * The final value is the set of start positions for the most recently
+   * consumed symbol in the item or `null` if the item has not consumed anything
+   * yet.
    */
   val items: TotalMap<Int, TotalMap<Int, TotalMap<Item, Set<Int?>>>> = _items
 
@@ -61,82 +65,93 @@ class Chart(val parseRules: ParseRules) {
   /**
    * Positions where a symbol ends given a start.
    *
-   * Index (in order) by:
-   * - start position (inclusive) and
+   * Indexed (in order) by:
+   * - start position and
    * - symbol.
    *
-   * The final value is the set of positions where the given symbol TODO.
+   * The final value is the set of end positions for the symbol at the given
+   * start position.
    *
-   * TODO: looks along a row for a given right child
-   * TODO: essentially symbols but indexed in a different order
+   * This is used by [add] to find the positions of symbols to be consumed by an
+   * item.
+   *
+   * This contains the same information as [symbols] but indexed in a different
+   * order.
    */
   val symbolEnds: TotalMap<Int, TotalMap<Symbol, Set<Int>>> = _symbolEnds
 
-  /** Mutable backing field for [itemStarts]. */
+  /** Mutable backing field for [nextItems]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
-  private val _itemStarts: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, MutableSet<Item>>>> =
+  private val _nextItems: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, MutableSet<Item>>>> =
     AutoMap { AutoMap { AutoMap { mutableSetOf() } } }
 
   /**
-   * TODO.
+   * Positions.
    *
-   * end -> nextSymbol -> start -> nextItem
-   * TODO: looks up a column for a left child
+   * Indexed (in order) by:
+   * - end position of the item,
+   * - symbol to be consumed by an item, and
+   * - start position of the item.
+   *
+   * The final value is the new item after the symbol has been consumed by an
+   * item at the start and end positions.
+   *
+   * Used by [add] to find items to consume a symbol.
    */
-  val itemStarts: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, Set<Item>>>> = _itemStarts
-
-  // TODO: Splitting position for a start, end and PartialProduction. Null if
-  // PartialProduction is present but has no splitting position (e.g., due to
-  // empty or just being asserted).
+  val nextItems: TotalMap<Int, TotalMap<Symbol, TotalMap<Int, Set<Item>>>> = _nextItems
 
   /**
-   * TODO.
+   * Add an entry to [symbols] and update the chart as needed.
    *
-   * @receiver TODO
-   * @param start the start position (inclusive) of the symbol to be added
-   * @param end the end position (exclusive) of the symbol to be added
+   * @receiver the chart to which to add the entry
+   * @param start the start position of the symbol to be added
+   * @param end the end position of the symbol to be added
    * @param symbol the symbol to be added
    */
   fun add(start: Int, end: Int, symbol: Symbol): Unit {
-    // NOTE: just an assertion and does not show how built
-    // TODO: add always adds ProductionEntry (via initialUses)
+    // Add the entry and do the following if it was not previously present
     if (_symbols[start][end].add(symbol)) {
       _symbolEnds[start][symbol] += end
-      for ((itemStart, itemSet) in itemStarts[start][symbol].toMap()) {
-        for (nextItem in itemSet.toSet()) {
-          add(itemStart, end, nextItem, start)
+      // Find item entries that can consume the symbol and add entries for the
+      // item after consuming the symbol
+      for ((nextItemStart, nextItemSet) in nextItems[start][symbol]) {
+        for (nextItem in nextItemSet.toSet()) {
+          add(nextItemStart, end, nextItem, start)
         }
       }
     }
   }
 
-  // TODO: find all "middle" and call them "split"
-  // val nextItem[start][nextEnd/start][nextItem][end/end]
-  // val nextItem[end][ConsumedSymbol] = Set<start>
-
   /**
-   * TODO.
+   * Add an entry to [items] and update the chart as needed.
    *
-   * @receiver TODO
-   * @param start the start position (inclusive) of the item to be added
-   * @param end the end position (exclusive) of the item to be added
+   * @receiver the chart to which to add the entry
+   * @param start the start position of the item to be added
+   * @param end the end position of the item to be added
    * @param item the item to be added
-   * @param split TODO
+   * @param split the start position of the most recently consumed symbol or
+   *   `null` if the item has not consumed anything yet
    */
   fun add(start: Int, end: Int, item: Item, split: Int?): Unit {
-    // require(split between start and end)
-    // require(start <= end)
-    // require(lhs in parser.parseRules)
-    // require(rhs in parser.parseRules[lhs])
+    // TODO: require(split between start and end)
+    // TODO: require(start <= end)
+    // TODO: require(lhs in parser.parseRules)
+    // TODO: require(rhs in parser.parseRules[lhs])
+    // Add the entry and do the following if it was not previously present
     if (_items[start][end][item].add(split)) {
+      // Check what symbol would be consumed next
       val consumed = item.consume()
       if (consumed == null) {
-        // NOTE: Addition goes up not down (we don't have info for down)
+        // The item is already complete and cannot consume more
+        // Add the symbol in the left-hand side of the item
         this.add(start, end, item.lhs)
       } else {
+        // The item is not yet complete and can consume more
         val (consumedSymbol, nextItem) = consumed
-        _itemStarts[end][consumedSymbol][start] += nextItem
-        for (nextEnd in symbolEnds[end][consumedSymbol].toSet()) {
+        _nextItems[end][consumedSymbol][start] += nextItem
+        // Find symbol entries that the item can consume and entries for the
+        // item after consuming the symbol
+        for (nextEnd in symbolEnds[end][consumedSymbol]) {
           add(start, nextEnd, nextItem, end)
         }
       }
@@ -144,21 +159,28 @@ class Chart(val parseRules: ParseRules) {
   }
 
   /**
-   * TODO.
+   * Add a sequence of symbols to the chart.
    *
-   * @receiver TODO
-   * @param symbols TODO
+   * The first symbol is added at position [start], [start] + 1.
+   * The next symbol is added at position [start] + 1, [start] + 1.
+   * And so on.
+   *
+   * @receiver the chart to which to add the symbols
+   * @param symbols the symbols to add to the start
+   * @param start the start position at which to place the first symbol
    */
-  fun add(symbols: Iterable<Symbol>): Unit =
-    symbols.forEachIndexed { start, symbol -> this.add(start, start + 1, symbol) }
+  fun add(symbols: Iterable<Symbol>, start: Int = 0): Unit =
+    symbols.forEachIndexed { index, symbol -> this.add(start + index, start + index + 1, symbol) }
 
   /**
-   * TODO.
+   * TODO: Add epsilon items (i.e., items that have not consumed anything) for
+   * all positions for all productions.
    *
-   * @receiver TODO
+   * @receiver the chart to which to add epsilon items
    */
   fun addEpsilonItems(): Unit {
-    val itemEndPositions = itemStarts.keys
+    // TODO: take productionMap as Parameter so parseRules is not a param of chart
+    val itemEndPositions = nextItems.keys
     val symbolStartPositions = symbolEnds.keys
     for (start in itemEndPositions + symbolStartPositions) {
       for ((lhs, rhsSet) in parseRules.productionMap) {
@@ -170,6 +192,7 @@ class Chart(val parseRules: ParseRules) {
   }
 }
 
+// TODO:
 // (implicit start and end)
 // symbol -> items
 // fun Chart.getItems(start: Int, end: Int, symbol: Symbol): Set<Item> = TODO()

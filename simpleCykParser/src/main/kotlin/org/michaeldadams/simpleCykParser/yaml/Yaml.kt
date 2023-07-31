@@ -74,11 +74,12 @@ fun incorrectType(expectedType: String, yamlNode: YamlNode): IncorrectTypeExcept
 // ================================================================== //
 
 /**
- * TODO.
+ * Convert a YAML map containing one entry to a pair of a string label and a
+ * YAML node.
  *
- * @receiver TODO
- * @return TODO
- * @throw YamlException TODO
+ * @receiver the YAML node to convert to a pair
+ * @return the pair represented by the YAML node
+ * @throw YamlException if the YAML map does not contain exactly one entry
  */
 fun YamlMap.toLabeled(): Pair<String, YamlNode> {
   val pair = this.entries.toList().singleOrNull()
@@ -87,10 +88,13 @@ fun YamlMap.toLabeled(): Pair<String, YamlNode> {
 }
 
 /**
- * TODO.
+ * Convert a YAML node to a pair of an optional string label and a YAML node.
  *
- * @receiver TODO
- * @return TODO
+ * If the YAML node is a [YamlMap], then it is converted using [toLabeled].
+ * Otherwise, a pair of `null` and the YAML node itself is returned.
+ *
+ * @receiver the YAML node to convert to a pair
+ * @return the pair represented by the YAML node
  */
 fun YamlNode.toOptionallyLabeled(): Pair<String?, YamlNode> =
   if (this is YamlMap) this.toLabeled() else null to this

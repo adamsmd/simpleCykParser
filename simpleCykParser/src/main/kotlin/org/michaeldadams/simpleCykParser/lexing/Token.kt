@@ -11,8 +11,8 @@ import org.michaeldadams.simpleCykParser.util.Generated as Gen
  * In [groups], index 0 corresponds to the entire match.  The remaining elements
  * are capture groups of the token's regular expression and are indexed from 1.
  *
- * An capture group's element can be `null` if there isno match captured by that
- * group.
+ * An capture group's element can be `null` if there is no match captured by
+ * that group.
  *
  * The [groups] list must not be empty and the element at index 0 must not be
  * `null`.

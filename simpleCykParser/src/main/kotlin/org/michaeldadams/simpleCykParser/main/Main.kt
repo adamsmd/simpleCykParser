@@ -44,10 +44,11 @@ import org.michaeldadams.simpleCykParser.yaml.toSymbol
 import org.michaeldadams.simpleCykParser.yaml.toYaml
 import org.michaeldadams.simpleCykParser.yaml.toYamlString
 
-// TODO: move TODO
 // TODO: Chart Entry Type
 // TODO: when to do "this."
 // TODO: check that all KDoc have @receiver
+// TODO: check @throws
+// TODO: check for unique terminal and nonterminal names
 
 /** The main entry point of the application.
  *
