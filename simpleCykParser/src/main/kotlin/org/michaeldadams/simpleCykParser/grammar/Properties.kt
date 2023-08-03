@@ -14,7 +14,7 @@ package org.michaeldadams.simpleCykParser.grammar
  * @receiver the lexing rules to get the defined terminals for
  * @return all the terminals defined in the given lexing rules
  */
-fun LexRules.definedTerminals(): Set<Terminal> = this.terminalRules.map { it.terminal }.toSet()
+fun LexRules.terminals(): Set<Terminal> = this.terminalRules.map { it.terminal }.toSet()
 
 /**
  * Get the nonterminals defined by a [ParseRules].
@@ -22,7 +22,9 @@ fun LexRules.definedTerminals(): Set<Terminal> = this.terminalRules.map { it.ter
  * @receiver the parse rules to get the defined nonterminals for
  * @return all the nonterminals defined in the given parse rules
  */
-fun ParseRules.definedNonterminals(): Set<Nonterminal> = this.productionMap.keys
+fun ParseRules.nonterminals(): Set<Nonterminal> = this.productionMap.keys
+
+fun ParseRules.nonterminalNames(): Set<String> = this.nonterminals().map { it.name }.toSet()
 
 /**
  * Get the symbols (terminals and nonterminals) defined by a [Grammar].
@@ -30,8 +32,7 @@ fun ParseRules.definedNonterminals(): Set<Nonterminal> = this.productionMap.keys
  * @receiver the grammar to get the defined symbols for
  * @return all the symbols defined in the given grammar
  */
-fun Grammar.definedSymbols(): Set<Symbol> =
-  this.lexRules.definedTerminals() + this.parseRules.definedNonterminals()
+fun Grammar.symbols(): Set<Symbol> = this.lexRules.terminals() + this.parseRules.nonterminals()
 
 /**
  * Find productions that use undefined symbols.
@@ -78,4 +79,4 @@ fun ParseRules.usedSymbols(): Set<Symbol> =
  * @receiver the grammar to compute the unused symbols for
  * @return the symbols that are not used anywhere in a grammar
  */
-fun Grammar.unusedSymbols(): Set<Symbol> = this.definedSymbols() - this.parseRules.usedSymbols()
+fun Grammar.unusedSymbols(): Set<Symbol> = this.symbols() - this.parseRules.usedSymbols()

@@ -9,13 +9,6 @@
 
 package org.michaeldadams.simpleCykParser.main
 
-import com.charleskorn.kaml.YamlException
-import com.charleskorn.kaml.YamlList
-import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.YamlNode
-import com.charleskorn.kaml.YamlScalar
-import com.charleskorn.kaml.yamlList
-import com.charleskorn.kaml.yamlScalar
 import com.github.ajalt.clikt.completion.completionOption
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.InvalidFileFormat
@@ -30,17 +23,18 @@ import org.michaeldadams.simpleCykParser.grammar.LexRules
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal
 import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Symbol
-import org.michaeldadams.simpleCykParser.grammar.definedNonterminals
-import org.michaeldadams.simpleCykParser.grammar.definedSymbols
+import org.michaeldadams.simpleCykParser.grammar.nonterminalNames
+import org.michaeldadams.simpleCykParser.grammar.nonterminals
 import org.michaeldadams.simpleCykParser.grammar.productionlessNonterminals
+import org.michaeldadams.simpleCykParser.grammar.symbols
 import org.michaeldadams.simpleCykParser.grammar.undefinedSymbols
 import org.michaeldadams.simpleCykParser.grammar.usedSymbols
 import org.michaeldadams.simpleCykParser.lexing.lex
 import org.michaeldadams.simpleCykParser.parsing.Chart
-import org.michaeldadams.simpleCykParser.yaml.incorrectType
-import org.michaeldadams.simpleCykParser.yaml.toItem
-import org.michaeldadams.simpleCykParser.yaml.toLabeled
-import org.michaeldadams.simpleCykParser.yaml.toSymbol
+import org.michaeldadams.simpleCykParser.parsing.ChartEntry
+import org.michaeldadams.simpleCykParser.parsing.add
+import org.michaeldadams.simpleCykParser.parsing.addUnconsumedItemEntries
+import org.michaeldadams.simpleCykParser.yaml.toChartEntries
 import org.michaeldadams.simpleCykParser.yaml.toYaml
 import org.michaeldadams.simpleCykParser.yaml.toYamlString
 
@@ -49,6 +43,7 @@ import org.michaeldadams.simpleCykParser.yaml.toYamlString
 // TODO: check that all KDoc have @receiver
 // TODO: check @throws
 // TODO: check for unique terminal and nonterminal names
+// TODO: distinguish YAML syntax errors from structure errors
 
 /** The main entry point of the application.
  *
@@ -122,7 +117,7 @@ class PrintGrammar : CliktCommand(help = "Print the internal represention of a g
  */
 fun CliktCommand.checkImpl(
   parseRules: ParseRules,
-  definedSymbols: Set<Symbol>,
+  symbols: Set<Symbol>,
   filter: (Symbol) -> Boolean,
 ): Unit {
   // Empty nonterminals
@@ -131,12 +126,12 @@ fun CliktCommand.checkImpl(
   }
 
   // Unused symbols
-  for (symbol in definedSymbols - parseRules.usedSymbols()) {
+  for (symbol in symbols - parseRules.usedSymbols()) {
     echo("Unused symbol: ${symbol}")
   }
 
   // Undefined nonterminals
-  for ((lhs, rhs, index) in parseRules.undefinedSymbols(definedSymbols)) {
+  for ((lhs, rhs, index) in parseRules.undefinedSymbols(symbols)) {
     if (filter(rhs.elements[index].symbol)) {
       echo("Undefined symbol ${index} of ${lhs} -> ${rhs}") // TODO
     }
@@ -148,7 +143,7 @@ fun CliktCommand.checkImpl(
 class CheckParseRules : CliktCommand(help = "Perform sanity checks on a parse rules") {
   val parseRules by parseRulesArgument()
   override fun run(): Unit {
-    checkImpl(parseRules, parseRules.definedNonterminals(), { it is Nonterminal })
+    checkImpl(parseRules, parseRules.nonterminals(), { it is Nonterminal })
   }
 }
 
@@ -156,7 +151,7 @@ class CheckGrammar : CliktCommand(help = "Perform sanity checks on a grammar") {
   val grammar by grammarArgument()
   override fun run(): Unit {
     // TODO: check overlapping terminals and nonterminals
-    checkImpl(grammar.parseRules, grammar.definedSymbols(), { true })
+    checkImpl(grammar.parseRules, grammar.symbols(), { true })
   }
 }
 
@@ -186,58 +181,6 @@ class Lex : CliktCommand(help = "Tokenize/lex a file") {
 // Parsing
 // ================================================================== //
 
-/**
- * TODO.
- *
- * @receiver TODO
- * @param chart TODO
- */
-fun YamlList.addListTo(chart: Chart): Unit {
-  var pos = 0
-  val nonterminals = chart.parseRules.productionMap.keys.map { it.name }.toSet()
-  for (node in this.items) {
-    // TODO: tryYaml
-    when (node) {
-      is YamlScalar -> {
-        // Add Symbol at next position
-        chart.add(pos, pos + 1, node.toSymbol(nonterminals))
-        pos++
-      }
-      is YamlMap -> {
-        // Add Symbol at next position
-        chart.add(pos, pos + 1, node.toLabeled().first.toSymbol(nonterminals))
-        pos++
-      }
-      is YamlList -> {
-        when (node.items.size) {
-          // Add Symbol at specified position
-          3 -> chart.add(
-            node.items[0].yamlScalar.toInt(),
-            node.items[1].yamlScalar.toInt().also { pos = it },
-            node.items[2].toSymbol(nonterminals),
-          )
-          // Add Item
-          4 -> chart.add(
-            node.items[0].yamlScalar.toInt(),
-            node.items[1].yamlScalar.toInt().also { pos = it },
-            node.items[2].toItem(nonterminals),
-            node.items[3].yamlScalar.toInt(),
-          )
-          else -> throw YamlException(
-            "Expected 3 (for symbols) or 4 (for items) elements in list but found ${
-              node.items.size}",
-            node.path,
-          )
-        }
-      }
-      else -> {
-        throw incorrectType("YamlScalar or YamlMap or YamlList", node)
-      }
-    }
-    // throw InvalidFileFormat("filename", "message", 10)
-  }
-}
-
 class Parse : CliktCommand(
   help = """
     Parse a sequence of symbols.
@@ -263,25 +206,20 @@ class Parse : CliktCommand(
   // TODO: val itemEnds by option()
   // TODO: include these in LexAndParse
   val parseRules: ParseRules by parseRulesArgument()
-  val input: List<YamlList> by inputArgument().convert { string ->
-    tryYaml {
-      val yaml = string.toYaml()
-      if (yaml is YamlMap) {
-        // TODO: constant for "symbols"
-        listOf("symbols").mapNotNull<String, YamlList> { yaml.get<YamlNode>(it)?.yamlList }
-        // TODO: check that list is not empty
-      } else {
-        listOf(yaml.yamlList)
-      }
-    }
+  val input: List<Triple<Int, Int, ChartEntry>> by inputArgument().convert { string ->
+    tryYaml { string.toYaml().toChartEntries(parseRules.nonterminalNames()) }
   }
   override fun run(): Unit {
-    val chart = Chart(parseRules)
-    input.forEach { it.addListTo(chart) }
-    chart.addEpsilonItems()
+    val chart = Chart()
+    input.forEach { (start, end, entry) -> chart.add(start, end, entry) }
+    chart.addUnconsumedItemEntries(parseRules)
     echo(chart.toYamlString())
   }
 }
+
+// TODO: better error message (specify which argument)
+// $ ./gradlew installDist && ./simpleCykParser/build/install/simpleCykParser/bin/simpleCykParser parse simpleCykParser/src/test/resources/test.parse <(echo "symbols: 'S'")
+// Error: Invalid YAML at symbols on line 1, column 10: Expected element to be YamlList but is YamlScalar
 
 class LexAndParse : CliktCommand(help = "Lex a file then parse the resulting tokens.") {
   val grammar: Grammar by grammarArgument()
@@ -291,9 +229,9 @@ class LexAndParse : CliktCommand(help = "Lex a file then parse the resulting tok
     if (position != input.length) {
       echo("WARNING: Lexing failed at character ${position}")
     }
-    val chart = Chart(grammar.parseRules)
+    val chart = Chart()
     chart.add(tokens.map { it.terminal })
-    chart.addEpsilonItems()
+    chart.addUnconsumedItemEntries(grammar.parseRules)
     echo(chart.toYamlString())
   }
 }

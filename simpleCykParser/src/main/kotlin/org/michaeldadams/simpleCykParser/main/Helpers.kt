@@ -45,8 +45,9 @@ fun <S, T> S.tryYaml(action: S.() -> T): T =
   } catch (@Suppress("SwallowedException") e: YamlException) {
     // TODO: InvalidFileFormat(filename, message, lineno)
     // Error: incorrect format in file filename line 10: message
+    // TODO: include argument name in error message
     throw UsageError(
-      "Invalid YAML at ${e.path.toHumanReadableString()} " +
+      "Invalid YAML at \"${e.path.toHumanReadableString()}\" " +
         "on line ${e.line}, column ${e.column}: ${e.message}",
     )
   }

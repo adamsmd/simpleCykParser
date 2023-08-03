@@ -2,20 +2,17 @@
 
 package org.michaeldadams.simpleCykParser.parsing
 
-import org.michaeldadams.simpleCykParser.grammar.ParseRules
 import org.michaeldadams.simpleCykParser.grammar.Symbol
 import org.michaeldadams.simpleCykParser.util.AutoMap
 import org.michaeldadams.simpleCykParser.util.TotalMap
 
 /**
  * TODO.
- * 
- * All start positions are inclusvie and all end positions are exclusive.
  *
- * @property parseRules TODO
+ * All start positions are inclusive and all end positions are exclusive.
  */
 @Suppress("TYPE_ALIAS")
-class Chart(val parseRules: ParseRules) {
+class Chart {
   /** Mutable backing field for [symbols]. */
   @Suppress("VARIABLE_NAME_INCORRECT_FORMAT")
   private val _symbols: TotalMap<Int, TotalMap<Int, MutableSet<Symbol>>> =
@@ -86,7 +83,7 @@ class Chart(val parseRules: ParseRules) {
     AutoMap { AutoMap { AutoMap { mutableSetOf() } } }
 
   /**
-   * Positions.
+   * Items that result from consuming a symbol.
    *
    * Indexed (in order) by:
    * - end position of the item,
@@ -133,10 +130,6 @@ class Chart(val parseRules: ParseRules) {
    *   `null` if the item has not consumed anything yet
    */
   fun add(start: Int, end: Int, item: Item, split: Int?): Unit {
-    // TODO: require(split between start and end)
-    // TODO: require(start <= end)
-    // TODO: require(lhs in parser.parseRules)
-    // TODO: require(rhs in parser.parseRules[lhs])
     // Add the entry and do the following if it was not previously present
     if (_items[start][end][item].add(split)) {
       // Check what symbol would be consumed next
@@ -151,8 +144,8 @@ class Chart(val parseRules: ParseRules) {
         _nextItems[end][consumedSymbol][start] += nextItem
         // Find symbol entries that the item can consume and entries for the
         // item after consuming the symbol
-        for (nextEnd in symbolEnds[end][consumedSymbol]) {
-          add(start, nextEnd, nextItem, end)
+        for (symbolEnd in symbolEnds[end][consumedSymbol]) {
+          add(start, symbolEnd, nextItem, end)
         }
       }
     }
@@ -169,27 +162,9 @@ class Chart(val parseRules: ParseRules) {
    * @param symbols the symbols to add to the start
    * @param start the start position at which to place the first symbol
    */
+  // TODO: Add ItemList
   fun add(symbols: Iterable<Symbol>, start: Int = 0): Unit =
     symbols.forEachIndexed { index, symbol -> this.add(start + index, start + index + 1, symbol) }
-
-  /**
-   * TODO: Add epsilon items (i.e., items that have not consumed anything) for
-   * all positions for all productions.
-   *
-   * @receiver the chart to which to add epsilon items
-   */
-  fun addEpsilonItems(): Unit {
-    // TODO: take productionMap as Parameter so parseRules is not a param of chart
-    val itemEndPositions = nextItems.keys
-    val symbolStartPositions = symbolEnds.keys
-    for (start in itemEndPositions + symbolStartPositions) {
-      for ((lhs, rhsSet) in parseRules.productionMap) {
-        for (rhs in rhsSet) {
-          add(start, start, Item(lhs, rhs, 0), null)
-        }
-      }
-    }
-  }
 }
 
 // TODO:

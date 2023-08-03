@@ -3,12 +3,18 @@
 package org.michaeldadams.simpleCykParser.yaml
 
 import com.charleskorn.kaml.YamlException
+import com.charleskorn.kaml.YamlList
+import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
+import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlScalar
 import org.michaeldadams.simpleCykParser.grammar.Nonterminal
 import org.michaeldadams.simpleCykParser.parsing.Chart
+import org.michaeldadams.simpleCykParser.parsing.ChartEntry
 import org.michaeldadams.simpleCykParser.parsing.Item
+import org.michaeldadams.simpleCykParser.parsing.ItemEntry
+import org.michaeldadams.simpleCykParser.parsing.SymbolEntry
 
 // ================================================================== //
 // Item
@@ -47,6 +53,67 @@ fun YamlNode.toItem(nonterminals: Set<String>): Item {
 }
 
 // ================================================================== //
+// ChartEntry
+// ================================================================== //
+
+// TODO: document
+fun YamlNode.toChartEntry(pos: Int, nonterminals: Set<String>): Triple<Int, Int, ChartEntry> =
+  when (this) {
+    is YamlScalar ->
+      // Symbol at next position
+      Triple(pos, pos + 1, SymbolEntry(this.toSymbol(nonterminals)))
+    is YamlMap ->
+      // Symbol at next position
+      Triple(pos, pos + 1, SymbolEntry(this.toLabeled().first.toSymbol(nonterminals)))
+    is YamlList ->
+      when (this.items.size) {
+        // Symbol at specified position
+        3 -> {
+          val (start, end, symbol) = this.items
+          Triple(
+            start.yamlScalar.toInt(),
+            end.yamlScalar.toInt(),
+            SymbolEntry(symbol.toSymbol(nonterminals)),
+          )
+        }
+        // Item at specified position
+        4 -> {
+          val (start, end, item, split) = this.items
+          Triple(
+            start.yamlScalar.toInt(),
+            end.yamlScalar.toInt(),
+            ItemEntry(item.toItem(nonterminals), split.toIntOrNull()),
+          )
+        }
+        else -> {
+          throw YamlException(
+            "Expected 3 (for symbols) or 4 (for items) list elements but found ${this.items.size}",
+            this.path,
+          )
+        }
+      }
+    else -> throw incorrectType("YamlScalar or YamlMap or YamlList", this)
+  }
+
+// TODO: document
+fun YamlList.toChartEntries(nonterminals: Set<String>): List<Triple<Int, Int, ChartEntry>> =
+  this.items.scan(Triple(0, 0, SymbolEntry(Nonterminal("")) as ChartEntry)) { acc, yamlNode ->
+    yamlNode.toChartEntry(acc.second, nonterminals)
+  }.drop(1)
+
+// TODO: document
+fun YamlNode.toChartEntries(nonterminals: Set<String>): List<Triple<Int, Int, ChartEntry>> =
+  when (this) {
+    is YamlList -> listOf(this)
+    is YamlMap ->
+      // TODO: constant for "symbols"
+      listOf("tokens", "symbols", "items")
+        .mapNotNull<String, YamlList> { get<YamlNode>(it)?.yamlList }
+      // TODO: check that list is not empty
+    else -> throw incorrectType("YamlMap or YamlList", this)
+  }.flatMap { it.toChartEntries(nonterminals) }
+
+// ================================================================== //
 // Chart
 // ================================================================== //
 
@@ -57,6 +124,7 @@ fun YamlNode.toItem(nonterminals: Set<String>): Item {
  * @return the YAML resulting from converting the object
  */
 fun Chart.toYamlString(): String = buildString {
+  // TODO: .sorted()
   appendLine("################################################################")
   appendLine("symbols:")
   appendLine()

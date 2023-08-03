@@ -10,6 +10,8 @@ import org.michaeldadams.simpleCykParser.yaml.toYaml
 import org.michaeldadams.simpleCykParser.yaml.toYamlString
 import kotlin.test.Test
 
+// TODO: check consistencey of aux Chart fields
+
 // TODO: more tests
 class ChartTest {
   @Test fun test1(): Unit {
@@ -22,7 +24,7 @@ class ChartTest {
           - E: ""
     """.trimIndent().toYaml().yamlMap.toParseRules()
 
-    val chart = Chart(parseRules)
+    val chart = Chart()
     chart.add(3, 4, Terminal("("))
     chart.add(3, 4, Terminal("\""))
     chart.add(2, 4, Nonterminal("S"))
@@ -35,7 +37,7 @@ class ChartTest {
 
     chart.add(2, 4, item, null)
     chart.add(1, 4, item.consume()!!.second, null)
-    chart.addEpsilonItems()
+    chart.addUnconsumedItemEntries(parseRules)
     println(chart.toYamlString())
   }
 
@@ -48,9 +50,9 @@ class ChartTest {
           - E: ""
     """.trimIndent().toYaml().yamlMap.toParseRules()
 
-    val chart = Chart(parseRules)
+    val chart = Chart()
     chart.add(listOf(Terminal("("), Terminal("("), Terminal(")"), Terminal(")")))
-    chart.addEpsilonItems()
+    chart.addUnconsumedItemEntries(parseRules)
     println(chart.toYamlString())
   }
 
@@ -64,9 +66,9 @@ class ChartTest {
           - T: a # Terminal
     """.trimIndent().toYaml().yamlMap.toParseRules()
 
-    val chart = Chart(parseRules)
+    val chart = Chart()
     chart.add(listOf("a", "a", "a", "a").map { Terminal(it) })
-    chart.addEpsilonItems()
+    chart.addUnconsumedItemEntries(parseRules)
     println(chart.toYamlString())
   }
 }

@@ -7,6 +7,8 @@ import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlException
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
+import com.charleskorn.kaml.YamlNull
+import com.charleskorn.kaml.YamlScalar
 import org.snakeyaml.engine.v2.api.Dump
 import org.snakeyaml.engine.v2.api.DumpSettings
 import org.snakeyaml.engine.v2.api.StreamDataWriter
@@ -26,6 +28,18 @@ import java.io.StringWriter
  * @return the [YamlNode] resulting from parsing the string
  */
 fun String.toYaml(): YamlNode = Yaml.default.parseToYamlNode(this)
+
+// ================================================================== //
+// Ints
+// ================================================================== //
+
+// TODO: document
+fun YamlNode.toIntOrNull(): Int? =
+  when (this) {
+    is YamlScalar -> this.toInt()
+    is YamlNull -> null
+    else -> throw incorrectType("YamlScalar or YamlNull", this)
+  }
 
 // ================================================================== //
 // Strings
@@ -55,6 +69,7 @@ fun String.toYamlString(): String {
 // ================================================================== //
 
 // TODO: prevent need to use in Main.kt
+// TODO: why does this method not throw? (code coverage)
 
 /**
  * Return an [IncorrectTypeException] for when a [YamlNode] is the wrong type.
